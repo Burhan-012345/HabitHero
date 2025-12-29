@@ -1,0 +1,110 @@
+{% extends "base.html" %} {% block title %}Login - HabitHero{% endblock %} {%
+block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/auth.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="logo">
+      <img
+        src="{{ url_for('static', filename='images/logo.png') }}"
+        alt="Logo"
+        class="auth-logo"
+      />
+      <p>Build better habits with friends</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('login') }}">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          class="form-control"
+          required
+        />
+      </div>
+
+      <div class="form-group password-toggle">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          class="form-control"
+          required
+        />
+        <button type="button" class="toggle-icon">
+          <i class="fas fa-eye"></i>
+        </button>
+      </div>
+
+      <div class="form-group">
+        <div class="form-check">
+          <input
+            type="checkbox"
+            id="remember"
+            name="remember"
+            class="form-check-input"
+          />
+          <label for="remember" class="form-check-label">Remember me</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <button type="submit" class="btn btn-primary btn-block">Login</button>
+      </div>
+
+      <div class="text-center">
+        <a href="{{ url_for('forgot_password') }}" class="small"
+          >Forgot password?</a
+        >
+      </div>
+    </form>
+
+    <div class="text-center mt-3">
+      <p class="small">
+        Don't have an account?
+        <a href="{{ url_for('register') }}">Register here</a>
+      </p>
+    </div>
+    <div style="text-align: center; margin-top: 1rem">
+      <a
+        href="{{ url_for('intro') }}"
+        style="color: #667eea; text-decoration: none"
+      >
+        <i class="fas fa-arrow-left"></i> Back to Home
+      </a>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/auth.js') }}" defer></script>
+
+<!-- Add this to your login.html file inside the script tag -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Password toggle for login page
+    const toggleIcon = document.querySelector(".password-toggle .toggle-icon");
+    if (toggleIcon) {
+      toggleIcon.addEventListener("click", function () {
+        const input = document.getElementById("password");
+        const icon = this.querySelector("i");
+
+        if (input.type === "password") {
+          input.type = "text";
+          icon.classList.remove("fa-eye");
+          icon.classList.add("fa-eye-slash");
+        } else {
+          input.type = "password";
+          icon.classList.remove("fa-eye-slash");
+          icon.classList.add("fa-eye");
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

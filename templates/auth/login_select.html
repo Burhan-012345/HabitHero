@@ -1,0 +1,583 @@
+{% extends "base.html" %} {% block title %}Select Account - HabitHero{% endblock
+%} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/auth.css') }}"
+/>
+<style>
+  .account-card {
+    background: #0a0a0a !important;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #222222 !important;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    color: #ffffff !important;
+    position: relative;
+    overflow: hidden;
+  }
+  .account-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, transparent, #00ff55, transparent);
+  }
+  .account-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 15px rgba(0, 255, 100, 0.2) !important;
+    border-color: #00ff55 !important;
+    text-decoration: none;
+    color: #ffffff !important;
+  }
+  .account-card.active {
+    border-color: #00ff55 !important;
+    background-color: #111111 !important;
+  }
+  .account-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00a040 0%, #00ff55 100%) !important;
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 auto 10px;
+    box-shadow: 0 0 8px rgba(0, 255, 100, 0.3) !important;
+    border: 2px solid #00ff55;
+  }
+  .account-info {
+    text-align: center;
+  }
+  .account-info h4 {
+    font-size: 1rem;
+    margin-bottom: 3px;
+    color: #ffffff !important;
+  }
+  .account-meta {
+    font-size: 0.75rem;
+    color: #888888 !important;
+    margin-top: 2px;
+    margin-bottom: 5px;
+  }
+  .account-info small {
+    font-size: 0.75rem;
+    color: #00ff55 !important;
+  }
+  .login-form-card {
+    background: #0a0a0a !important;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 15px;
+    border: 1px solid #222222 !important;
+    display: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .login-form-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, transparent, #00ff55, transparent);
+  }
+  .login-form-card.active {
+    display: block;
+    box-shadow: 0 0 10px rgba(0, 255, 100, 0.15) !important;
+  }
+  #passwordForm input:disabled {
+    background-color: #111111 !important;
+  }
+  .no-accounts-message {
+    text-align: center;
+    padding: 30px;
+    color: #ffffff !important;
+  }
+  .back-link {
+    color: #888888 !important;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+  }
+  .back-link:hover {
+    color: #00ff55 !important;
+    text-decoration: underline;
+  }
+  .account-list {
+    margin-bottom: 20px;
+  }
+  /* CREATE NEW ACCOUNT CARD */
+  .create-new-account-card {
+    background: linear-gradient(135deg, #111111 0%, #0a0a0a 100%) !important;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px dashed #444444 !important;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    color: #ffffff !important;
+    position: relative;
+    overflow: hidden;
+  }
+  .create-new-account-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, transparent, #00ff55, transparent);
+  }
+  .create-new-account-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 15px rgba(0, 255, 100, 0.2) !important;
+    border-color: #00ff55 !important;
+    border-style: solid;
+    background: linear-gradient(135deg, #00a040 0%, #00ff55 100%) !important;
+    color: black !important;
+  }
+  .create-new-account-card:hover .create-new-icon {
+    background: #000000 !important;
+    color: #00ff55 !important;
+    box-shadow: 0 0 8px rgba(0, 255, 100, 0.4) !important;
+  }
+  .create-new-account-card:hover .create-new-title,
+  .create-new-account-card:hover .create-new-subtitle {
+    color: black !important;
+  }
+  .create-new-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00a040 0%, #00ff55 100%) !important;
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 auto 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 8px rgba(0, 255, 100, 0.3) !important;
+    border: 2px solid #00ff55;
+  }
+  .create-new-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff !important;
+    text-align: center;
+    margin-bottom: 3px;
+    transition: all 0.3s ease;
+  }
+  .create-new-subtitle {
+    font-size: 0.8rem;
+    color: #888888 !important;
+    text-align: center;
+    margin-bottom: 5px;
+    transition: all 0.3s ease;
+  }
+  /* Limit warning style */
+  .limit-warning {
+    font-size: 0.75rem;
+    color: #ff5555 !important;
+    text-align: center;
+    margin-top: 5px;
+  }
+  /* Smaller auth container */
+  .auth-container {
+    max-width: 450px;
+    margin: 20px auto;
+    padding: 0 15px;
+  }
+  .auth-card {
+    padding: 25px;
+    background: #0a0a0a !important;
+    border: 1px solid #222222 !important;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0, 255, 100, 0.1) !important;
+    position: relative;
+    overflow: hidden;
+  }
+  .auth-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #00ff55, transparent);
+  }
+  .logo h1 {
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+    color: #ffffff !important;
+  }
+  .logo p {
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    color: #888888 !important;
+  }
+  .text-center.mb-4 p {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    color: #888888 !important;
+  }
+  /* Enhanced Form Controls */
+  .form-group {
+    margin-bottom: 15px;
+  }
+  .form-group label {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    color: #ffffff !important;
+  }
+  .form-control {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    height: 40px;
+    background-color: #111111 !important;
+    border: 1px solid #333333 !important;
+    color: #ffffff !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  .form-control:focus {
+    border-color: #00ff55 !important;
+    box-shadow: 0 0 0 2px rgba(0, 255, 100, 0.2) !important;
+    background-color: #0a0a0a !important;
+    outline: none;
+  }
+  .btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #00a040, #00ff55) !important;
+    border: 1px solid #00ff55 !important;
+    color: #000000 !important;
+    font-weight: 600;
+    box-shadow: 0 0 8px rgba(0, 255, 100, 0.2) !important;
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 12px rgba(0, 255, 100, 0.3) !important;
+    transform: translateY(-1px);
+  }
+  .btn-outline-primary {
+    background: transparent !important;
+    border: 1px solid #00ff55 !important;
+    color: #00ff55 !important;
+  }
+  .btn-outline-primary:hover {
+    background: rgba(0, 255, 100, 0.1) !important;
+    color: #ffffff !important;
+  }
+  .btn-block {
+    width: 100%;
+  }
+  /* Form check adjustments */
+  .form-check {
+    margin-bottom: 10px;
+  }
+  .form-check-label {
+    font-size: 0.85rem;
+    color: #ffffff !important;
+  }
+  .form-check-input {
+    background-color: #111111 !important;
+    border-color: #444444 !important;
+  }
+  .form-check-input:checked {
+    background-color: #00ff55 !important;
+    border-color: #00ff55 !important;
+  }
+  /* Password toggle */
+  .password-toggle {
+    position: relative;
+  }
+  .toggle-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888888;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    z-index: 10;
+    transition: color 0.3s;
+  }
+  .toggle-icon:hover {
+    color: #00ff55;
+  }
+  /* Responsive adjustments */
+  @media (max-width: 576px) {
+    .auth-container {
+      margin: 10px auto;
+      padding: 0 10px;
+    }
+    .auth-card {
+      padding: 20px 15px;
+    }
+    .account-card,
+    .create-new-account-card {
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .account-avatar,
+    .create-new-icon {
+      width: 45px;
+      height: 45px;
+      font-size: 18px;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="logo">
+      <img
+        src="{{ url_for('static', filename='images/logo.png') }}"
+        alt="Logo"
+        class="auth-logo"
+      />
+      <p>Select your account to continue</p>
+    </div>
+
+    <div class="text-center mb-4">
+      <p class="text-muted"><i class="fas fa-envelope"></i> {{ email }}</p>
+      {% if accounts %}
+      <p class="text-muted">
+        You have {{ accounts|length }} account(s) with this email
+      </p>
+      {% endif %}
+    </div>
+
+    {% if accounts %}
+    <div class="account-list">
+      {% for account in accounts %}
+      <a
+        href="{{ url_for('login_account_page', account_id=account.id, email=email) }}"
+        class="account-card"
+        id="account-{{ account.id }}"
+      >
+        <div class="account-avatar">{{ account.username[0]|upper }}</div>
+        <div class="account-info">
+          <h4>{{ account.username }}</h4>
+          <p class="account-meta">
+            <i class="fas fa-calendar"></i> Created {{
+            account.created_at.strftime('%b %d, %Y') }}
+          </p>
+          <small class="text-primary">
+            <i class="fas fa-sign-in-alt"></i> Click to login
+          </small>
+        </div>
+      </a>
+      {% endfor %}
+
+      <!-- CREATE NEW ACCOUNT OPTION -->
+      <a
+        href="{{ url_for('create_account_page_from_login', email=email) }}"
+        class="create-new-account-card"
+        id="create-new-account"
+      >
+        <div class="create-new-icon">
+          <i class="fas fa-plus"></i>
+        </div>
+        <div class="account-info">
+          <h4 class="create-new-title">Create New Account</h4>
+          <p class="create-new-subtitle">Add another account with this email</p>
+          {% if accounts|length >= 10 %}
+          <div class="limit-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            Maximum of 10 accounts per email reached
+          </div>
+          {% else %}
+          <small class="text-primary">
+            <i class="fas fa-user-plus"></i> Click to create new account
+          </small>
+          {% endif %}
+        </div>
+      </a>
+    </div>
+
+    {#
+    <div class="login-form-card" id="inlineLoginForm">
+      <h4 class="text-center mb-4">Enter password</h4>
+
+      <p class="text-center text-muted mb-4" id="selectedAccountText">
+        Select an account to continue
+      </p>
+
+      <form method="POST" action="{{ url_for('login') }}" id="passwordForm">
+        <input type="hidden" name="email" value="{{ email }}" />
+        <input type="hidden" name="account_id" id="formAccountId" />
+
+        <div class="form-group password-toggle">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-control"
+            disabled
+            required
+          />
+          <span class="toggle-icon">
+            <i class="fas fa-eye"></i>
+          </span>
+        </div>
+
+        <div class="form-group">
+          <div class="form-check">
+            <input
+              type="checkbox"
+              id="remember"
+              name="remember"
+              class="form-check-input"
+            />
+            <label for="remember" class="form-check-label">Remember me</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <button
+            type="submit"
+            class="btn btn-primary btn-block"
+            id="submitBtn"
+            disabled
+          >
+            <i class="fas fa-sign-in-alt"></i> Login to Selected Account
+          </button>
+        </div>
+
+        <div class="text-center">
+          <a href="{{ url_for('forgot_password', email=email) }}" class="small">
+            <i class="fas fa-key"></i> Forgot password?
+          </a>
+        </div>
+      </form>
+    </div>
+    #} {% else %}
+    <div class="no-accounts-message">
+      <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+      <h4>No accounts found</h4>
+      <p class="text-muted mb-4">
+        No accounts found with email: <strong>{{ email }}</strong>
+      </p>
+      <div class="d-grid gap-2">
+        <a href="{{ url_for('register') }}" class="btn btn-primary">
+          <i class="fas fa-user-plus"></i> Create a new account
+        </a>
+        <a href="{{ url_for('login') }}" class="btn btn-outline-primary">
+          <i class="fas fa-arrow-left"></i> Try a different email
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="text-center mt-4">
+      <a href="{{ url_for('login') }}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Use a different email
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      // Password toggle (for inline form if used)
+      const toggleIcon = document.querySelector(".toggle-icon");
+      if (toggleIcon) {
+          toggleIcon.addEventListener("click", function() {
+              const input = this.previousElementSibling;
+              const icon = this.querySelector("i");
+
+              if (input.type === "password") {
+                  input.type = "text";
+                  icon.classList.remove("fa-eye");
+                  icon.classList.add("fa-eye-slash");
+              } else {
+                  input.type = "password";
+                  icon.classList.remove("fa-eye-slash");
+                  icon.classList.add("fa-eye");
+              }
+          });
+      }
+
+      // Disable create new account link if limit reached
+      const createNewAccountLink = document.getElementById('create-new-account');
+      const accountsCount = {{ accounts|length if accounts else 0 }};
+
+      if (createNewAccountLink && accountsCount >= 10) {
+          createNewAccountLink.onclick = function(e) {
+              e.preventDefault();
+              alert('Maximum of 10 accounts per email address reached. Please use a different email address to create more accounts.');
+          };
+          createNewAccountLink.style.cursor = 'not-allowed';
+          createNewAccountLink.style.opacity = '0.6';
+          createNewAccountLink.style.pointerEvents = 'none';
+      }
+
+      // Optional: Inline form selection logic (if using the inline form)
+      {#
+      let selectedAccountId = null;
+
+      function selectAccount(accountId, username) {
+          // Remove active class from all accounts
+          document.querySelectorAll('.account-card').forEach(card => {
+              card.classList.remove('active');
+          });
+
+          // Add active class to selected account
+          const selectedCard = document.getElementById('account-' + accountId);
+          selectedCard.classList.add('active');
+
+          // Update form
+          selectedAccountId = accountId;
+          document.getElementById('selectedAccountText').innerHTML =
+              'Enter password for <strong>' + username + '</strong>';
+
+          // Enable password field and submit button
+          const passwordInput = document.getElementById('password');
+          const submitBtn = document.getElementById('submitBtn');
+          const loginForm = document.getElementById('inlineLoginForm');
+
+          passwordInput.disabled = false;
+          submitBtn.disabled = false;
+          passwordInput.focus();
+          loginForm.classList.add('active');
+
+          // Store account ID in hidden field
+          document.getElementById('formAccountId').value = accountId;
+      }
+
+      // Update form submission
+      const passwordForm = document.getElementById('passwordForm');
+      if (passwordForm) {
+          passwordForm.addEventListener('submit', function(e) {
+              if (!selectedAccountId) {
+                  e.preventDefault();
+                  alert('Please select an account first.');
+                  return;
+              }
+          });
+      }
+      #}
+  });
+</script>
+{% endblock %}
