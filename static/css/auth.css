@@ -1,0 +1,609 @@
+/* Auth-specific styles - Black & Neon Blue Theme */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, #0a0a0f 0%, #05050a 100%);
+}
+
+.auth-card {
+  background: rgba(10, 10, 15, 0.95);
+  border-radius: 16px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 25px -5px rgba(0, 180, 255, 0.1),
+    0 10px 10px -5px rgba(0, 180, 255, 0.04);
+  border: 1px solid rgba(0, 180, 255, 0.2);
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.logo h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #00b4ff 0%, #0088cc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 10px rgba(0, 180, 255, 0.3);
+}
+
+.logo p {
+  color: #8899aa;
+  font-size: 0.875rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 0.875rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem 3rem 0.75rem 1rem;
+  border: 2px solid rgba(0, 180, 255, 0.2);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s;
+  background: rgba(10, 10, 15, 0.9);
+  color: #ffffff;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #00b4ff;
+  box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.1);
+}
+
+.form-control:disabled {
+  background-color: rgba(10, 10, 15, 0.5);
+  cursor: not-allowed;
+}
+
+/* FIXED: Password toggle positioning */
+.password-toggle {
+  position: relative;
+}
+
+.password-toggle .form-control {
+  padding-right: 3rem;
+}
+
+.toggle-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8899aa;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  z-index: 10;
+  height: 1.5rem;
+  width: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+/* FIXED: Specific positioning for password fields */
+.form-group.password-toggle .toggle-icon {
+  top: calc(50% + 0.4rem); /* Adjusted for label */
+}
+
+.toggle-icon:hover {
+  color: #00b4ff;
+}
+
+.password-strength {
+  margin-top: 0.5rem;
+}
+
+.strength-meter {
+  height: 6px;
+  background-color: rgba(0, 180, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.strength-meter-fill {
+  height: 100%;
+  transition: width 0.3s, background-color 0.3s;
+}
+
+.strength-weak {
+  background-color: #ff4757;
+  width: 33%;
+}
+
+.strength-medium {
+  background-color: #ffaa00;
+  width: 66%;
+}
+
+.strength-strong {
+  background-color: #00ff9d;
+  width: 100%;
+}
+
+.password-rules {
+  background-color: rgba(0, 180, 255, 0.05);
+  border: 1px solid rgba(0, 180, 255, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+  animation: slideDown 0.3s ease;
+}
+
+.password-rules ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.password-rules li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: #8899aa;
+}
+
+.rule-valid {
+  color: #00ff9d;
+}
+
+.rule-invalid {
+  color: #ff4757;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #00b4ff 0%, #0088cc 100%);
+  color: #0a0a0f;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 180, 255, 0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background-color: #8899aa;
+  color: #0a0a0f;
+}
+
+.btn-secondary:hover {
+  background-color: #667788;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-muted {
+  color: #8899aa;
+}
+
+.small {
+  font-size: 0.875rem;
+}
+
+.mt-1 {
+  margin-top: 0.25rem;
+}
+.mt-2 {
+  margin-top: 0.5rem;
+}
+.mt-3 {
+  margin-top: 1rem;
+}
+.mt-4 {
+  margin-top: 1.5rem;
+}
+.mt-5 {
+  margin-top: 2rem;
+}
+
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Flash messages for auth pages */
+.flash-messages-auth {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: 90%;
+  max-width: 420px;
+}
+
+.alert-auth {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: slideIn 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 180, 255, 0.1);
+  background: rgba(10, 10, 15, 0.95);
+  border: 1px solid rgba(0, 180, 255, 0.2);
+}
+
+.alert-auth-success {
+  color: #00ff9d;
+  border-left: 4px solid #00ff9d;
+}
+
+.alert-auth-danger {
+  color: #ff4757;
+  border-left: 4px solid #ff4757;
+}
+
+.alert-auth-warning {
+  color: #ffaa00;
+  border-left: 4px solid #ffaa00;
+}
+
+.alert-auth-info {
+  color: #00b4ff;
+  border-left: 4px solid #00b4ff;
+}
+
+/* Loading spinner */
+.spinner {
+  animation: spin 1s linear infinite;
+  color: #00b4ff;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 1.5rem;
+  }
+
+  .logo h1 {
+    font-size: 2rem;
+  }
+
+  .form-control {
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+  }
+
+  .toggle-icon {
+    right: 0.75rem;
+  }
+}
+
+.auth-logo {
+  max-height: 80px;
+  width: auto;
+  margin-bottom: 15px;
+}
+
+/* ======================
+   LINK STYLES
+   ====================== */
+
+/* Base link styles */
+.auth-card a {
+  color: #00bfff !important;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.auth-card a:hover {
+  color: #ffffff !important;
+  text-decoration: underline;
+  text-shadow: 0 0 5px rgba(0, 191, 255, 0.5);
+}
+
+/* Specific link types */
+.auth-card .back-link {
+  color: #cccccc !important;
+  font-size: 0.9rem;
+}
+
+.auth-card .back-link:hover {
+  color: #ffffff !important;
+}
+
+/* Forgot password link */
+.auth-card .forgot-password-link {
+  color: #00bfff !important;
+  font-size: 0.85rem;
+}
+
+.auth-card .forgot-password-link:hover {
+  color: #ffffff !important;
+}
+
+/* Register/Login toggle links */
+.auth-card .auth-toggle-link {
+  color: #00bfff !important;
+  font-weight: 500;
+}
+
+.auth-card .auth-toggle-link:hover {
+  color: #ffffff !important;
+  text-decoration: underline;
+}
+
+/* Back to home links */
+.auth-card .back-home-link {
+  color: #667eea !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.auth-card .back-home-link:hover {
+  color: #ffffff !important;
+}
+
+/* Account selection links */
+.account-card {
+  text-decoration: none !important;
+}
+
+.account-card:hover {
+  text-decoration: none !important;
+}
+
+/* Create new account link */
+.create-new-account-card {
+  text-decoration: none !important;
+}
+
+.create-new-account-card:hover {
+  text-decoration: none !important;
+}
+
+/* Terms and Privacy links */
+.auth-card .policy-link {
+  color: #00bfff !important;
+  text-decoration: underline;
+}
+
+.auth-card .policy-link:hover {
+  color: #ffffff !important;
+}
+
+/* Form check links (for terms/privacy) */
+.form-check-label a {
+  color: #00bfff !important;
+  text-decoration: underline;
+}
+
+.form-check-label a:hover {
+  color: #ffffff !important;
+}
+
+/* Error/Alert links */
+.alert a {
+  color: inherit !important;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.alert a:hover {
+  color: #ffffff !important;
+}
+
+/* Small text links */
+.auth-card .small-link {
+  font-size: 0.85rem;
+  color: #cccccc !important;
+}
+
+.auth-card .small-link:hover {
+  color: #ffffff !important;
+}
+
+/* Icon links */
+.auth-card .icon-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Back to selection links */
+.auth-card .back-to-selection-link {
+  color: #cccccc !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-card .back-to-selection-link:hover {
+  color: #ffffff !important;
+}
+
+/* Login account page links */
+.login-card a {
+  color: #cccccc !important;
+  text-decoration: none;
+}
+
+.login-card a:hover {
+  color: #ffffff !important;
+  text-decoration: underline;
+}
+
+/* Password reset flow links */
+.reset-flow-link {
+  color: #00bfff !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reset-flow-link:hover {
+  color: #ffffff !important;
+}
+
+/* ======================
+   BUTTON-LIKE LINKS
+   ====================== */
+
+.btn-link {
+  background: linear-gradient(135deg, #0066cc, #00bfff) !important;
+  border: 1px solid #00bfff !important;
+  color: #ffffff !important;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none !important;
+  display: inline-block;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.btn-link:hover {
+  background: linear-gradient(135deg, #0055aa, #0099cc) !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+  box-shadow: 0 0 12px rgba(0, 191, 255, 0.6) !important;
+}
+
+.btn-link-outline {
+  background: transparent !important;
+  border: 1px solid #00bfff !important;
+  color: #00bfff !important;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none !important;
+  display: inline-block;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.btn-link-outline:hover {
+  background: rgba(0, 191, 255, 0.1) !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+}
+
+/* ======================
+   RESPONSIVE LINK STYLES
+   ====================== */
+
+@media (max-width: 576px) {
+  .auth-card a {
+    font-size: 0.9rem;
+  }
+
+  .auth-card .small-link {
+    font-size: 0.8rem;
+  }
+
+  .btn-link,
+  .btn-link-outline {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+}
+
+/* ======================
+   FOCUS STATES FOR ACCESSIBILITY
+   ====================== */
+
+.auth-card a:focus {
+  outline: 2px solid #00bfff;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Remove default outline for button-like links */
+.btn-link:focus,
+.btn-link-outline:focus {
+  outline: 2px solid #00bfff;
+  outline-offset: 2px;
+}
+
+/* ======================
+   ACTIVE STATE FOR LINKS
+   ====================== */
+
+.auth-card a:active {
+  transform: translateY(1px);
+}
+
+.btn-link:active,
+.btn-link-outline:active {
+  transform: translateY(1px);
+}
