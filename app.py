@@ -52,6 +52,10 @@ os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'snaps'), exist_ok=True)
 os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'avatars'), exist_ok=True)
 os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'videos'), exist_ok=True)
 
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)  # Session expires after 1 hour
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=30)  # "Remember me" lasts 30 days
+app.config['REMEMBER_COOKIE_REFRESH_EACH_REQUEST'] = True  # Refresh remember cookie
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -4318,6 +4322,28 @@ with app.app_context():
     create_default_admin_user(app, db, models)
     
     print("✓ Flask-Admin initialized")
+
+@app.route('/test-admin-template')
+@login_required
+def test_admin_template():
+    """Test admin template rendering"""
+    if not hasattr(current_user, 'is_admin') or not current_user.is_admin:
+        return "Admin access required", 403
+    
+    # Test rendering a simple admin template
+    return render_template('admin/index.html',
+                         stats={
+                             'total_users': 1,
+                             'online_users': 1,
+                             'total_habits': 0,
+                             'active_habits': 0,
+                             'total_snaps': 0,
+                             'today_snaps': 0,
+                             'total_messages': 0,
+                             'unread_messages': 0
+                         },
+                         recent_users=[current_user],
+                         recent_snaps=[])
     
 if __name__ == '__main__':
     host = '0.0.0.0'  
