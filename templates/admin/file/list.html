@@ -1,0 +1,1100 @@
+{% extends 'admin/layout.html' %} {% block title %}File Manager{% endblock %} {%
+block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('admin.index') }}">Admin</a>
+</li>
+<li class="breadcrumb-item active">File Manager</li>
+{% endblock %} {% block head_css %} {{ super() }}
+<style>
+  .file-manager {
+    min-height: 600px;
+  }
+
+  .file-item {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .file-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+  }
+
+  .file-item.selected {
+    background-color: #e3f2fd;
+    border-left: 3px solid #2196f3;
+  }
+
+  .file-icon {
+    font-size: 24px;
+    width: 40px;
+    text-align: center;
+  }
+
+  .file-name {
+    word-break: break-all;
+  }
+
+  .file-size {
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+
+  .file-actions {
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .file-item:hover .file-actions {
+    opacity: 1;
+  }
+
+  .directory-tree {
+    border-right: 1px solid #dee2e6;
+    padding-right: 15px;
+  }
+
+  .tree-item {
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    margin-bottom: 2px;
+  }
+
+  .tree-item:hover {
+    background-color: #f8f9fa;
+  }
+
+  .tree-item.selected {
+    background-color: #e3f2fd;
+    font-weight: 600;
+  }
+
+  .preview-container {
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    min-height: 400px;
+    background-color: #f8f9fa;
+  }
+
+  .image-preview {
+    max-width: 100%;
+    max-height: 300px;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .text-preview {
+    white-space: pre-wrap;
+    font-family: "Courier New", monospace;
+    font-size: 0.9rem;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .upload-dropzone {
+    border: 2px dashed #dee2e6;
+    border-radius: 10px;
+    padding: 40px;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .upload-dropzone:hover,
+  .upload-dropzone.dragover {
+    border-color: #2196f3;
+    background-color: #f0f8ff;
+  }
+
+  .progress-container {
+    display: none;
+    margin-top: 20px;
+  }
+
+  .storage-stats {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+</style>
+{% endblock %} {% block body %}
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">File Manager</h1>
+    <div class="btn-group">
+      <button
+        class="btn btn-admin"
+        data-toggle="modal"
+        data-target="#uploadModal"
+      >
+        <i class="fas fa-upload"></i> Upload Files
+      </button>
+      <button class="btn btn-outline-secondary" onclick="refreshFiles()">
+        <i class="fas fa-sync-alt"></i> Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Storage Stats -->
+  <div class="storage-stats">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="text-center">
+          <i class="fas fa-hdd fa-3x mb-3"></i>
+          <h4 id="totalSpace">Loading...</h4>
+          <p class="mb-0">Total Space</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="text-center">
+          <i class="fas fa-database fa-3x mb-3"></i>
+          <h4 id="usedSpace">Loading...</h4>
+          <p class="mb-0">Used Space</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="text-center">
+          <i class="fas fa-folder-open fa-3x mb-3"></i>
+          <h4 id="fileCount">0</h4>
+          <p class="mb-0">Files</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="text-center">
+          <i class="fas fa-folder fa-3x mb-3"></i>
+          <h4 id="folderCount">0</h4>
+          <p class="mb-0">Folders</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress mt-4" style="height: 10px">
+      <div
+        class="progress-bar"
+        id="storageProgress"
+        role="progressbar"
+        style="width: 0%"
+      ></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Directory Tree -->
+    <div class="col-md-3 directory-tree">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Directories</h6>
+        </div>
+        <div class="card-body p-0">
+          <div id="directoryTree" class="p-3">
+            <div class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card shadow">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+        </div>
+        <div class="card-body">
+          <div class="btn-group-vertical w-100">
+            <button
+              class="btn btn-outline-primary mb-2"
+              onclick="createFolder()"
+            >
+              <i class="fas fa-folder-plus"></i> New Folder
+            </button>
+            <button
+              class="btn btn-outline-success mb-2"
+              onclick="downloadSelected()"
+            >
+              <i class="fas fa-download"></i> Download
+            </button>
+            <button
+              class="btn btn-outline-danger mb-2"
+              onclick="deleteSelected()"
+            >
+              <i class="fas fa-trash"></i> Delete
+            </button>
+            <button class="btn btn-outline-info" onclick="openSelected()">
+              <i class="fas fa-external-link-alt"></i> Open
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- File List -->
+    <div class="col-md-5">
+      <div class="card shadow file-manager">
+        <div
+          class="card-header py-3 d-flex justify-content-between align-items-center"
+        >
+          <h6 class="m-0 font-weight-bold text-primary">
+            Files in: <span id="currentPath">/uploads</span>
+          </h6>
+          <div class="btn-group">
+            <button
+              class="btn btn-sm btn-outline-secondary"
+              onclick="goUp()"
+              id="upButton"
+              disabled
+            >
+              <i class="fas fa-arrow-up"></i> Up
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="goHome()">
+              <i class="fas fa-home"></i> Home
+            </button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th style="width: 40px">
+                    <input
+                      type="checkbox"
+                      id="selectAll"
+                      onchange="toggleSelectAll(this)"
+                    />
+                  </th>
+                  <th>Name</th>
+                  <th>Size</th>
+                  <th>Modified</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="fileList">
+                <tr>
+                  <td colspan="5" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="sr-only">Loading...</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview Panel -->
+    <div class="col-md-4">
+      <div class="card shadow">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Preview</h6>
+        </div>
+        <div class="card-body">
+          <div id="previewContent" class="preview-container">
+            <div class="text-center py-5 text-muted">
+              <i class="fas fa-file fa-3x mb-3"></i>
+              <p>Select a file to preview</p>
+            </div>
+          </div>
+
+          <!-- File Info -->
+          <div id="fileInfo" class="mt-3" style="display: none">
+            <h6>File Information</h6>
+            <table class="table table-sm">
+              <tbody>
+                <tr>
+                  <th>Name:</th>
+                  <td id="infoName">-</td>
+                </tr>
+                <tr>
+                  <th>Path:</th>
+                  <td id="infoPath">-</td>
+                </tr>
+                <tr>
+                  <th>Size:</th>
+                  <td id="infoSize">-</td>
+                </tr>
+                <tr>
+                  <th>Type:</th>
+                  <td id="infoType">-</td>
+                </tr>
+                <tr>
+                  <th>Modified:</th>
+                  <td id="infoModified">-</td>
+                </tr>
+                <tr>
+                  <th>Permissions:</th>
+                  <td id="infoPermissions">-</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Upload Files</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="upload-dropzone" id="dropzone">
+          <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-primary"></i>
+          <h5>Drop files here or click to browse</h5>
+          <p class="text-muted">Maximum file size: 50MB</p>
+          <input type="file" id="fileInput" multiple style="display: none" />
+          <button
+            type="button"
+            class="btn btn-admin mt-3"
+            onclick="document.getElementById('fileInput').click()"
+          >
+            <i class="fas fa-folder-open"></i> Browse Files
+          </button>
+        </div>
+
+        <div class="progress-container" id="progressContainer">
+          <div class="progress mb-3">
+            <div
+              class="progress-bar progress-bar-striped progress-bar-animated"
+              id="uploadProgress"
+              role="progressbar"
+              style="width: 0%"
+            ></div>
+          </div>
+          <div class="text-center">
+            <span id="uploadStatus">Uploading...</span>
+          </div>
+        </div>
+
+        <div id="fileListPreview" class="mt-3"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-admin"
+          id="startUpload"
+          onclick="startUpload()"
+          disabled
+        >
+          <i class="fas fa-upload"></i> Start Upload
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Folder Modal -->
+<div class="modal fade" id="createFolderModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create New Folder</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="folderForm">
+          <div class="form-group">
+            <label for="folderName">Folder Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="folderName"
+              placeholder="Enter folder name"
+              required
+            />
+            <small class="form-text text-muted"
+              >Only letters, numbers, underscores and hyphens allowed</small
+            >
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-admin" onclick="submitFolder()">
+          Create
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentPath = "/uploads";
+  let selectedFiles = new Set();
+  let currentFiles = [];
+
+  document.addEventListener("DOMContentLoaded", function () {
+    loadDirectoryTree();
+    loadFiles(currentPath);
+    loadStats();
+
+    // Setup drag and drop
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("fileInput");
+
+    dropzone.addEventListener("click", () => fileInput.click());
+
+    dropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropzone.classList.add("dragover");
+    });
+
+    dropzone.addEventListener("dragleave", () => {
+      dropzone.classList.remove("dragover");
+    });
+
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("dragover");
+      handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener("change", (e) => {
+      handleFiles(e.target.files);
+    });
+  });
+
+  function loadDirectoryTree() {
+    fetch("/admin/file/tree")
+      .then((response) => response.json())
+      .then((data) => {
+        const treeContainer = document.getElementById("directoryTree");
+        treeContainer.innerHTML = renderTree(data.tree);
+      })
+      .catch((error) => {
+        console.error("Failed to load directory tree:", error);
+      });
+  }
+
+  function renderTree(tree, level = 0) {
+    let html = "";
+    const indent = level * 20;
+
+    tree.forEach((item) => {
+      const isSelected = item.path === currentPath;
+      html += `
+            <div class="tree-item ${isSelected ? "selected" : ""}" 
+                 style="padding-left: ${indent}px;"
+                 onclick="navigateTo('${item.path}')"
+                 data-path="${item.path}">
+                <i class="fas fa-${
+                  item.type === "directory" ? "folder" : "file"
+                } mr-2"></i>
+                ${item.name}
+            </div>
+        `;
+
+      if (item.children && item.children.length > 0) {
+        html += renderTree(item.children, level + 1);
+      }
+    });
+
+    return html;
+  }
+
+  function loadFiles(path) {
+    fetch(`/admin/file/list?path=${encodeURIComponent(path)}`)
+      .then((response) => response.json())
+      .then((data) => {
+        currentPath = path;
+        currentFiles = data.files || [];
+
+        document.getElementById("currentPath").textContent = path;
+        document.getElementById("fileList").innerHTML =
+          renderFileList(currentFiles);
+        document.getElementById("upButton").disabled = path === "/uploads";
+
+        // Update directory tree selection
+        document.querySelectorAll(".tree-item").forEach((item) => {
+          item.classList.remove("selected");
+          if (item.dataset.path === path) {
+            item.classList.add("selected");
+          }
+        });
+      })
+      .catch((error) => {
+        console.error("Failed to load files:", error);
+        alert("Failed to load files: " + error.message);
+      });
+  }
+
+  function renderFileList(files) {
+    if (files.length === 0) {
+      return `
+            <tr>
+                <td colspan="5" class="text-center py-5 text-muted">
+                    <i class="fas fa-folder-open fa-2x mb-3"></i>
+                    <p>This folder is empty</p>
+                </td>
+            </tr>
+        `;
+    }
+
+    let html = "";
+    files.forEach((file) => {
+      const isSelected = selectedFiles.has(file.path);
+      const icon = getFileIcon(file.type, file.name);
+      const size = formatFileSize(file.size);
+      const modified = new Date(file.modified).toLocaleString();
+
+      html += `
+            <tr class="file-item ${isSelected ? "selected" : ""}" 
+                onclick="selectFile('${file.path}', event)"
+                data-path="${file.path}">
+                <td>
+                    <input type="checkbox" ${isSelected ? "checked" : ""} 
+                           onchange="toggleFileSelection('${
+                             file.path
+                           }', this.checked)">
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="file-icon mr-2">
+                            <i class="fas fa-${icon}"></i>
+                        </div>
+                        <div class="file-name">
+                            ${file.name}
+                            ${file.type === "directory" ? "/" : ""}
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="file-size">${size}</div>
+                </td>
+                <td>
+                    <small class="text-muted">${modified}</small>
+                </td>
+                <td>
+                    <div class="file-actions">
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" onclick="previewFile('${
+                              file.path
+                            }', event)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-outline-success" onclick="downloadFile('${
+                              file.path
+                            }', event)">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="deleteFile('${
+                              file.path
+                            }', event)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+
+    return html;
+  }
+
+  function getFileIcon(type, name) {
+    if (type === "directory") return "folder";
+
+    const ext = name.split(".").pop().toLowerCase();
+    const icons = {
+      // Images
+      jpg: "file-image",
+      jpeg: "file-image",
+      png: "file-image",
+      gif: "file-image",
+      bmp: "file-image",
+      svg: "file-image",
+      webp: "file-image",
+      // Documents
+      pdf: "file-pdf",
+      doc: "file-word",
+      docx: "file-word",
+      xls: "file-excel",
+      xlsx: "file-excel",
+      ppt: "file-powerpoint",
+      pptx: "file-powerpoint",
+      txt: "file-alt",
+      md: "file-alt",
+      // Code
+      html: "file-code",
+      css: "file-code",
+      js: "file-code",
+      py: "file-code",
+      java: "file-code",
+      cpp: "file-code",
+      c: "file-code",
+      php: "file-code",
+      json: "file-code",
+      xml: "file-code",
+      // Media
+      mp3: "file-audio",
+      wav: "file-audio",
+      mp4: "file-video",
+      avi: "file-video",
+      mov: "file-video",
+      mkv: "file-video",
+      // Archives
+      zip: "file-archive",
+      rar: "file-archive",
+      tar: "file-archive",
+      gz: "file-archive",
+    };
+
+    return icons[ext] || "file";
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  }
+
+  function navigateTo(path) {
+    loadFiles(path);
+    selectedFiles.clear();
+    document.getElementById("previewContent").innerHTML = `
+        <div class="text-center py-5 text-muted">
+            <i class="fas fa-file fa-3x mb-3"></i>
+            <p>Select a file to preview</p>
+        </div>
+    `;
+    document.getElementById("fileInfo").style.display = "none";
+  }
+
+  function goUp() {
+    const path = currentPath.split("/").slice(0, -1).join("/") || "/uploads";
+    navigateTo(path);
+  }
+
+  function goHome() {
+    navigateTo("/uploads");
+  }
+
+  function selectFile(path, event) {
+    if (
+      event.target.type === "checkbox" ||
+      event.target.tagName === "BUTTON" ||
+      event.target.tagName === "I"
+    ) {
+      return;
+    }
+
+    previewFile(path);
+  }
+
+  function toggleFileSelection(path, checked) {
+    if (checked) {
+      selectedFiles.add(path);
+    } else {
+      selectedFiles.delete(path);
+    }
+
+    const row = document.querySelector(`tr[data-path="${path}"]`);
+    if (row) {
+      row.classList.toggle("selected", checked);
+    }
+
+    document.getElementById("selectAll").checked =
+      selectedFiles.size === currentFiles.length;
+  }
+
+  function toggleSelectAll(source) {
+    const checkboxes = document.querySelectorAll(
+      'input[type="checkbox"]:not(#selectAll)'
+    );
+    checkboxes.forEach((checkbox) => {
+      checkbox.checked = source.checked;
+      const path = checkbox.closest("tr").dataset.path;
+      if (source.checked) {
+        selectedFiles.add(path);
+      } else {
+        selectedFiles.delete(path);
+      }
+    });
+
+    document.querySelectorAll(".file-item").forEach((row) => {
+      row.classList.toggle("selected", source.checked);
+    });
+  }
+
+  function previewFile(path) {
+    fetch(`/admin/file/preview?path=${encodeURIComponent(path)}`)
+      .then((response) => response.json())
+      .then((data) => {
+        const preview = document.getElementById("previewContent");
+        const info = document.getElementById("fileInfo");
+
+        if (data.type === "image") {
+          preview.innerHTML = `<img src="${data.url}" class="image-preview" alt="Preview">`;
+        } else if (data.type === "text") {
+          preview.innerHTML = `<div class="text-preview">${escapeHtml(
+            data.content
+          )}</div>`;
+        } else if (data.type === "pdf") {
+          preview.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-file-pdf fa-3x text-danger mb-3"></i>
+                        <p>PDF file preview not available</p>
+                        <a href="${data.url}" target="_blank" class="btn btn-outline-danger">
+                            <i class="fas fa-external-link-alt"></i> Open PDF
+                        </a>
+                    </div>
+                `;
+        } else {
+          preview.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-file fa-3x text-muted mb-3"></i>
+                        <p>Preview not available for this file type</p>
+                        <a href="${data.url}" target="_blank" class="btn btn-outline-primary">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    </div>
+                `;
+        }
+
+        // Update file info
+        document.getElementById("infoName").textContent = data.info.name;
+        document.getElementById("infoPath").textContent = data.info.path;
+        document.getElementById("infoSize").textContent = formatFileSize(
+          data.info.size
+        );
+        document.getElementById("infoType").textContent = data.info.type;
+        document.getElementById("infoModified").textContent = new Date(
+          data.info.modified
+        ).toLocaleString();
+        document.getElementById("infoPermissions").textContent =
+          data.info.permissions;
+
+        info.style.display = "block";
+      })
+      .catch((error) => {
+        console.error("Failed to preview file:", error);
+        alert("Failed to preview file: " + error.message);
+      });
+  }
+
+  function downloadFile(path) {
+    window.open(
+      `/admin/file/download?path=${encodeURIComponent(path)}`,
+      "_blank"
+    );
+  }
+
+  function downloadSelected() {
+    if (selectedFiles.size === 0) {
+      alert("Please select files to download");
+      return;
+    }
+
+    if (selectedFiles.size === 1) {
+      downloadFile(Array.from(selectedFiles)[0]);
+    } else {
+      alert("Bulk download not implemented yet. Downloading individually...");
+      selectedFiles.forEach((file) => {
+        window.open(
+          `/admin/file/download?path=${encodeURIComponent(file)}`,
+          "_blank"
+        );
+      });
+    }
+  }
+
+  function deleteFile(path) {
+    if (!confirm("Are you sure you want to delete this file?")) {
+      return;
+    }
+
+    fetch(`/admin/file/delete?path=${encodeURIComponent(path)}`, {
+      method: "DELETE",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          loadFiles(currentPath);
+          loadStats();
+          selectedFiles.delete(path);
+        } else {
+          alert("Failed to delete file: " + data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to delete file:", error);
+        alert("Failed to delete file: " + error.message);
+      });
+  }
+
+  function deleteSelected() {
+    if (selectedFiles.size === 0) {
+      alert("Please select files to delete");
+      return;
+    }
+
+    if (
+      !confirm(
+        `Are you sure you want to delete ${selectedFiles.size} selected item(s)?`
+      )
+    ) {
+      return;
+    }
+
+    fetch("/admin/file/bulk-delete", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ files: Array.from(selectedFiles) }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          loadFiles(currentPath);
+          loadStats();
+          selectedFiles.clear();
+        } else {
+          alert("Failed to delete files: " + data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to delete files:", error);
+        alert("Failed to delete files: " + error.message);
+      });
+  }
+
+  function openSelected() {
+    if (selectedFiles.size === 1) {
+      const path = Array.from(selectedFiles)[0];
+      const file = currentFiles.find((f) => f.path === path);
+      if (file && file.type === "directory") {
+        navigateTo(path);
+      } else {
+        window.open(
+          `/admin/file/open?path=${encodeURIComponent(path)}`,
+          "_blank"
+        );
+      }
+    } else {
+      alert("Please select only one file or folder to open");
+    }
+  }
+
+  function createFolder() {
+    $("#createFolderModal").modal("show");
+  }
+
+  function submitFolder() {
+    const name = document.getElementById("folderName").value.trim();
+    if (!name) {
+      alert("Please enter a folder name");
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_\- ]+$/.test(name)) {
+      alert(
+        "Folder name can only contain letters, numbers, spaces, underscores and hyphens"
+      );
+      return;
+    }
+
+    fetch("/admin/file/create-folder", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        path: currentPath,
+        name: name,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          $("#createFolderModal").modal("hide");
+          document.getElementById("folderName").value = "";
+          loadFiles(currentPath);
+          loadDirectoryTree();
+        } else {
+          alert("Failed to create folder: " + data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to create folder:", error);
+        alert("Failed to create folder: " + error.message);
+      });
+  }
+
+  function handleFiles(files) {
+    const fileListPreview = document.getElementById("fileListPreview");
+    const startUploadBtn = document.getElementById("startUpload");
+
+    if (files.length === 0) return;
+
+    let html = '<h6>Selected Files:</h6><ul class="list-group">';
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      html += `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="fas fa-file mr-2"></i>
+                    ${file.name}
+                </span>
+                <span class="badge badge-primary badge-pill">
+                    ${formatFileSize(file.size)}
+                </span>
+            </li>
+        `;
+    }
+    html += "</ul>";
+
+    fileListPreview.innerHTML = html;
+    startUploadBtn.disabled = false;
+  }
+
+  function startUpload() {
+    const fileInput = document.getElementById("fileInput");
+    const files = fileInput.files;
+
+    if (files.length === 0) {
+      alert("Please select files to upload");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("path", currentPath);
+    for (let i = 0; i < files.length; i++) {
+      formData.append("files", files[i]);
+    }
+
+    const progressContainer = document.getElementById("progressContainer");
+    const progressBar = document.getElementById("uploadProgress");
+    const uploadStatus = document.getElementById("uploadStatus");
+
+    progressContainer.style.display = "block";
+    progressBar.style.width = "0%";
+    uploadStatus.textContent = "Uploading...";
+
+    const xhr = new XMLHttpRequest();
+
+    xhr.upload.addEventListener("progress", (e) => {
+      if (e.lengthComputable) {
+        const percent = Math.round((e.loaded / e.total) * 100);
+        progressBar.style.width = percent + "%";
+        uploadStatus.textContent = `Uploading... ${percent}%`;
+      }
+    });
+
+    xhr.addEventListener("load", () => {
+      try {
+        const response = JSON.parse(xhr.responseText);
+        if (response.success) {
+          uploadStatus.textContent = "Upload complete!";
+          progressBar.classList.remove("progress-bar-animated");
+          progressBar.classList.remove("progress-bar-striped");
+
+          setTimeout(() => {
+            $("#uploadModal").modal("hide");
+            loadFiles(currentPath);
+            loadStats();
+            resetUploadForm();
+          }, 1000);
+        } else {
+          uploadStatus.textContent = "Upload failed: " + response.message;
+          progressBar.style.width = "100%";
+          progressBar.classList.add("bg-danger");
+        }
+      } catch (error) {
+        uploadStatus.textContent = "Upload failed";
+        progressBar.style.width = "100%";
+        progressBar.classList.add("bg-danger");
+      }
+    });
+
+    xhr.addEventListener("error", () => {
+      uploadStatus.textContent = "Upload failed";
+      progressBar.style.width = "100%";
+      progressBar.classList.add("bg-danger");
+    });
+
+    xhr.open("POST", "/admin/file/upload");
+    xhr.send(formData);
+  }
+
+  function resetUploadForm() {
+    document.getElementById("fileInput").value = "";
+    document.getElementById("fileListPreview").innerHTML = "";
+    document.getElementById("progressContainer").style.display = "none";
+    document.getElementById("startUpload").disabled = true;
+    const progressBar = document.getElementById("uploadProgress");
+    progressBar.style.width = "0%";
+    progressBar.classList.remove("bg-danger");
+    progressBar.classList.add("progress-bar-animated");
+    progressBar.classList.add("progress-bar-striped");
+  }
+
+  function refreshFiles() {
+    loadFiles(currentPath);
+    loadDirectoryTree();
+    loadStats();
+  }
+
+  function loadStats() {
+    fetch("/admin/file/stats")
+      .then((response) => response.json())
+      .then((data) => {
+        document.getElementById("totalSpace").textContent = data.totalSpace;
+        document.getElementById("usedSpace").textContent = data.usedSpace;
+        document.getElementById("fileCount").textContent = data.fileCount;
+        document.getElementById("folderCount").textContent = data.folderCount;
+
+        const progress = data.usedPercent;
+        document.getElementById("storageProgress").style.width = progress + "%";
+
+        if (progress > 90) {
+          document.getElementById("storageProgress").classList.add("bg-danger");
+        } else if (progress > 70) {
+          document
+            .getElementById("storageProgress")
+            .classList.add("bg-warning");
+        } else {
+          document
+            .getElementById("storageProgress")
+            .classList.add("bg-success");
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load storage stats:", error);
+      });
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+</script>
+{% endblock %}
