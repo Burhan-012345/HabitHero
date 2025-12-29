@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy - HabitHero</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, sans-serif;
+      }
+
+      body {
+        background: #000;
+        color: #e0e0e0;
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      .service-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: #0a0a0a;
+        min-height: 100vh;
+        border: 1px solid #333;
+      }
+
+      .service-header {
+        padding: 2rem 0;
+        border-bottom: 1px solid #333;
+        margin-bottom: 2rem;
+      }
+
+      .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #00f3ff;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        transition: color 0.3s;
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.3);
+      }
+
+      .back-button:hover {
+        color: #0066ff;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #00f3ff;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 8px rgba(0, 243, 255, 0.5);
+      }
+
+      .logo i {
+        color: #0066ff;
+      }
+
+      .service-header h1 {
+        font-size: 2.5rem;
+        color: #00f3ff;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 10px rgba(0, 243, 255, 0.4);
+      }
+
+      .last-updated {
+        color: #888;
+        font-size: 0.9rem;
+      }
+
+      .content-section {
+        margin-bottom: 3rem;
+        animation: fadeInUp 0.6s ease-out;
+      }
+
+      .content-section h2 {
+        color: #00f3ff;
+        margin: 1.5rem 0 1rem;
+        font-size: 1.5rem;
+        border-left: 4px solid #0066ff;
+        padding-left: 1rem;
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.3);
+      }
+
+      .content-section h3 {
+        color: #ccc;
+        margin: 1.2rem 0 0.8rem;
+        font-size: 1.2rem;
+      }
+
+      .content-section p {
+        margin-bottom: 1rem;
+        color: #ccc;
+      }
+
+      .content-section ul,
+      .content-section ol {
+        margin: 1rem 0 1rem 2rem;
+        color: #ccc;
+      }
+
+      .content-section li {
+        margin-bottom: 0.5rem;
+      }
+
+      .highlight-box {
+        background: #1a1a1a;
+        border-left: 4px solid #0066ff;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        border-radius: 0 8px 8px 0;
+        box-shadow: 0 0 10px rgba(0, 102, 255, 0.2);
+      }
+
+      .contact-info {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 102, 255, 0.1) 0%,
+          rgba(0, 243, 255, 0.1) 100%
+        );
+        padding: 2rem;
+        border-radius: 12px;
+        margin: 2rem 0;
+        border: 1px solid #0066ff;
+      }
+
+      .contact-info h3 {
+        color: #00f3ff;
+        margin-bottom: 1rem;
+      }
+
+      .contact-info a {
+        color: #00f3ff;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .contact-info a:hover {
+        text-decoration: underline;
+      }
+
+      .footer {
+        text-align: center;
+        padding: 2rem 0;
+        margin-top: 3rem;
+        border-top: 1px solid #333;
+        color: #888;
+      }
+
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 1rem 0;
+      }
+
+      .footer-link {
+        color: #00f3ff;
+        text-decoration: none;
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.3);
+      }
+
+      .footer-link:hover {
+        text-decoration: none;
+        color: #0066ff;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .service-container {
+          padding: 1rem;
+        }
+
+        .service-header h1 {
+          font-size: 2rem;
+        }
+
+        .content-section {
+          padding: 0 0.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="service-container">
+      <header class="service-header">
+        <a href="{{ url_for('intro') }}" class="back-button">
+          <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+        <div class="logo">
+          <i class="fas fa-fire"></i>
+          <span>HabitHero</span>
+        </div>
+        <h1>Privacy Policy</h1>
+        <p class="last-updated">Last Updated: January 1, 2024</p>
+      </header>
+
+      <main>
+        <div class="content-section">
+          <p>
+            At HabitHero, we take your privacy seriously. This Privacy Policy
+            explains how we collect, use, disclose, and safeguard your
+            information when you use our habit-tracking application.
+          </p>
+
+          <div class="highlight-box">
+            <strong>TL;DR:</strong> We only collect data necessary to provide
+            our service, we don't sell your data, and we take security
+            seriously.
+          </div>
+        </div>
+
+        <div class="content-section">
+          <h2>Information We Collect</h2>
+
+          <h3>Personal Information</h3>
+          <p>When you create an account, we collect:</p>
+          <ul>
+            <li>Email address</li>
+            <li>Username</li>
+            <li>Password (encrypted)</li>
+            <li>Profile information you choose to provide</li>
+          </ul>
+
+          <h3>Habit Data</h3>
+          <p>We collect data about your habits and progress, including:</p>
+          <ul>
+            <li>Habit names and descriptions</li>
+            <li>Completion dates and times</li>
+            <li>Streak information</li>
+            <li>Notes you add to habit completions</li>
+          </ul>
+
+          <h3>Usage Data</h3>
+          <p>
+            We automatically collect information about how you use HabitHero:
+          </p>
+          <ul>
+            <li>Device information</li>
+            <li>App usage patterns</li>
+            <li>Feature interactions</li>
+            <li>Error reports</li>
+          </ul>
+        </div>
+
+        <div class="content-section">
+          <h2>How We Use Your Information</h2>
+          <ul>
+            <li>
+              <strong>Provide Services:</strong> To operate and maintain
+              HabitHero features
+            </li>
+            <li>
+              <strong>Improve Experience:</strong> To understand how users
+              interact with our app
+            </li>
+            <li>
+              <strong>Communication:</strong> To send important updates and
+              notifications
+            </li>
+            <li>
+              <strong>Security:</strong> To protect against unauthorized access
+            </li>
+            <li>
+              <strong>Analytics:</strong> To improve our services (anonymous
+              data only)
+            </li>
+          </ul>
+        </div>
+
+        <div class="content-section">
+          <h2>Data Sharing and Disclosure</h2>
+          <p>
+            We do not sell, trade, or rent your personal information to third
+            parties. We may share data only in these circumstances:
+          </p>
+          <ul>
+            <li>With your consent for specific purposes</li>
+            <li>
+              With service providers who help us operate (under strict
+              confidentiality agreements)
+            </li>
+            <li>When required by law or legal process</li>
+            <li>To protect the rights and safety of our users</li>
+          </ul>
+        </div>
+
+        <div class="content-section">
+          <h2>Data Security</h2>
+          <p>
+            We implement industry-standard security measures to protect your
+            data:
+          </p>
+          <ul>
+            <li>Encryption of data in transit and at rest</li>
+            <li>Secure authentication methods</li>
+            <li>Regular security audits</li>
+            <li>Limited access to personal data</li>
+          </ul>
+        </div>
+
+        <div class="content-section">
+          <h2>Your Rights and Choices</h2>
+          <p>You have the right to:</p>
+          <ul>
+            <li>Access your personal data</li>
+            <li>Correct inaccurate data</li>
+            <li>Delete your account and associated data</li>
+            <li>Export your data</li>
+            <li>Opt-out of marketing communications</li>
+          </ul>
+          <p>
+            To exercise these rights, contact us at
+            <a href="mailto:privacy@habithero.com">privacy@habithero.com</a>
+          </p>
+        </div>
+
+        <div class="content-section">
+          <h2>Cookies and Tracking</h2>
+          <p>We use cookies and similar technologies to:</p>
+          <ul>
+            <li>Keep you signed in</li>
+            <li>Remember your preferences</li>
+            <li>Analyze usage patterns</li>
+            <li>Improve performance</li>
+          </ul>
+          <p>You can control cookies through your browser settings.</p>
+        </div>
+
+        <div class="content-section">
+          <h2>Children's Privacy</h2>
+          <p>
+            HabitHero is not intended for children under 13. We do not knowingly
+            collect data from children under 13. If we learn we have collected
+            such data, we will delete it promptly.
+          </p>
+        </div>
+
+        <div class="content-section">
+          <h2>International Data Transfers</h2>
+          <p>
+            Your information may be transferred to and processed in countries
+            other than your own. We ensure appropriate safeguards are in place
+            for such transfers.
+          </p>
+        </div>
+
+        <div class="content-section">
+          <h2>Changes to This Policy</h2>
+          <p>
+            We may update this Privacy Policy periodically. We will notify you
+            of significant changes via email or in-app notification.
+          </p>
+        </div>
+
+        <div class="contact-info">
+          <h3>Contact Us</h3>
+          <p>
+            If you have questions about this Privacy Policy or our data
+            practices:
+          </p>
+          <p>
+            Email:
+            <a href="mailto:privacy@habithero.com">privacy@habithero.com</a>
+          </p>
+          <p>
+            Mail: HabitHero Privacy Team<br />
+            123 Innovation Drive<br />
+            San Francisco, CA 94107
+          </p>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <div class="footer-links">
+          <a href="{{ url_for('privacy') }}" class="footer-link"
+            >Privacy Policy</a
+          >
+          <a href="{{ url_for('terms') }}" class="footer-link"
+            >Terms of Service</a
+          >
+          <a href="{{ url_for('contact') }}" class="footer-link">Contact</a>
+          <a href="{{ url_for('intro') }}" class="footer-link">Home</a>
+        </div>
+        <p>© 2024 HabitHero. All rights reserved.</p>
+      </footer>
+    </div>
+
+    <script>
+      // Add fade-in animations for sections
+      document.addEventListener("DOMContentLoaded", function () {
+        const sections = document.querySelectorAll(".content-section");
+
+        sections.forEach((section, index) => {
+          section.style.animationDelay = `${index * 0.1}s`;
+          section.style.opacity = "0";
+          section.style.transform = "translateY(20px)";
+
+          setTimeout(() => {
+            section.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+            section.style.opacity = "1";
+            section.style.transform = "translateY(0)";
+          }, 100 + index * 100);
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Terms of Service - HabitHero</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, sans-serif;
+      }
+
+      body {
+        background: #000;
+        color: #e0e0e0;
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      .service-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: #0a0a0a;
+        min-height: 100vh;
+        border: 1px solid #333;
+      }
+
+      .service-header {
+        padding: 2rem 0;
+        border-bottom: 1px solid #333;
+        margin-bottom: 2rem;
+      }
+
+      .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #00f3ff;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        transition: color 0.3s;
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.3);
+      }
+
+      .back-button:hover {
+        color: #0066ff;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #00f3ff;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 8px rgba(0, 243, 255, 0.5);
+      }
+
+      .logo i {
+        color: #0066ff;
+      }
+
+      .service-header h1 {
+        font-size: 2.5rem;
+        color: #00f3ff;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 10px rgba(0, 243, 255, 0.4);
+      }
+
+      .last-updated {
+        color: #888;
+        font-size: 0.9rem;
+      }
+
+      .toc-nav {
+        background: #1a1a1a;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 2rem 0;
+        border: 1px solid #0066ff;
+        box-shadow: 0 0 15px rgba(0, 102, 255, 0.2);
+      }
+
+      .toc-nav h3 {
+        color: #00f3ff;
+        margin-bottom: 1rem;
+      }
+
+      .toc-nav ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .toc-nav li {
+        margin-bottom: 0.5rem;
+      }
+
+      .toc-nav a {
+        color: #00f3ff;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: color 0.3s;
+      }
+
+      .toc-nav a:hover {
+        color: #0066ff;
+        text-decoration: none;
+        text-shadow: 0 0 5px rgba(0, 102, 255, 0.5);
+      }
+
+      .content-section {
+        margin-bottom: 3rem;
+      }
+
+      .content-section h2 {
+        color: #00f3ff;
+        margin: 2rem 0 1rem;
+        font-size: 1.5rem;
+        border-left: 4px solid #0066ff;
+        padding-left: 1rem;
+        scroll-margin-top: 80px;
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.3);
+      }
+
+      .content-section h3 {
+        color: #ccc;
+        margin: 1.5rem 0 1rem;
+        font-size: 1.2rem;
+      }
+
+      .content-section p {
+        margin-bottom: 1rem;
+        color: #ccc;
+      }
+
+      .content-section ul,
+      .content-section ol {
+        margin: 1rem 0 1rem 2rem;
+        color: #ccc;
+      }
+
+      .content-section li {
+        margin-bottom: 0.5rem;
+      }
+
+      .important-note {
+        background: #1a1a1a;
+        border-left: 4px solid #0066ff;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        border-radius: 0 8px 8px 0;
+        box-shadow: 0 0 10px rgba(0, 102, 255, 0.2);
+      }
+
+      .prohibited-list {
+        background: #1a1a1a;
+        border: 1px solid #0066ff;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+        box-shadow: 0 0 10px rgba(0, 102, 255, 0.2);
+      }
+
+      .prohibited-list h4 {
+        color: #00f3ff;
+        margin-bottom: 1rem;
+      }
+
+      .footer {
+        text-align: center;
+        padding: 2rem 0;
+        margin-top: 3rem;
+        border-top: 1px solid #333;
+        color: #888;
+      }
+
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 1rem 0;
+      }
+
+      .footer-link {
+        color: #00f3ff;
+        text-decoration: none;
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.3);
+      }
+
+      .footer-link:hover {
+        text-decoration: none;
+        color: #0066ff;
+      }
+
+      .agreement-box {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 102, 255, 0.1) 0%,
+          rgba(0, 243, 255, 0.1) 100%
+        );
+        padding: 2rem;
+        border-radius: 12px;
+        margin: 2rem 0;
+        border: 2px solid #0066ff;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0, 102, 255, 0.3);
+      }
+
+      .agreement-box h3 {
+        color: #00f3ff;
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.3);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .service-container {
+          padding: 1rem;
+        }
+
+        .service-header h1 {
+          font-size: 2rem;
+        }
+
+        .toc-nav {
+          padding: 1rem;
+        }
+
+        .footer-links {
+          flex-direction: column;
+          gap: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="service-container">
+      <header class="service-header">
+        <a href="{{ url_for('intro') }}" class="back-button">
+          <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+        <div class="logo">
+          <i class="fas fa-fire"></i>
+          <span>HabitHero</span>
+        </div>
+        <h1>Terms of Service</h1>
+        <p class="last-updated">Last Updated: January 1, 2024</p>
+      </header>
+
+      <div class="toc-nav">
+        <h3>Table of Contents</h3>
+        <ul>
+          <li>
+            <a href="#acceptance"
+              ><i class="fas fa-check-circle"></i> Acceptance of Terms</a
+            >
+          </li>
+          <li>
+            <a href="#account"
+              ><i class="fas fa-user"></i> Account Registration</a
+            >
+          </li>
+          <li>
+            <a href="#usage"><i class="fas fa-laptop"></i> Acceptable Use</a>
+          </li>
+          <li>
+            <a href="#content"><i class="fas fa-camera"></i> User Content</a>
+          </li>
+          <li>
+            <a href="#privacy"><i class="fas fa-shield-alt"></i> Privacy</a>
+          </li>
+          <li>
+            <a href="#termination"><i class="fas fa-ban"></i> Termination</a>
+          </li>
+          <li>
+            <a href="#disclaimer"
+              ><i class="fas fa-exclamation-triangle"></i> Disclaimer</a
+            >
+          </li>
+          <li>
+            <a href="#limitation"
+              ><i class="fas fa-balance-scale"></i> Limitation of Liability</a
+            >
+          </li>
+          <li>
+            <a href="#changes"><i class="fas fa-sync"></i> Changes to Terms</a>
+          </li>
+        </ul>
+      </div>
+
+      <main>
+        <div class="agreement-box">
+          <h3>Important: Please Read Carefully</h3>
+          <p>
+            By accessing or using HabitHero, you agree to be bound by these
+            Terms of Service. If you do not agree to these terms, please do not
+            use our service.
+          </p>
+        </div>
+
+        <div class="content-section" id="acceptance">
+          <h2>1. Acceptance of Terms</h2>
+          <p>
+            These Terms of Service ("Terms") govern your access to and use of
+            the HabitHero application, website, and services ("Service"). By
+            accessing or using the Service, you agree to be bound by these
+            Terms.
+          </p>
+          <p>
+            If you are using the Service on behalf of an organization, you agree
+            to these Terms for that organization and represent that you have the
+            authority to bind that organization to these Terms.
+          </p>
+        </div>
+
+        <div class="content-section" id="account">
+          <h2>2. Account Registration</h2>
+          <h3>2.1 Eligibility</h3>
+          <p>
+            You must be at least 13 years old to use HabitHero. By using the
+            Service, you represent that you are at least 13 years old.
+          </p>
+
+          <h3>2.2 Account Security</h3>
+          <p>You are responsible for:</p>
+          <ul>
+            <li>Maintaining the confidentiality of your login credentials</li>
+            <li>All activities that occur under your account</li>
+            <li>Notifying us immediately of any unauthorized access</li>
+          </ul>
+
+          <h3>2.3 Account Information</h3>
+          <p>
+            You agree to provide accurate, current, and complete information
+            during registration and to update such information to keep it
+            accurate.
+          </p>
+        </div>
+
+        <div class="content-section" id="usage">
+          <h2>3. Acceptable Use</h2>
+          <p>You agree not to use the Service to:</p>
+
+          <div class="prohibited-list">
+            <h4>Prohibited Activities</h4>
+            <ul>
+              <li>Violate any applicable laws or regulations</li>
+              <li>Infringe upon the intellectual property rights of others</li>
+              <li>Harass, abuse, or harm another person</li>
+              <li>Transmit viruses, malware, or other malicious code</li>
+              <li>Attempt to gain unauthorized access to the Service</li>
+              <li>Interfere with the proper functioning of the Service</li>
+              <li>Use the Service for any illegal purpose</li>
+              <li>Impersonate any person or entity</li>
+              <li>Collect or harvest personal information about other users</li>
+              <li>
+                Engage in any activity that could damage, disable, or impair the
+                Service
+              </li>
+            </ul>
+          </div>
+
+          <div class="important-note">
+            <p>
+              <strong>Note:</strong> We reserve the right to investigate and
+              take appropriate legal action against anyone who violates these
+              Terms, including removing offending content and terminating
+              accounts.
+            </p>
+          </div>
+        </div>
+
+        <div class="content-section" id="content">
+          <h2>4. User Content</h2>
+          <h3>4.1 Your Content</h3>
+          <p>
+            You retain ownership of any content you create, upload, or share
+            through HabitHero ("User Content").
+          </p>
+
+          <h3>4.2 License to HabitHero</h3>
+          <p>
+            By submitting User Content, you grant HabitHero a worldwide,
+            non-exclusive, royalty-free license to use, reproduce, modify, and
+            display your content solely for the purpose of providing and
+            improving the Service.
+          </p>
+
+          <h3>4.3 Content Standards</h3>
+          <p>
+            You are solely responsible for your User Content and must ensure it:
+          </p>
+          <ul>
+            <li>Does not violate these Terms or any laws</li>
+            <li>Does not infringe any third-party rights</li>
+            <li>Is not offensive, defamatory, or inappropriate</li>
+            <li>
+              Does not contain personal information of others without consent
+            </li>
+          </ul>
+
+          <h3>4.4 Content Removal</h3>
+          <p>
+            We reserve the right to remove any User Content that violates these
+            Terms or is otherwise objectionable in our sole discretion.
+          </p>
+        </div>
+
+        <div class="content-section" id="privacy">
+          <h2>5. Privacy</h2>
+          <p>
+            Your privacy is important to us. Our Privacy Policy explains how we
+            collect, use, and disclose information about you. By using the
+            Service, you consent to our collection, use, and disclosure of your
+            information as described in our
+            <a href="{{ url_for('privacy') }}">Privacy Policy</a>.
+          </p>
+        </div>
+
+        <div class="content-section" id="termination">
+          <h2>6. Termination</h2>
+          <h3>6.1 By You</h3>
+          <p>
+            You may stop using the Service at any time. You may also delete your
+            account through the settings page in the app.
+          </p>
+
+          <h3>6.2 By Us</h3>
+          <p>We may suspend or terminate your access to the Service if you:</p>
+          <ul>
+            <li>Violate these Terms</li>
+            <li>
+              Use the Service in a manner that could cause us legal liability
+            </li>
+            <li>Disrupt the Service for other users</li>
+            <li>Have not accessed your account for an extended period</li>
+          </ul>
+
+          <h3>6.3 Effect of Termination</h3>
+          <p>
+            Upon termination, your right to use the Service will immediately
+            cease. We may retain your information as described in our Privacy
+            Policy.
+          </p>
+        </div>
+
+        <div class="content-section" id="disclaimer">
+          <h2>7. Disclaimer of Warranties</h2>
+          <p>
+            THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT
+            WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. TO THE FULLEST
+            EXTENT PERMITTED BY LAW, HABITHERO DISCLAIMS ALL WARRANTIES,
+            INCLUDING:
+          </p>
+          <ul>
+            <li>IMPLIED WARRANTIES OF MERCHANTABILITY</li>
+            <li>FITNESS FOR A PARTICULAR PURPOSE</li>
+            <li>NON-INFRINGEMENT</li>
+            <li>ACCURACY, RELIABILITY, OR COMPLETENESS OF CONTENT</li>
+          </ul>
+          <p>
+            We do not warrant that the Service will be uninterrupted, secure, or
+            error-free.
+          </p>
+        </div>
+
+        <div class="content-section" id="limitation">
+          <h2>8. Limitation of Liability</h2>
+          <p>
+            TO THE MAXIMUM EXTENT PERMITTED BY LAW, HABITHERO SHALL NOT BE
+            LIABLE FOR:
+          </p>
+          <ul>
+            <li>
+              INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES
+            </li>
+            <li>LOSS OF PROFITS, DATA, USE, OR GOODWILL</li>
+            <li>PERSONAL INJURY OR PROPERTY DAMAGE</li>
+            <li>
+              UNAUTHORIZED ACCESS TO OR ALTERATION OF YOUR TRANSMISSIONS OR DATA
+            </li>
+          </ul>
+          <p>
+            IN NO EVENT SHALL HABITHERO'S TOTAL LIABILITY EXCEED THE AMOUNT YOU
+            HAVE PAID TO HABITHERO IN THE PAST 12 MONTHS, OR $100, WHICHEVER IS
+            GREATER.
+          </p>
+        </div>
+
+        <div class="content-section" id="changes">
+          <h2>9. Changes to Terms</h2>
+          <p>
+            We may modify these Terms at any time. We will provide notice of
+            material changes through the Service or via email. Your continued
+            use of the Service after such changes constitutes your acceptance of
+            the new Terms.
+          </p>
+        </div>
+
+        <div class="content-section">
+          <h2>10. Governing Law</h2>
+          <p>
+            These Terms shall be governed by the laws of the State of
+            California, without regard to its conflict of law provisions.
+          </p>
+        </div>
+
+        <div class="content-section">
+          <h2>11. Contact Information</h2>
+          <p>If you have questions about these Terms, please contact us at:</p>
+          <p>
+            Email: <a href="mailto:legal@habithero.com">legal@habithero.com</a
+            ><br />
+            Mail: HabitHero Legal Department<br />
+            123 Innovation Drive<br />
+            San Francisco, CA 94107
+          </p>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <div class="footer-links">
+          <a href="{{ url_for('privacy') }}" class="footer-link"
+            >Privacy Policy</a
+          >
+          <a href="{{ url_for('terms') }}" class="footer-link"
+            >Terms of Service</a
+          >
+          <a href="{{ url_for('contact') }}" class="footer-link">Contact</a>
+          <a href="{{ url_for('intro') }}" class="footer-link">Home</a>
+        </div>
+        <p>© 2024 HabitHero. All rights reserved.</p>
+      </footer>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Smooth scroll for table of contents links
+        document.querySelectorAll(".toc-nav a").forEach((anchor) => {
+          anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute("href");
+            const targetElement = document.querySelector(targetId);
+
+            if (targetElement) {
+              const headerOffset = 80;
+              const elementPosition = targetElement.getBoundingClientRect().top;
+              const offsetPosition =
+                elementPosition + window.pageYOffset - headerOffset;
+
+              window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth",
+              });
+
+              // Highlight the section
+              targetElement.style.backgroundColor = "#f0f9ff";
+              setTimeout(() => {
+                targetElement.style.backgroundColor = "";
+              }, 2000);
+            }
+          });
+        });
+
+        // Add fade-in animation to sections
+        const sections = document.querySelectorAll(".content-section");
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.style.opacity = "1";
+                entry.target.style.transform = "translateY(0)";
+                entry.target.style.transition =
+                  "opacity 0.6s ease, transform 0.6s ease";
+              }
+            });
+          },
+          {
+            threshold: 0.1,
+          }
+        );
+
+        sections.forEach((section) => {
+          section.style.opacity = "0";
+          section.style.transform = "translateY(20px)";
+          observer.observe(section);
+        });
+      });
+    </script>
+  </body>
+</html>

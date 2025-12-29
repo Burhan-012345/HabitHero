@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Us - HabitHero</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 102, 255, 0.1) 0%,
+          rgba(0, 243, 255, 0.1) 100%
+        );
+        color: #e0e0e0;
+        line-height: 1.6;
+        min-height: 100vh;
+        background-color: #000;
+      }
+
+      .contact-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #00f3ff;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.3);
+      }
+
+      .back-button:hover {
+        color: #0066ff;
+        transform: translateX(-5px);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 0.8s ease-out;
+      }
+
+      .logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #00f3ff;
+        margin-bottom: 1rem;
+        text-shadow: 0 0 8px rgba(0, 243, 255, 0.5);
+      }
+
+      .logo i {
+        color: #0066ff;
+      }
+
+      .header h1 {
+        font-size: 3rem;
+        color: #00f3ff;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #00f3ff, #0066ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 10px rgba(0, 102, 255, 0.3);
+      }
+
+      .header p {
+        font-size: 1.2rem;
+        color: #ccc;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .contact-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 4rem;
+      }
+
+      .contact-card {
+        background: #0a0a0a;
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        text-align: center;
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+        border: 1px solid #333;
+      }
+
+      .contact-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 102, 255, 0.4);
+        border: 1px solid #0066ff;
+      }
+
+      .card-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #0066ff, #00f3ff);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 1.8rem;
+        color: #000;
+        box-shadow: 0 0 15px rgba(0, 102, 255, 0.5);
+      }
+
+      .contact-card h3 {
+        color: #00f3ff;
+        margin-bottom: 1rem;
+        font-size: 1.4rem;
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.3);
+      }
+
+      .contact-card p {
+        color: #ccc;
+        margin-bottom: 1.5rem;
+      }
+
+      .contact-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #00f3ff;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.8rem 1.5rem;
+        border-radius: 25px;
+        border: 2px solid #0066ff;
+        transition: all 0.3s ease;
+        background: rgba(0, 102, 255, 0.1);
+      }
+
+      .contact-link:hover {
+        background: linear-gradient(135deg, #0066ff, #00f3ff);
+        color: #000;
+        border-color: #00f3ff;
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(0, 102, 255, 0.5);
+      }
+
+      .faq-section {
+        background: #0a0a0a;
+        padding: 3rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        margin-bottom: 4rem;
+        animation: fadeInUp 0.8s ease-out 0.2s both;
+        border: 1px solid #333;
+      }
+
+      .faq-section h2 {
+        text-align: center;
+        color: #00f3ff;
+        margin-bottom: 2rem;
+        font-size: 2rem;
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.3);
+      }
+
+      .faq-item {
+        border-bottom: 1px solid #333;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+      }
+
+      .faq-question {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        padding: 1rem 0;
+        color: #e0e0e0;
+        font-weight: 500;
+        transition: color 0.3s;
+      }
+
+      .faq-question:hover {
+        color: #00f3ff;
+      }
+
+      .faq-question i {
+        transition: transform 0.3s;
+        color: #0066ff;
+      }
+
+      .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+        color: #ccc;
+        line-height: 1.6;
+      }
+
+      .faq-item.active .faq-answer {
+        max-height: 500px;
+        padding: 0 0 1rem;
+      }
+
+      .faq-item.active .faq-question i {
+        transform: rotate(180deg);
+      }
+
+      .contact-form-section {
+        background: #0a0a0a;
+        padding: 3rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        animation: fadeInUp 0.8s ease-out 0.4s both;
+        border: 1px solid #333;
+      }
+
+      .contact-form-section h2 {
+        text-align: center;
+        color: #00f3ff;
+        margin-bottom: 2rem;
+        font-size: 2rem;
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.3);
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #00f3ff;
+        font-weight: 500;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        background: #1a1a1a;
+        border: 2px solid #333;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        color: #e0e0e0;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: #0066ff;
+        box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
+      }
+
+      .submit-button {
+        background: linear-gradient(135deg, #0066ff, #00f3ff);
+        color: #000;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 0 15px rgba(0, 102, 255, 0.4);
+      }
+
+      .submit-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 102, 255, 0.6);
+      }
+
+      .footer {
+        text-align: center;
+        padding: 3rem 0 1rem;
+        color: #888;
+      }
+
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 2rem 0;
+      }
+
+      .footer-link {
+        color: #00f3ff;
+        text-decoration: none;
+        transition: color 0.3s;
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.3);
+      }
+
+      .footer-link:hover {
+        color: #0066ff;
+        text-decoration: none;
+      }
+
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .contact-container {
+          padding: 1rem;
+        }
+
+        .header h1 {
+          font-size: 2.2rem;
+        }
+
+        .contact-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .faq-section,
+        .contact-form-section {
+          padding: 2rem 1rem;
+        }
+
+        .footer-links {
+          flex-direction: column;
+          gap: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="contact-container">
+      <a href="{{ url_for('intro') }}" class="back-button">
+        <i class="fas fa-arrow-left"></i> Back to Home
+      </a>
+
+      <header class="header">
+        <div class="logo">
+          <i class="fas fa-fire"></i>
+          <span>HabitHero</span>
+        </div>
+        <h1>Contact Us</h1>
+        <p>
+          We're here to help! Reach out to us for support, feedback, or just to
+          say hello.
+        </p>
+      </header>
+
+      <div class="contact-grid">
+        <div class="contact-card" style="animation-delay: 0.1s">
+          <div class="card-icon">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <h3>General Support</h3>
+          <p>
+            For general questions, feedback, or assistance with your account
+          </p>
+          <a href="mailto:support@habithero.com" class="contact-link">
+            <i class="fas fa-paper-plane"></i> support@habithero.com
+          </a>
+        </div>
+
+        <div class="contact-card" style="animation-delay: 0.2s">
+          <div class="card-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h3>Privacy & Security</h3>
+          <p>For privacy concerns, data requests, or security issues</p>
+          <a href="mailto:privacy@habithero.com" class="contact-link">
+            <i class="fas fa-lock"></i> privacy@habithero.com
+          </a>
+        </div>
+
+        <div class="contact-card" style="animation-delay: 0.3s">
+          <div class="card-icon">
+            <i class="fas fa-balance-scale"></i>
+          </div>
+          <h3>Legal Inquiries</h3>
+          <p>For legal matters, partnerships, or business inquiries</p>
+          <a href="mailto:legal@habithero.com" class="contact-link">
+            <i class="fas fa-gavel"></i> legal@habithero.com
+          </a>
+        </div>
+      </div>
+
+      <div class="faq-section">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>How do I reset my password?</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            <p>
+              Click "Forgot Password" on the login page, enter your email, and
+              follow the instructions sent to your inbox. If you don't receive
+              the email, check your spam folder or contact support.
+            </p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Is my data secure?</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            <p>
+              Yes! We use industry-standard encryption and security practices.
+              Your data is encrypted both in transit and at rest. Read our
+              <a href="{{ url_for('privacy') }}" style="color: #667eea"
+                >Privacy Policy</a
+              >
+              for more details.
+            </p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Can I export my habit data?</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            <p>
+              Yes, you can export your habit data in CSV format from the
+              Analytics page. Go to Analytics → Export Data.
+            </p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>How do I delete my account?</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            <p>
+              Go to Settings → Account → Delete Account. Please note that this
+              action is permanent and cannot be undone.
+            </p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Do you offer a mobile app?</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            <p>
+              HabitHero is a web application that works on all devices. You can
+              add it to your home screen for a mobile app-like experience.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-form-section">
+        <h2>Send Us a Message</h2>
+        <form id="contactForm">
+          <div class="form-group">
+            <label for="name">Your Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              placeholder="Enter your name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              placeholder="Enter your email"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="subject">Subject</label>
+            <select id="subject" name="subject" required>
+              <option value="">Select a topic</option>
+              <option value="support">Technical Support</option>
+              <option value="feedback">Feedback & Suggestions</option>
+              <option value="account">Account Issues</option>
+              <option value="privacy">Privacy Concern</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea
+              id="message"
+              name="message"
+              rows="5"
+              required
+              placeholder="How can we help you?"
+            ></textarea>
+          </div>
+
+          <button type="submit" class="submit-button">
+            <i class="fas fa-paper-plane"></i> Send Message
+          </button>
+        </form>
+      </div>
+
+      <footer class="footer">
+        <div class="footer-links">
+          <a href="{{ url_for('privacy') }}" class="footer-link"
+            >Privacy Policy</a
+          >
+          <a href="{{ url_for('terms') }}" class="footer-link"
+            >Terms of Service</a
+          >
+          <a href="{{ url_for('contact') }}" class="footer-link">Contact</a>
+          <a href="{{ url_for('intro') }}" class="footer-link">Home</a>
+        </div>
+        <p>© 2024 HabitHero. All rights reserved.</p>
+        <p style="margin-top: 1rem; font-size: 0.9rem">
+          <i class="fas fa-map-marker-alt"></i> 123 Innovation Drive, San
+          Francisco, CA 94107
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // FAQ toggle functionality
+        document.querySelectorAll(".faq-question").forEach((question) => {
+          question.addEventListener("click", () => {
+            const item = question.parentElement;
+            item.classList.toggle("active");
+          });
+        });
+
+        // Form submission
+        const contactForm = document.getElementById("contactForm");
+        contactForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const formData = {
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+            subject: document.getElementById("subject").value,
+            message: document.getElementById("message").value,
+          };
+
+          // In a real application, you would send this data to your server
+          // For now, we'll just show a success message
+          const submitButton = contactForm.querySelector(".submit-button");
+          const originalText = submitButton.innerHTML;
+
+          submitButton.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Sending...';
+          submitButton.disabled = true;
+
+          setTimeout(() => {
+            submitButton.innerHTML =
+              '<i class="fas fa-check"></i> Message Sent!';
+            submitButton.style.background =
+              "linear-gradient(135deg, #4ade80, #22c55e)";
+
+            // Reset form
+            contactForm.reset();
+
+            // Reset button after 3 seconds
+            setTimeout(() => {
+              submitButton.innerHTML = originalText;
+              submitButton.style.background =
+                "linear-gradient(135deg, #667eea, #764ba2)";
+              submitButton.disabled = false;
+            }, 3000);
+          }, 1500);
+        });
+
+        // Add hover effect to contact cards with delay
+        const cards = document.querySelectorAll(".contact-card");
+        cards.forEach((card) => {
+          card.addEventListener("mouseenter", function () {
+            this.style.transform = "translateY(-10px)";
+          });
+
+          card.addEventListener("mouseleave", function () {
+            this.style.transform = "translateY(0)";
+          });
+        });
+
+        // Add scroll animation for form
+        const formSection = document.querySelector(".contact-form-section");
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.style.opacity = "1";
+                entry.target.style.transform = "translateY(0)";
+              }
+            });
+          },
+          {
+            threshold: 0.2,
+          }
+        );
+
+        observer.observe(formSection);
+      });
+    </script>
+  </body>
+</html>
