@@ -172,7 +172,6 @@
     </style>
   </head>
   <body>
-    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark admin-header">
       <div class="container">
         <a class="navbar-brand" href="{{ url_for('admin.index') }}">
@@ -246,17 +245,27 @@
               </a>
             </li>
             <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('habitlog.index_view') }}">
+                <i class="fas fa-history"></i> Habit Logs
+              </a>
+            </li>
+            <li class="nav-item">
               <a class="nav-link" href="{{ url_for('snap.index_view') }}">
                 <i class="fas fa-camera"></i> Snaps
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('friendship.index_view') }}">
+              <!-- FIXED: Changed from friendship.index_view to friend.index_view -->
+              <a class="nav-link" href="{{ url_for('friend.index_view') }}">
                 <i class="fas fa-user-friends"></i> Friendships
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('message.index_view') }}">
+              <!-- FIXED: Changed from message.index_view to chatmessage.index_view -->
+              <a
+                class="nav-link"
+                href="{{ url_for('chatmessage.index_view') }}"
+              >
                 <i class="fas fa-comments"></i> Messages
               </a>
             </li>
@@ -268,18 +277,52 @@
                 <i class="fas fa-bell"></i> Notifications
               </a>
             </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="{{ url_for('snapreaction.index_view') }}"
+              >
+                <i class="fas fa-smile"></i> Snap Reactions
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('savedsnap.index_view') }}">
+                <i class="fas fa-bookmark"></i> Saved Snaps
+              </a>
+            </li>
+            <li class="nav-item mt-4">
+              <div class="nav-link text-muted">
+                <small>SYSTEM</small>
+              </div>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="{{ url_for('emailverificationotp.index_view') }}"
+              >
+                <i class="fas fa-envelope"></i> Email OTPs
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="{{ url_for('passwordresettoken.index_view') }}"
+              >
+                <i class="fas fa-key"></i> Password Tokens
+              </a>
+            </li>
             <li class="nav-item mt-4">
               <div class="nav-link text-muted">
                 <small>TOOLS</small>
               </div>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('admin_cleanup') }}">
+              <a class="nav-link" href="{{ url_for('admin_cleanup_page') }}">
                 <i class="fas fa-broom"></i> Cleanup Tools
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('admin.export_data') }}">
+              <a class="nav-link" href="{{ url_for('admin_export_page') }}">
                 <i class="fas fa-download"></i> Export Data
               </a>
             </li>
@@ -330,7 +373,7 @@
           <div class="col-md-6 text-md-right">
             <p class="mb-0">
               <i class="fas fa-server"></i> Server Time: {{
-              now().strftime('%Y-%m-%d %H:%M:%S UTC') }}
+              now.strftime('%Y-%m-%d %H:%M:%S UTC') if now is defined else '' }}
             </p>
           </div>
         </div>
