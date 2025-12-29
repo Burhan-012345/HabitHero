@@ -67,7 +67,7 @@ endblock %} {% block breadcrumb %}
                     class="form-control"
                     id="dateTo"
                     name="date_to"
-                    value="{{ now().strftime('%Y-%m-%d') }}"
+                    value="{{ now.strftime('%Y-%m-%d') if now is defined else '' }}"
                   />
                 </div>
               </div>
@@ -106,9 +106,9 @@ endblock %} {% block breadcrumb %}
                       value="{{ field }}"
                       checked
                     />
-                    <label class="custom-control-label" for="field_{{ field }}"
-                      >{{ field|replace('_', ' ')|title }}</label
-                    >
+                    <label class="custom-control-label" for="field_{{ field }}">
+                      {{ field|replace('_', ' ')|title }}
+                    </label>
                   </div>
                 </div>
                 {% endfor %}
