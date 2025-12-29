@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}HabitHero{% endblock %}</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/chat.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    {% block extra_css %}{% endblock %}
+
+    <meta
+      name="csrf-token"
+      content="{{ csrf_token() if csrf_token else '' }}"
+    />
+  </head>
+  <body
+    data-user-id="{{ current_user.id if current_user.is_authenticated else '' }}"
+  >
+    {% include 'components/flash_messages.html' %} {% if not is_intro and
+    current_user.is_authenticated %}
+    <!-- Add a meta tag for user ID -->
+    <meta name="user-id" content="{{ current_user.id }}" />
+    {% endif %} {% if not is_intro %}
+    <!-- Page transition wrapper - only show if not intro page -->
+    <div class="page-transition-container">
+      {% block content %}{% endblock %}
+    </div>
+    {% else %}
+    <!-- Intro page loads without transitions -->
+    <div class="no-transition">{% block content_intro %}{% endblock %}</div>
+    {% endif %}
+
+    <!-- Socket.IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+
+    <!-- Fix the Socket.IO event handlers in base.html -->
+    <script>
+      // Global socket connection
+      let socket = null;
+      let socketReady = false;
+      const socketReadyCallbacks = [];
+
+      // Initialize Socket.IO connection if user is authenticated
+      {% if current_user.is_authenticated %}
+      console.log('🔌 Initializing Socket.IO for user: {{ current_user.username }}');
+
+      socket = io({
+        query: {
+          user_id: {{ current_user.id }},
+          username: '{{ current_user.username }}'
+        },
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000
+      });
+
+      // Handle connection
+      socket.on('connect', function() {
+        console.log('✅ Socket.IO connected successfully. Socket ID:', socket.id);
+        socketReady = true;
+
+        // Join user's personal room for notifications
+        socket.emit("join_chat", { user_id: {{ current_user.id }} });
+
+        // Execute all queued callbacks
+        socketReadyCallbacks.forEach(callback => callback());
+        socketReadyCallbacks.length = 0;
+      });
+
+      // Handle connection error
+      socket.on('connect_error', function(error) {
+        console.error('❌ Socket.IO connection error:', error);
+      });
+
+      // Handle disconnection
+      socket.on('disconnect', function(reason) {
+        console.log('🔌 Socket.IO disconnected. Reason:', reason);
+        socketReady = false;
+      });
+
+      // Listen for new notifications
+      socket.on('new_notification', function(data) {
+        console.log('📢 New notification:', data);
+        if (window.HabitHero && window.HabitHero.showNotification) {
+          window.HabitHero.showNotification(data.notification.text, 'info');
+        }
+        updateNotificationBadgeUI();
+      });
+
+      // Listen for notification count updates
+      socket.on('notification_count_update', function(data) {
+        console.log('🔢 Notification count update:', data);
+        updateNotificationBadgeUI(data.count);
+      });
+
+      {% else %}
+      console.log('❌ User not authenticated, Socket.IO not initialized');
+      {% endif %}
+
+      // Make socket globally available
+      window.getSocket = function() {
+        return socket;
+      };
+
+      // Function to wait for socket to be ready
+      window.waitForSocketReady = function() {
+        return new Promise((resolve) => {
+          if (socketReady && socket && socket.connected) {
+            resolve(socket);
+          } else {
+            socketReadyCallbacks.push(() => {
+              if (socket && socket.connected) {
+                resolve(socket);
+              }
+            });
+          }
+        });
+      };
+
+      // Check if socket is ready
+      window.isSocketReady = function() {
+        return socketReady && socket && socket.connected;
+      };
+
+      // Function to update notification badge in UI
+      function updateNotificationBadgeUI(count = null) {
+        console.log('🔄 Updating notification badge UI');
+
+        // Get notification badge element
+        const notificationBadge = document.getElementById('notificationBadge');
+        if (notificationBadge) {
+          if (count !== null) {
+            // Update with provided count
+            if (count > 0) {
+              notificationBadge.textContent = count > 99 ? '99+' : count.toString();
+              notificationBadge.style.display = 'flex';
+            } else {
+              notificationBadge.style.display = 'none';
+            }
+          } else {
+            // Fetch count from server
+            fetch('/api/notifications/unread-count')
+              .then(response => response.json())
+              .then(data => {
+                if (data.count > 0) {
+                  notificationBadge.textContent = data.count > 99 ? '99+' : data.count.toString();
+                  notificationBadge.style.display = 'flex';
+                } else {
+                  notificationBadge.style.display = 'none';
+                }
+              })
+              .catch(error => {
+                console.error('Error fetching notification count:', error);
+              });
+          }
+        }
+      }
+    </script>
+
+    <!-- Now load other scripts -->
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    {% if not is_intro %}
+    <!-- Only load transition JS for non-intro pages -->
+    <script src="{{ url_for('static', filename='js/transition.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    {% endif %} {% block extra_js %}{% endblock %}
+  </body>
+</html>
