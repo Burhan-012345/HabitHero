@@ -1,0 +1,187 @@
+{% extends 'admin/layout.html' %} {% import 'admin/lib.html' as lib with context
+%} {% block title %}{{ admin_view.name }}{% endblock %} {% block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('admin.index') }}">Admin</a>
+</li>
+<li class="breadcrumb-item active">{{ admin_view.name }}</li>
+{% endblock %} {% block body %}
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">{{ admin_view.name }}</h1>
+    <div class="btn-group">
+      {% if admin_view.can_create %}
+      <a
+        href="{{ url_for('.create_view', url=return_url) }}"
+        class="btn btn-admin"
+      >
+        <i class="fas fa-plus"></i> Add New
+      </a>
+      {% endif %} {% if admin_view.export %}
+      <button
+        type="button"
+        class="btn btn-outline-secondary dropdown-toggle"
+        data-toggle="dropdown"
+      >
+        <i class="fas fa-download"></i> Export
+      </button>
+      <div class="dropdown-menu">
+        <a class="dropdown-item" href="#">CSV</a>
+        <a class="dropdown-item" href="#">JSON</a>
+        <a class="dropdown-item" href="#">Excel</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  {% block search_form %} {% if admin_view.search_fields %}
+  <div class="card shadow mb-4">
+    <div class="card-body">
+      <form method="GET" action="" class="form-inline">
+        <div class="input-group w-100">
+          <input
+            type="text"
+            class="form-control"
+            name="search"
+            placeholder="Search {{ admin_view.name.lower() }}..."
+            value="{{ request.args.get('search', '') }}"
+          />
+          <div class="input-group-append">
+            <button class="btn btn-primary" type="submit">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %} {% endblock %}
+
+  <!-- Main Table -->
+  <div class="card shadow">
+    <div class="card-body">
+      {% block list_table %}
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              {% for column in admin_view.list_columns %}
+              <th>
+                {{ admin_view.get_column_name(column) }} {% if
+                admin_view.sortable_columns and column in
+                admin_view.sortable_columns %}
+                <a
+                  href="{{ url_for('.index_view', sort=column, desc=not (request.args.get('desc') == '1')) }}"
+                >
+                  <i class="fas fa-sort"></i>
+                </a>
+                {% endif %}
+              </th>
+              {% endfor %} {% if admin_view.can_edit or admin_view.can_delete %}
+              <th>Actions</th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data %}
+            <tr>
+              {% for column in admin_view.list_columns %}
+              <td>{{ get_value(row, column) }}</td>
+              {% endfor %} {% if admin_view.can_edit or admin_view.can_delete %}
+              <td>
+                <div class="btn-group btn-group-sm">
+                  {% if admin_view.can_edit %}
+                  <a
+                    href="{{ url_for('.edit_view', id=get_pk_value(row), url=return_url) }}"
+                    class="btn btn-outline-primary"
+                    title="Edit"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  {% endif %} {% if admin_view.can_view_details %}
+                  <a
+                    href="{{ url_for('.details_view', id=get_pk_value(row), url=return_url) }}"
+                    class="btn btn-outline-info"
+                    title="Details"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  {% endif %} {% if admin_view.can_delete %}
+                  <a
+                    href="{{ url_for('.delete_view', id=get_pk_value(row), url=return_url) }}"
+                    class="btn btn-outline-danger confirm-delete"
+                    title="Delete"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </a>
+                  {% endif %}
+                </div>
+              </td>
+              {% endif %}
+            </tr>
+            {% else %}
+            <tr>
+              <td
+                colspan="{{ admin_view.list_columns|length + 1 }}"
+                class="text-center text-muted py-4"
+              >
+                <i class="fas fa-inbox fa-2x mb-3"></i>
+                <p>No {{ admin_view.name.lower() }} found</p>
+                {% if admin_view.can_create %}
+                <a
+                  href="{{ url_for('.create_view') }}"
+                  class="btn btn-admin btn-sm"
+                >
+                  <i class="fas fa-plus"></i> Create New
+                </a>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endblock %}
+
+      <!-- Pagination -->
+      {% if pagination %}
+      <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+          {% if pagination.has_prev %}
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="{{ url_for('.index_view', page=pagination.prev_num) }}"
+            >
+              <i class="fas fa-chevron-left"></i>
+            </a>
+          </li>
+          {% endif %} {% for page in pagination.iter_pages() %} {% if page %}
+          <li
+            class="page-item {% if page == pagination.page %}active{% endif %}"
+          >
+            <a class="page-link" href="{{ url_for('.index_view', page=page) }}"
+              >{{ page }}</a
+            >
+          </li>
+          {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">...</span>
+          </li>
+          {% endif %} {% endfor %} {% if pagination.has_next %}
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="{{ url_for('.index_view', page=pagination.next_num) }}"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
