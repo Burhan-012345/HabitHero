@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}HabitHero Admin{% endblock %}</title>
+
+    <!-- Bootstrap 4 CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <!-- Custom Admin CSS -->
+    <style>
+      body {
+        background-color: #f8f9fa;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .admin-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem 0;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .sidebar {
+        background: white;
+        border-right: 1px solid #dee2e6;
+        min-height: calc(100vh - 76px);
+        position: sticky;
+        top: 76px;
+        padding: 1rem 0;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+      }
+      .sidebar .nav-link {
+        color: #495057;
+        padding: 0.75rem 1.5rem;
+        border-left: 3px solid transparent;
+        transition: all 0.3s;
+      }
+      .sidebar .nav-link:hover {
+        background-color: #f8f9fa;
+        color: #667eea;
+      }
+      .sidebar .nav-link.active {
+        background-color: #f0f7ff;
+        color: #667eea;
+        border-left-color: #667eea;
+        font-weight: 600;
+      }
+      .sidebar .nav-link i {
+        width: 20px;
+        text-align: center;
+        margin-right: 10px;
+      }
+      .content {
+        padding: 2rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+      }
+      .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+      }
+      .stat-card {
+        border-radius: 10px;
+        border: none;
+        transition: transform 0.3s;
+        margin-bottom: 1rem;
+      }
+      .stat-card:hover {
+        transform: translateY(-5px);
+      }
+      .stat-card .card-body {
+        padding: 1.5rem;
+      }
+      .stat-card i {
+        font-size: 2.5rem;
+        opacity: 0.8;
+      }
+      .stat-card .card-title {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.8;
+      }
+      .stat-card .card-text {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+      }
+      .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+      .table th {
+        border-top: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        background-color: #f8f9fa;
+      }
+      .badge-admin {
+        background-color: #667eea;
+        color: white;
+      }
+      .badge-verified {
+        background-color: #10b981;
+        color: white;
+      }
+      .badge-unverified {
+        background-color: #f59e0b;
+        color: white;
+      }
+      .badge-online {
+        background-color: #3b82f6;
+        color: white;
+      }
+      .badge-offline {
+        background-color: #6b7280;
+        color: white;
+      }
+      .btn-admin {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 5px;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+      .btn-admin:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        color: white;
+      }
+      .footer {
+        margin-top: 3rem;
+        padding: 1rem 0;
+        border-top: 1px solid #dee2e6;
+        color: #6c757d;
+        font-size: 0.9rem;
+      }
+      .alert-admin {
+        border-radius: 8px;
+        border: none;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+      .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: #667eea;
+      }
+      .breadcrumb {
+        background-color: transparent;
+        padding: 0.75rem 0;
+        margin-bottom: 1.5rem;
+      }
+      .breadcrumb-item a {
+        color: #667eea;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark admin-header">
+      <div class="container">
+        <a class="navbar-brand" href="{{ url_for('admin.index') }}">
+          <i class="fas fa-crown mr-2"></i>HabitHero Admin
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#adminNavbar"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="adminNavbar">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="{{ url_for('dashboard') }}"
+                target="_blank"
+              >
+                <i class="fas fa-external-link-alt"></i> View Site
+              </a>
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="userDropdown"
+                role="button"
+                data-toggle="dropdown"
+              >
+                <i class="fas fa-user-circle"></i> {{ current_user.username }}
+              </a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="{{ url_for('profile') }}">
+                  <i class="fas fa-user"></i> My Profile
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="{{ url_for('logout') }}">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a
+                class="nav-link {% if request.endpoint == 'admin.index' %}active{% endif %}"
+                href="{{ url_for('admin.index') }}"
+              >
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('user.index_view') }}">
+                <i class="fas fa-users"></i> Users
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('habit.index_view') }}">
+                <i class="fas fa-tasks"></i> Habits
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('snap.index_view') }}">
+                <i class="fas fa-camera"></i> Snaps
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('friendship.index_view') }}">
+                <i class="fas fa-user-friends"></i> Friendships
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('message.index_view') }}">
+                <i class="fas fa-comments"></i> Messages
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="{{ url_for('notification.index_view') }}"
+              >
+                <i class="fas fa-bell"></i> Notifications
+              </a>
+            </li>
+            <li class="nav-item mt-4">
+              <div class="nav-link text-muted">
+                <small>TOOLS</small>
+              </div>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('admin_cleanup') }}">
+                <i class="fas fa-broom"></i> Cleanup Tools
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('admin.export_data') }}">
+                <i class="fas fa-download"></i> Export Data
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+          <!-- Breadcrumb -->
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item">
+                <a href="{{ url_for('admin.index') }}">Admin</a>
+              </li>
+              {% block breadcrumb %}{% endblock %}
+            </ol>
+          </nav>
+
+          <!-- Flash Messages -->
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %} {% for category, message in messages %}
+          <div
+            class="alert alert-{{ category }} alert-admin alert-dismissible fade show"
+            role="alert"
+          >
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert">
+              <span>&times;</span>
+            </button>
+          </div>
+          {% endfor %} {% endif %} {% endwith %}
+
+          <!-- Page Content -->
+          {% block body %}{% endblock %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            <p class="mb-0">
+              <i class="fas fa-shield-alt"></i> HabitHero Admin Panel v1.0
+            </p>
+          </div>
+          <div class="col-md-6 text-md-right">
+            <p class="mb-0">
+              <i class="fas fa-server"></i> Server Time: {{
+              now().strftime('%Y-%m-%d %H:%M:%S UTC') }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+
+    <script>
+      // Auto-dismiss alerts after 5 seconds
+      setTimeout(function () {
+        $(".alert").alert("close");
+      }, 5000);
+
+      // Confirm before critical actions
+      $(document).on("click", ".confirm-action", function (e) {
+        if (
+          !confirm(
+            "Are you sure you want to perform this action? This cannot be undone."
+          )
+        ) {
+          e.preventDefault();
+          return false;
+        }
+      });
+
+      // Update server time every second
+      function updateServerTime() {
+        const now = new Date();
+        const serverTimeEl = document.querySelector(".server-time");
+        if (serverTimeEl) {
+          serverTimeEl.textContent =
+            now
+              .toLocaleString("en-US", {
+                timeZone: "UTC",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: false,
+              })
+              .replace(",", "") + " UTC";
+        }
+      }
+
+      setInterval(updateServerTime, 1000);
+      updateServerTime();
+
+      // Tooltips
+      $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+      });
+    </script>
+
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

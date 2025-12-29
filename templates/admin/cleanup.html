@@ -1,0 +1,640 @@
+{% extends 'admin/base.html' %} {% block title %}Cleanup Tools - HabitHero
+Admin{% endblock %} {% block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('admin.index') }}">Dashboard</a>
+</li>
+<li class="breadcrumb-item active">Cleanup Tools</li>
+{% endblock %} {% block body %}
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">System Cleanup Tools</h1>
+    <div class="btn-group">
+      <button class="btn btn-admin" onclick="runAllCleanup()">
+        <i class="fas fa-broom"></i> Run All Cleanup
+      </button>
+      <button
+        class="btn btn-outline-danger confirm-action"
+        onclick="emergencyCleanup()"
+      >
+        <i class="fas fa-exclamation-triangle"></i> Emergency Cleanup
+      </button>
+    </div>
+  </div>
+
+  <!-- System Status -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">
+            Current System Status
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3">
+              <div class="d-flex align-items-center mb-3">
+                <div class="mr-3">
+                  <div class="icon-circle bg-primary">
+                    <i class="fas fa-database text-white"></i>
+                  </div>
+                </div>
+                <div>
+                  <div class="small text-gray-500">Database Size</div>
+                  <div class="font-weight-bold">{{ db_size }} MB</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="d-flex align-items-center mb-3">
+                <div class="mr-3">
+                  <div class="icon-circle bg-success">
+                    <i class="fas fa-trash text-white"></i>
+                  </div>
+                </div>
+                <div>
+                  <div class="small text-gray-500">Expired Records</div>
+                  <div class="font-weight-bold">{{ expired_count }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="d-flex align-items-center mb-3">
+                <div class="mr-3">
+                  <div class="icon-circle bg-warning">
+                    <i class="fas fa-user-clock text-white"></i>
+                  </div>
+                </div>
+                <div>
+                  <div class="small text-gray-500">Inactive Users</div>
+                  <div class="font-weight-bold">{{ inactive_users }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="d-flex align-items-center mb-3">
+                <div class="mr-3">
+                  <div class="icon-circle bg-info">
+                    <i class="fas fa-hdd text-white"></i>
+                  </div>
+                </div>
+                <div>
+                  <div class="small text-gray-500">Storage Used</div>
+                  <div class="font-weight-bold">{{ storage_used }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cleanup Tools -->
+  <div class="row">
+    <div class="col-lg-4 mb-4">
+      <div class="card shadow h-100">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">
+            Expired Data Cleanup
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="list-group list-group-flush">
+            <div
+              class="list-group-item d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <i class="fas fa-camera text-info mr-2"></i>
+                <span>Expired Snaps</span>
+                <small class="d-block text-muted"
+                  >{{ expired_snaps }} expired snaps</small
+                >
+              </div>
+              <button
+                class="btn btn-sm btn-outline-primary"
+                onclick="cleanupExpired('snaps')"
+              >
+                Clean
+              </button>
+            </div>
+
+            <div
+              class="list-group-item d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <i class="fas fa-key text-warning mr-2"></i>
+                <span>Expired OTPs</span>
+                <small class="d-block text-muted"
+                  >{{ expired_otps }} expired OTPs</small
+                >
+              </div>
+              <button
+                class="btn btn-sm btn-outline-primary"
+                onclick="cleanupExpired('otps')"
+              >
+                Clean
+              </button>
+            </div>
+
+            <div
+              class="list-group-item d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <i class="fas fa-redo text-danger mr-2"></i>
+                <span>Expired Reset Tokens</span>
+                <small class="d-block text-muted"
+                  >{{ expired_tokens }} expired tokens</small
+                >
+              </div>
+              <button
+                class="btn btn-sm btn-outline-primary"
+                onclick="cleanupExpired('tokens')"
+              >
+                Clean
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4 mb-4">
+      <div class="card shadow h-100">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-success">User Management</h6>
+        </div>
+        <div class="card-body">
+          <div class="list-group list-group-flush">
+            <div
+              class="list-group-item d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <i class="fas fa-user-clock text-muted mr-2"></i>
+                <span>Inactive Users</span>
+                <small class="d-block text-muted"
+                  >Users inactive for 30+ days</small
+                >
+              </div>
+              <button
+                class="btn btn-sm btn-outline-success confirm-action"
+                onclick="deactivateInactiveUsers()"
+              >
+                Deactivate
+              </button>
+            </div>
+
+            <div
+              class="list-group-item d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <i class="fas fa-user-times text-danger mr-2"></i>
+                <span>Unverified Users</span>
+                <small class="d-block text-muted"
+                  >{{ unverified_users }} unverified accounts</small
+                >
+              </div>
+              <button
+                class="btn btn-sm btn-outline-success confirm-action"
+                onclick="deleteUnverifiedUsers()"
+              >
+                Delete
+              </button>
+            </div>
+
+            <div
+              class="list-group-item d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <i class="fas fa-ghost text-info mr-2"></i>
+                <span>Ghost Users</span>
+                <small class="d-block text-muted">Users with 0 activity</small>
+              </div>
+              <button
+                class="btn btn-sm btn-outline-success confirm-action"
+                onclick="removeGhostUsers()"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4 mb-4">
+      <div class="card shadow h-100">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-warning">System Maintenance</h6>
+        </div>
+        <div class="card-body">
+          <div class="list-group list-group-flush">
+            <div
+              class="list-group-item d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <i class="fas fa-trash-alt text-warning mr-2"></i>
+                <span>Orphaned Files</span>
+                <small class="d-block text-muted"
+                  >Clean up unused uploaded files</small
+                >
+              </div>
+              <button
+                class="btn btn-sm btn-outline-warning confirm-action"
+                onclick="cleanupOrphanedFiles()"
+              >
+                Clean
+              </button>
+            </div>
+
+            <div
+              class="list-group-item d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <i class="fas fa-compress-arrows-alt text-info mr-2"></i>
+                <span>Optimize Database</span>
+                <small class="d-block text-muted"
+                  >Optimize tables and indexes</small
+                >
+              </div>
+              <button
+                class="btn btn-sm btn-outline-warning"
+                onclick="optimizeDatabase()"
+              >
+                Optimize
+              </button>
+            </div>
+
+            <div
+              class="list-group-item d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <i class="fas fa-history text-primary mr-2"></i>
+                <span>Clear Old Logs</span>
+                <small class="d-block text-muted"
+                  >Logs older than 30 days</small
+                >
+              </div>
+              <button
+                class="btn btn-sm btn-outline-warning confirm-action"
+                onclick="clearOldLogs()"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Advanced Cleanup -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-danger">
+            Advanced Cleanup (Danger Zone)
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Warning:</strong> These actions are irreversible and may
+            affect system functionality. Use with extreme caution.
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <div class="card border-danger">
+                <div class="card-body text-center">
+                  <i class="fas fa-comment-slash fa-2x text-danger mb-3"></i>
+                  <h6 class="card-title">Delete All Messages</h6>
+                  <p class="card-text small text-muted">
+                    Remove all chat messages from the system
+                  </p>
+                  <button
+                    class="btn btn-outline-danger confirm-action"
+                    onclick="deleteAllMessages()"
+                  >
+                    <i class="fas fa-trash"></i> Delete All
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <div class="card border-danger">
+                <div class="card-body text-center">
+                  <i class="fas fa-camera-slash fa-2x text-danger mb-3"></i>
+                  <h6 class="card-title">Delete All Snaps</h6>
+                  <p class="card-text small text-muted">
+                    Remove all snap content and files
+                  </p>
+                  <button
+                    class="btn btn-outline-danger confirm-action"
+                    onclick="deleteAllSnaps()"
+                  >
+                    <i class="fas fa-trash"></i> Delete All
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <div class="card border-danger">
+                <div class="card-body text-center">
+                  <i class="fas fa-user-minus fa-2x text-danger mb-3"></i>
+                  <h6 class="card-title">Delete All Non-Admin Users</h6>
+                  <p class="card-text small text-muted">
+                    Remove all regular user accounts
+                  </p>
+                  <button
+                    class="btn btn-outline-danger confirm-action"
+                    onclick="deleteAllUsers()"
+                  >
+                    <i class="fas fa-trash"></i> Delete All
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cleanup Log -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow">
+        <div
+          class="card-header py-3 d-flex justify-content-between align-items-center"
+        >
+          <h6 class="m-0 font-weight-bold text-primary">
+            Recent Cleanup Actions
+          </h6>
+          <button
+            class="btn btn-sm btn-outline-secondary"
+            onclick="refreshLogs()"
+          >
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered" id="cleanupLogs">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Action</th>
+                  <th>Details</th>
+                  <th>Items Affected</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for log in cleanup_logs %}
+                <tr>
+                  <td><small>{{ log.timestamp }}</small></td>
+                  <td>{{ log.action }}</td>
+                  <td>{{ log.details }}</td>
+                  <td>
+                    <span
+                      class="badge badge-{{ 'success' if log.count > 0 else 'secondary' }}"
+                    >
+                      {{ log.count }}
+                    </span>
+                  </td>
+                  <td>
+                    {% if log.status == 'success' %}
+                    <span class="badge badge-success">Success</span>
+                    {% elif log.status == 'warning' %}
+                    <span class="badge badge-warning">Warning</span>
+                    {% else %}
+                    <span class="badge badge-danger">Failed</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="5" class="text-center text-muted py-4">
+                    <i class="fas fa-clipboard-list fa-2x mb-3"></i>
+                    <p>No cleanup logs yet</p>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function cleanupExpired(type) {
+    const actions = {
+      snaps: {
+        url: "/admin/cleanup-expired-snaps",
+        confirm: "Clean up all expired snaps?",
+      },
+      otps: {
+        url: "/admin/cleanup-expired-otps",
+        confirm: "Clean up all expired OTP verification codes?",
+      },
+      tokens: {
+        url: "/admin/cleanup-expired-tokens",
+        confirm: "Clean up all expired password reset tokens?",
+      },
+    };
+
+    if (confirm(actions[type].confirm)) {
+      fetch(actions[type].url)
+        .then((response) => response.text())
+        .then((data) => {
+          alert(data);
+          location.reload();
+        })
+        .catch((error) => {
+          alert("Error: " + error.message);
+        });
+    }
+  }
+
+  function runAllCleanup() {
+    if (confirm("Run all cleanup operations? This may take a while.")) {
+      fetch("/admin/cleanup-all")
+        .then((response) => response.json())
+        .then((data) => {
+          alert(data.message);
+          location.reload();
+        })
+        .catch((error) => {
+          alert("Error: " + error.message);
+        });
+    }
+  }
+
+  function deactivateInactiveUsers() {
+    if (confirm("Deactivate all users inactive for 30+ days?")) {
+      fetch("/admin/deactivate-inactive-users", { method: "POST" })
+        .then((response) => response.json())
+        .then((data) => {
+          alert(`${data.count} users deactivated`);
+          location.reload();
+        })
+        .catch(console.error);
+    }
+  }
+
+  function deleteUnverifiedUsers() {
+    if (confirm("Permanently delete all unverified user accounts?")) {
+      fetch("/admin/delete-unverified-users", { method: "POST" })
+        .then((response) => response.json())
+        .then((data) => {
+          alert(`${data.count} users deleted`);
+          location.reload();
+        })
+        .catch(console.error);
+    }
+  }
+
+  function removeGhostUsers() {
+    if (confirm("Remove all users with zero activity?")) {
+      fetch("/admin/remove-ghost-users", { method: "POST" })
+        .then((response) => response.json())
+        .then((data) => {
+          alert(`${data.count} users removed`);
+          location.reload();
+        })
+        .catch(console.error);
+    }
+  }
+
+  function cleanupOrphanedFiles() {
+    if (confirm("Clean up all orphaned uploaded files?")) {
+      fetch("/admin/cleanup-orphaned-files", { method: "POST" })
+        .then((response) => response.json())
+        .then((data) => {
+          alert(`${data.count} files removed, freed ${data.freed} MB`);
+          location.reload();
+        })
+        .catch(console.error);
+    }
+  }
+
+  function optimizeDatabase() {
+    fetch("/admin/optimize-database")
+      .then((response) => response.text())
+      .then((data) => {
+        alert(data);
+        location.reload();
+      })
+      .catch(console.error);
+  }
+
+  function clearOldLogs() {
+    if (confirm("Clear all logs older than 30 days?")) {
+      fetch("/admin/clear-old-logs", { method: "POST" })
+        .then((response) => response.json())
+        .then((data) => {
+          alert(`${data.count} log entries cleared`);
+          location.reload();
+        })
+        .catch(console.error);
+    }
+  }
+
+  function deleteAllMessages() {
+    if (
+      confirm("Permanently delete ALL chat messages? This cannot be undone!")
+    ) {
+      fetch("/admin/delete-all-messages", { method: "POST" })
+        .then((response) => response.json())
+        .then((data) => {
+          alert(`${data.count} messages deleted`);
+          location.reload();
+        })
+        .catch(console.error);
+    }
+  }
+
+  function deleteAllSnaps() {
+    if (
+      confirm(
+        "Permanently delete ALL snaps and associated files? This cannot be undone!"
+      )
+    ) {
+      fetch("/admin/delete-all-snaps", { method: "POST" })
+        .then((response) => response.json())
+        .then((data) => {
+          alert(`${data.count} snaps deleted`);
+          location.reload();
+        })
+        .catch(console.error);
+    }
+  }
+
+  function deleteAllUsers() {
+    if (
+      confirm(
+        "Permanently delete ALL non-admin user accounts? This cannot be undone!"
+      )
+    ) {
+      fetch("/admin/delete-all-users", { method: "POST" })
+        .then((response) => response.json())
+        .then((data) => {
+          alert(`${data.count} users deleted`);
+          location.reload();
+        })
+        .catch(console.error);
+    }
+  }
+
+  function emergencyCleanup() {
+    if (
+      confirm(
+        "EMERGENCY CLEANUP!\n\nThis will:\n1. Delete all expired data\n2. Optimize database\n3. Clear all cache\n4. Restart background services\n\nContinue?"
+      )
+    ) {
+      fetch("/admin/emergency-cleanup", { method: "POST" })
+        .then((response) => response.json())
+        .then((data) => {
+          alert("Emergency cleanup completed: " + data.message);
+          location.reload();
+        })
+        .catch(console.error);
+    }
+  }
+
+  function refreshLogs() {
+    fetch("/admin/cleanup-logs")
+      .then((response) => response.json())
+      .then((data) => {
+        // Update logs table
+        console.log("Logs refreshed", data);
+        location.reload();
+      })
+      .catch(console.error);
+  }
+</script>
+
+<style>
+  .icon-circle {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .card.border-danger .card-body {
+    background-color: rgba(220, 53, 69, 0.05);
+  }
+  .confirm-action {
+    cursor: pointer;
+  }
+</style>
+{% endblock %}

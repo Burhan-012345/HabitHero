@@ -1,0 +1,361 @@
+{% extends 'admin/base.html' %} {% block title %}Export Data - HabitHero Admin{%
+endblock %} {% block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('admin.index') }}">Dashboard</a>
+</li>
+<li class="breadcrumb-item active">Export Data</li>
+{% endblock %} {% block body %}
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Data Export</h1>
+    <button class="btn btn-admin" onclick="exportAll()">
+      <i class="fas fa-file-export"></i> Export All Data
+    </button>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Export Options</h6>
+        </div>
+        <div class="card-body">
+          <form id="exportForm">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="dataType">Data Type</label>
+                  <select class="form-control" id="dataType" name="data_type">
+                    <option value="users">Users</option>
+                    <option value="habits">Habits</option>
+                    <option value="snaps">Snaps</option>
+                    <option value="messages">Messages</option>
+                    <option value="notifications">Notifications</option>
+                    <option value="friendships">Friendships</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="format">Format</label>
+                  <select class="form-control" id="format" name="format">
+                    <option value="csv">CSV</option>
+                    <option value="json">JSON</option>
+                    <option value="excel">Excel</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="dateFrom">Date From</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="dateFrom"
+                    name="date_from"
+                  />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="dateTo">Date To</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="dateTo"
+                    name="date_to"
+                    value="{{ now().strftime('%Y-%m-%d') }}"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="custom-control custom-checkbox">
+                <input
+                  type="checkbox"
+                  class="custom-control-input"
+                  id="includeSensitive"
+                  name="include_sensitive"
+                />
+                <label class="custom-control-label" for="includeSensitive">
+                  Include sensitive data (emails, IPs, etc.)
+                </label>
+                <small class="form-text text-muted d-block">
+                  Warning: Sensitive data should only be included for authorized
+                  purposes.
+                </small>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Fields to Include</label>
+              <div class="row">
+                {% for field in ['id', 'username', 'email', 'created_at',
+                'is_verified'] %}
+                <div class="col-md-4">
+                  <div class="custom-control custom-checkbox">
+                    <input
+                      type="checkbox"
+                      class="custom-control-input"
+                      id="field_{{ field }}"
+                      name="fields"
+                      value="{{ field }}"
+                      checked
+                    />
+                    <label class="custom-control-label" for="field_{{ field }}"
+                      >{{ field|replace('_', ' ')|title }}</label
+                    >
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-admin"
+              onclick="exportSelected()"
+            >
+              <i class="fas fa-download"></i> Export Selected
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              onclick="previewData()"
+            >
+              <i class="fas fa-eye"></i> Preview Data
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Export History</h6>
+        </div>
+        <div class="card-body">
+          <div class="list-group list-group-flush">
+            {% for export in export_history %}
+            <div
+              class="list-group-item d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <small class="d-block text-muted">{{ export.timestamp }}</small>
+                <span
+                  >{{ export.data_type|title }} ({{ export.format|upper
+                  }})</span
+                >
+              </div>
+              <a
+                href="{{ export.download_url }}"
+                class="btn btn-sm btn-outline-primary"
+              >
+                <i class="fas fa-download"></i>
+              </a>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+              <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+              <p class="text-muted">No export history yet</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Quick Export</h6>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <button
+              class="btn btn-outline-primary"
+              onclick="quickExport('users_today')"
+            >
+              <i class="fas fa-users"></i> Today's Users
+            </button>
+            <button
+              class="btn btn-outline-success"
+              onclick="quickExport('active_users')"
+            >
+              <i class="fas fa-user-check"></i> Active Users (Last 7 days)
+            </button>
+            <button
+              class="btn btn-outline-info"
+              onclick="quickExport('recent_snaps')"
+            >
+              <i class="fas fa-camera"></i> Recent Snaps (Last 24h)
+            </button>
+            <button
+              class="btn btn-outline-warning"
+              onclick="quickExport('system_logs')"
+            >
+              <i class="fas fa-clipboard-list"></i> System Logs
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview Modal -->
+  <div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Data Preview</h5>
+          <button type="button" class="close" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div id="previewContent">
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+              <p class="mt-3">Loading preview...</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            Close
+          </button>
+          <button
+            type="button"
+            class="btn btn-admin"
+            onclick="downloadPreview()"
+          >
+            <i class="fas fa-download"></i> Download
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function exportSelected() {
+    const form = document.getElementById("exportForm");
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+
+    for (let [key, value] of formData.entries()) {
+      if (key === "fields") {
+        // Handle multiple checkboxes
+        const fields = formData.getAll("fields");
+        params.append("fields", fields.join(","));
+      } else {
+        params.append(key, value);
+      }
+    }
+
+    window.location.href = `/admin/export/selected?${params.toString()}`;
+  }
+
+  function exportAll() {
+    if (
+      confirm(
+        "This will export ALL data from the system. This may take a while. Continue?"
+      )
+    ) {
+      window.location.href = "/admin/export/all";
+    }
+  }
+
+  function quickExport(type) {
+    window.location.href = `/admin/export/quick/${type}`;
+  }
+
+  function previewData() {
+    const form = document.getElementById("exportForm");
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+
+    for (let [key, value] of formData.entries()) {
+      if (key === "fields") {
+        const fields = formData.getAll("fields");
+        params.append("fields", fields.join(","));
+      } else {
+        params.append(key, value);
+      }
+    }
+
+    $("#previewModal").modal("show");
+
+    fetch(`/admin/export/preview?${params.toString()}`)
+      .then((response) => response.json())
+      .then((data) => {
+        const previewContent = document.getElementById("previewContent");
+        if (data.success) {
+          previewContent.innerHTML = `
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    ${data.fields
+                                      .map((field) => `<th>${field}</th>`)
+                                      .join("")}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.data
+                                  .slice(0, 50)
+                                  .map(
+                                    (row) => `
+                                    <tr>
+                                        ${data.fields
+                                          .map(
+                                            (field) =>
+                                              `<td>${row[field] || ""}</td>`
+                                          )
+                                          .join("")}
+                                    </tr>
+                                `
+                                  )
+                                  .join("")}
+                            </tbody>
+                        </table>
+                    </div>
+                    ${
+                      data.data.length > 50
+                        ? `
+                        <div class="alert alert-info">
+                            Showing 50 of ${data.data.length} records. Full export will contain all records.
+                        </div>
+                    `
+                        : ""
+                    }
+                `;
+        } else {
+          previewContent.innerHTML = `
+                    <div class="alert alert-danger">
+                        Error: ${data.message}
+                    </div>
+                `;
+        }
+      })
+      .catch((error) => {
+        document.getElementById("previewContent").innerHTML = `
+                <div class="alert alert-danger">
+                    Error loading preview: ${error.message}
+                </div>
+            `;
+      });
+  }
+
+  function downloadPreview() {
+    alert(
+      "This would download the previewed data. Implement based on your backend."
+    );
+  }
+</script>
+{% endblock %}
