@@ -1,0 +1,499 @@
+{% extends 'admin/layout.html' %} {% block title %}Redis Console{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('admin.index') }}">Admin</a>
+</li>
+<li class="breadcrumb-item active">Redis Console</li>
+{% endblock %} {% block head_css %} {{ super() }}
+<style>
+  .console-container {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    font-family: "Consolas", "Monaco", "Courier New", monospace;
+    border-radius: 5px;
+    padding: 15px;
+    height: 500px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+  }
+
+  .console-line {
+    margin-bottom: 5px;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .console-input {
+    font-family: "Consolas", "Monaco", "Courier New", monospace;
+  }
+
+  .redis-prompt {
+    color: #4ec9b0;
+    font-weight: bold;
+  }
+
+  .redis-command {
+    color: #dcdcaa;
+  }
+
+  .redis-response {
+    color: #ce9178;
+  }
+
+  .redis-error {
+    color: #f44747;
+  }
+
+  .redis-success {
+    color: #6a9955;
+  }
+
+  .redis-key {
+    color: #9cdcfe;
+  }
+
+  .redis-value {
+    color: #b5cea8;
+  }
+
+  .redis-info {
+    color: #6796e6;
+  }
+
+  .stats-card {
+    transition: all 0.3s;
+  }
+
+  .stats-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+</style>
+{% endblock %} {% block body %}
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Redis Console</h1>
+    <div class="btn-group">
+      <button class="btn btn-admin" onclick="clearConsole()">
+        <i class="fas fa-broom"></i> Clear Console
+      </button>
+      <button class="btn btn-outline-info" onclick="loadStats()">
+        <i class="fas fa-sync-alt"></i> Refresh Stats
+      </button>
+    </div>
+  </div>
+
+  <!-- Redis Stats -->
+  <div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2 stats-card">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div
+                class="text-xs font-weight-bold text-primary text-uppercase mb-1"
+              >
+                Connected
+              </div>
+              <div
+                class="h5 mb-0 font-weight-bold text-gray-800"
+                id="redisConnected"
+              >
+                Checking...
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-plug fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-success shadow h-100 py-2 stats-card">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div
+                class="text-xs font-weight-bold text-success text-uppercase mb-1"
+              >
+                Memory Used
+              </div>
+              <div
+                class="h5 mb-0 font-weight-bold text-gray-800"
+                id="redisMemory"
+              >
+                Checking...
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-memory fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2 stats-card">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div
+                class="text-xs font-weight-bold text-info text-uppercase mb-1"
+              >
+                Keys
+              </div>
+              <div
+                class="h5 mb-0 font-weight-bold text-gray-800"
+                id="redisKeys"
+              >
+                Checking...
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-key fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-warning shadow h-100 py-2 stats-card">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div
+                class="text-xs font-weight-bold text-warning text-uppercase mb-1"
+              >
+                Uptime
+              </div>
+              <div
+                class="h5 mb-0 font-weight-bold text-gray-800"
+                id="redisUptime"
+              >
+                Checking...
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-clock fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Console -->
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">Redis Console</h6>
+    </div>
+    <div class="card-body">
+      <div class="console-container" id="consoleOutput">
+        <div class="console-line redis-info">Redis Console v1.0</div>
+        <div class="console-line redis-info">
+          Type Redis commands below. Press Enter to execute.
+        </div>
+        <div class="console-line redis-info">
+          Use 'help' for available commands.
+        </div>
+        <div class="console-line"><br /></div>
+      </div>
+
+      <form id="redisForm" class="mt-3">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text redis-prompt">redis></span>
+          </div>
+          <input
+            type="text"
+            class="form-control console-input"
+            id="redisInput"
+            placeholder="Enter Redis command (e.g., GET key, SET key value, KEYS *)"
+            autocomplete="off"
+            autofocus
+          />
+          <div class="input-group-append">
+            <button class="btn btn-admin" type="submit">
+              <i class="fas fa-play"></i> Execute
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <div class="mt-3">
+        <small class="text-muted">
+          <i class="fas fa-info-circle"></i>
+          Common commands: <code class="redis-command">KEYS *</code>,
+          <code class="redis-command">GET key</code>,
+          <code class="redis-command">SET key value</code>,
+          <code class="redis-command">DEL key</code>,
+          <code class="redis-command">INFO</code>
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Commands -->
+  <div class="card shadow">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">Quick Commands</h6>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-title">Cache Management</h6>
+              <div class="btn-group-vertical w-100">
+                <button
+                  class="btn btn-outline-primary btn-sm mb-1"
+                  onclick="executeCommand('FLUSHDB')"
+                >
+                  <i class="fas fa-trash"></i> FLUSHDB (Clear all keys)
+                </button>
+                <button
+                  class="btn btn-outline-secondary btn-sm mb-1"
+                  onclick="executeCommand('DBSIZE')"
+                >
+                  <i class="fas fa-database"></i> DBSIZE (Key count)
+                </button>
+                <button
+                  class="btn btn-outline-info btn-sm"
+                  onclick="executeCommand('INFO memory')"
+                >
+                  <i class="fas fa-chart-bar"></i> Memory Info
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-title">Key Operations</h6>
+              <div class="btn-group-vertical w-100">
+                <button
+                  class="btn btn-outline-success btn-sm mb-1"
+                  onclick="executeCommand('KEYS *')"
+                >
+                  <i class="fas fa-key"></i> KEYS * (List all)
+                </button>
+                <button
+                  class="btn btn-outline-warning btn-sm mb-1"
+                  onclick="executeCommand('SCAN 0')"
+                >
+                  <i class="fas fa-search"></i> SCAN 0 (Iterate)
+                </button>
+                <button
+                  class="btn btn-outline-danger btn-sm"
+                  onclick="executeCommand('RANDOMKEY')"
+                >
+                  <i class="fas fa-random"></i> RANDOMKEY
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-title">System Info</h6>
+              <div class="btn-group-vertical w-100">
+                <button
+                  class="btn btn-outline-primary btn-sm mb-1"
+                  onclick="executeCommand('INFO')"
+                >
+                  <i class="fas fa-info-circle"></i> INFO (Full)
+                </button>
+                <button
+                  class="btn btn-outline-secondary btn-sm mb-1"
+                  onclick="executeCommand('CLIENT LIST')"
+                >
+                  <i class="fas fa-users"></i> CLIENT LIST
+                </button>
+                <button
+                  class="btn btn-outline-info btn-sm"
+                  onclick="executeCommand('TIME')"
+                >
+                  <i class="fas fa-clock"></i> TIME
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let commandHistory = [];
+  let historyIndex = -1;
+
+  document.getElementById("redisForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const command = document.getElementById("redisInput").value.trim();
+    if (command) {
+      executeCommand(command);
+      addToHistory(command);
+      document.getElementById("redisInput").value = "";
+      historyIndex = -1;
+    }
+  });
+
+  document
+    .getElementById("redisInput")
+    .addEventListener("keydown", function (e) {
+      // Arrow up/down for history
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (commandHistory.length > 0) {
+          if (historyIndex < commandHistory.length - 1) {
+            historyIndex++;
+          }
+          this.value =
+            commandHistory[commandHistory.length - 1 - historyIndex] || "";
+        }
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (historyIndex > 0) {
+          historyIndex--;
+          this.value =
+            commandHistory[commandHistory.length - 1 - historyIndex] || "";
+        } else {
+          historyIndex = -1;
+          this.value = "";
+        }
+      }
+    });
+
+  function addToHistory(command) {
+    if (
+      commandHistory.length === 0 ||
+      commandHistory[commandHistory.length - 1] !== command
+    ) {
+      commandHistory.push(command);
+      if (commandHistory.length > 50) {
+        commandHistory.shift();
+      }
+    }
+  }
+
+  function executeCommand(command) {
+    const consoleOutput = document.getElementById("consoleOutput");
+
+    // Display command
+    const commandLine = document.createElement("div");
+    commandLine.className = "console-line";
+    commandLine.innerHTML = `<span class="redis-prompt">redis></span> <span class="redis-command">${escapeHtml(
+      command
+    )}</span>`;
+    consoleOutput.appendChild(commandLine);
+
+    // Send to server
+    fetch("/admin/redis/execute", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ command: command }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Display response
+        const responseLine = document.createElement("div");
+        responseLine.className = "console-line";
+
+        if (data.success) {
+          if (typeof data.result === "string") {
+            responseLine.innerHTML = `<span class="redis-success">${escapeHtml(
+              data.result
+            )}</span>`;
+          } else if (Array.isArray(data.result)) {
+            data.result.forEach((item) => {
+              const itemLine = document.createElement("div");
+              itemLine.className = "console-line";
+              itemLine.innerHTML = `<span class="redis-key">${escapeHtml(
+                item
+              )}</span>`;
+              consoleOutput.appendChild(itemLine);
+            });
+            return;
+          } else {
+            responseLine.innerHTML = `<span class="redis-value">${escapeHtml(
+              JSON.stringify(data.result, null, 2)
+            )}</span>`;
+          }
+        } else {
+          responseLine.innerHTML = `<span class="redis-error">${escapeHtml(
+            data.error
+          )}</span>`;
+        }
+
+        consoleOutput.appendChild(responseLine);
+        consoleOutput.scrollTop = consoleOutput.scrollHeight;
+
+        // Refresh stats after certain commands
+        if (
+          command.toUpperCase().startsWith("FLUSH") ||
+          command.toUpperCase().startsWith("DEL") ||
+          command === "KEYS *"
+        ) {
+          loadStats();
+        }
+      })
+      .catch((error) => {
+        const errorLine = document.createElement("div");
+        errorLine.className = "console-line";
+        errorLine.innerHTML = `<span class="redis-error">Error: ${escapeHtml(
+          error.message
+        )}</span>`;
+        consoleOutput.appendChild(errorLine);
+        consoleOutput.scrollTop = consoleOutput.scrollHeight;
+      });
+
+    consoleOutput.scrollTop = consoleOutput.scrollHeight;
+  }
+
+  function clearConsole() {
+    document.getElementById("consoleOutput").innerHTML = `
+        <div class="console-line redis-info">Console cleared</div>
+        <div class="console-line redis-info">Redis Console v1.0</div>
+        <div class="console-line"><br></div>
+    `;
+  }
+
+  function loadStats() {
+    fetch("/admin/redis/stats")
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          document.getElementById("redisConnected").textContent = data.connected
+            ? "Yes"
+            : "No";
+          document.getElementById("redisMemory").textContent = data.memory;
+          document.getElementById("redisKeys").textContent = data.keys;
+          document.getElementById("redisUptime").textContent = data.uptime;
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load Redis stats:", error);
+      });
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Load stats on page load
+  document.addEventListener("DOMContentLoaded", loadStats);
+</script>
+{% endblock %}
