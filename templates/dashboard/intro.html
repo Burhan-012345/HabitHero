@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HabitHero - Build Better Habits Together</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: white;
+        overflow-x: hidden; /* Prevent horizontal scroll */
+      }
+
+      .intro-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem; /* Add horizontal padding */
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        flex-wrap: wrap; /* Allow wrapping on mobile */
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.8rem;
+        font-weight: bold;
+        flex-shrink: 0; /* Prevent logo from shrinking */
+      }
+
+      .logo i {
+        color: #4ade80;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+      }
+
+      .nav-link {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: opacity 0.3s;
+        white-space: nowrap; /* Prevent text wrapping */
+      }
+
+      .nav-link:hover {
+        opacity: 0.8;
+      }
+
+      .cta-button {
+        background: #4ade80;
+        color: white;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 25px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 0.3s, box-shadow 0.3s;
+        white-space: nowrap;
+      }
+
+      .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .hero {
+        text-align: center;
+        padding: 3rem 1rem; /* Reduced padding for mobile */
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .hero h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem); /* Responsive font size */
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+        word-wrap: break-word;
+      }
+
+      .hero p {
+        font-size: clamp(1rem, 3vw, 1.2rem); /* Responsive font size */
+        margin-bottom: 2rem;
+        opacity: 0.9;
+        line-height: 1.6;
+      }
+
+      .hero-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        flex-wrap: wrap; /* Allow buttons to wrap */
+      }
+
+      .btn-primary {
+        background: #4ade80;
+        color: white;
+        padding: clamp(0.875rem, 3vw, 1rem) clamp(1.5rem, 4vw, 2rem); /* Responsive padding */
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: transform 0.3s;
+        text-align: center;
+        flex: 1; /* Allow buttons to grow */
+        min-width: 200px; /* Minimum button width */
+        max-width: 300px; /* Maximum button width */
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: clamp(0.875rem, 3vw, 1rem) clamp(1.5rem, 4vw, 2rem); /* Responsive padding */
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: bold;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        transition: transform 0.3s;
+        text-align: center;
+        flex: 1;
+        min-width: 200px;
+        max-width: 300px;
+      }
+
+      .btn-secondary:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(
+          auto-fit,
+          minmax(min(300px, 100%), 1fr)
+        ); /* Responsive grid */
+        gap: 2rem;
+        padding: 3rem 1rem; /* Reduced padding */
+      }
+
+      .feature-card {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1.5rem;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        transition: transform 0.3s;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #4ade80;
+      }
+
+      .feature-card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+      }
+
+      .feature-card p {
+        opacity: 0.8;
+        line-height: 1.6;
+        font-size: 0.95rem;
+      }
+
+      .how-it-works {
+        padding: 3rem 1rem;
+        text-align: center;
+      }
+
+      .how-it-works h2 {
+        font-size: clamp(1.75rem, 4vw, 2.5rem);
+        margin-bottom: 3rem;
+      }
+
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+        gap: 2rem;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      .step {
+        text-align: center;
+        padding: 0 1rem;
+      }
+
+      .step-number {
+        width: 50px;
+        height: 50px;
+        background: #4ade80;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin: 0 auto 1rem;
+      }
+
+      .step h3 {
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+      }
+
+      .step p {
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+
+      .testimonials {
+        padding: 3rem 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        margin: 2rem 1rem; /* Adjust margins for mobile */
+      }
+
+      .testimonial {
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: center;
+        font-style: italic;
+        opacity: 0.9;
+        padding: 0 1rem;
+      }
+
+      .testimonial p {
+        font-size: 1.1rem;
+        line-height: 1.6;
+      }
+
+      .testimonial-author {
+        margin-top: 1rem;
+        font-weight: bold;
+      }
+
+      .footer {
+        text-align: center;
+        padding: 3rem 1rem;
+        margin-top: 3rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 1rem;
+        flex-wrap: wrap; /* Allow links to wrap */
+      }
+
+      .footer-link {
+        color: white;
+        text-decoration: none;
+        opacity: 0.8;
+        padding: 0.5rem;
+      }
+
+      .footer-link:hover {
+        opacity: 1;
+      }
+
+      .header-buttons {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-shrink: 0; /* Prevent shrinking */
+      }
+
+      .login-button {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.6rem 1.2rem;
+        border-radius: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+        white-space: nowrap;
+      }
+
+      .login-button:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
+      }
+
+      /* Mobile responsiveness */
+      @media (max-width: 1024px) {
+        .intro-container {
+          padding: 1.5rem;
+        }
+
+        .nav-links {
+          gap: 1rem;
+        }
+
+        .header-buttons {
+          gap: 0.75rem;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header {
+          flex-direction: column;
+          gap: 1rem;
+          text-align: center;
+        }
+
+        .nav-links {
+          order: 3;
+          width: 100%;
+          justify-content: center;
+          margin-top: 1rem;
+          gap: 1rem;
+        }
+
+        .header-buttons {
+          order: 2;
+          width: 100%;
+          justify-content: center;
+        }
+
+        .hero {
+          padding: 2rem 0;
+        }
+
+        .hero-buttons {
+          flex-direction: column;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+          max-width: 100%;
+          width: 100%;
+        }
+
+        .features {
+          grid-template-columns: 1fr; /* Single column on mobile */
+          gap: 1.5rem;
+        }
+
+        .steps {
+          grid-template-columns: 1fr;
+          gap: 2rem;
+        }
+
+        .step {
+          padding: 0;
+        }
+
+        .testimonials {
+          margin: 1rem;
+          padding: 2rem 1rem;
+        }
+
+        .footer-links {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .footer {
+          padding: 2rem 1rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .intro-container {
+          padding: 1rem;
+        }
+
+        .logo {
+          font-size: 1.5rem;
+        }
+
+        .hero h1 {
+          font-size: 2rem;
+        }
+
+        .hero p {
+          font-size: 1rem;
+        }
+
+        .nav-links {
+          gap: 0.75rem;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        .nav-link {
+          font-size: 0.9rem;
+        }
+
+        .header-buttons {
+          flex-direction: column;
+          width: 100%;
+        }
+
+        .login-button,
+        .cta-button {
+          width: 100%;
+          text-align: center;
+          padding: 0.75rem;
+        }
+
+        .feature-card {
+          padding: 1.25rem;
+        }
+
+        .feature-icon {
+          font-size: 2rem;
+        }
+
+        .feature-card h3 {
+          font-size: 1.1rem;
+        }
+
+        .feature-card p {
+          font-size: 0.9rem;
+        }
+
+        .how-it-works h2 {
+          font-size: 1.75rem;
+          margin-bottom: 2rem;
+        }
+
+        .step h3 {
+          font-size: 1.1rem;
+        }
+
+        .step p {
+          font-size: 0.9rem;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+          padding: 0.875rem 1.5rem;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .logo {
+          font-size: 1.25rem;
+        }
+
+        .hero h1 {
+          font-size: 1.75rem;
+        }
+
+        .nav-link {
+          font-size: 0.85rem;
+          padding: 0.25rem;
+        }
+
+        .feature-card,
+        .step,
+        .testimonial {
+          padding: 1rem;
+        }
+      }
+
+      /* Smooth scroll behavior for the whole page */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* Fade-in animation for page load */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Slide-in from left animation */
+      @keyframes slideInLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* Slide-in from right animation */
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* Scale-up animation */
+      @keyframes scaleUp {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      /* Pulse animation for CTA buttons */
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+        }
+        70% {
+          transform: scale(1.05);
+          box-shadow: 0 0 0 10px rgba(74, 222, 128, 0);
+        }
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+        }
+      }
+
+      /* Floating animation for feature cards */
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      /* Apply animations to elements */
+      .intro-container {
+        animation: fadeIn 0.8s ease-out;
+      }
+
+      .header {
+        animation: slideInLeft 0.8s ease-out 0.2s both;
+      }
+
+      .hero h1 {
+        animation: slideInLeft 0.8s ease-out 0.4s both;
+      }
+
+      .hero p {
+        animation: slideInRight 0.8s ease-out 0.6s both;
+      }
+
+      .hero-buttons {
+        animation: scaleUp 0.8s ease-out 0.8s both;
+      }
+
+      .feature-card {
+        animation: scaleUp 0.6s ease-out both;
+        animation-delay: calc(var(--index) * 0.1s + 0.8s);
+      }
+
+      .feature-card:hover {
+        animation: float 3s ease-in-out infinite;
+      }
+
+      .how-it-works h2 {
+        animation: fadeIn 0.8s ease-out 1.2s both;
+      }
+
+      .step {
+        animation: slideInLeft 0.6s ease-out both;
+        animation-delay: calc(var(--step-index) * 0.2s + 1.2s);
+      }
+
+      /* Add animation delay classes */
+      .delay-1 {
+        animation-delay: 0.1s !important;
+      }
+      .delay-2 {
+        animation-delay: 0.2s !important;
+      }
+      .delay-3 {
+        animation-delay: 0.3s !important;
+      }
+      .delay-4 {
+        animation-delay: 0.4s !important;
+      }
+      .delay-5 {
+        animation-delay: 0.5s !important;
+      }
+
+      /* Enhanced hover effects */
+      .nav-link {
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .nav-link::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #4ade80;
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .nav-link:hover::after {
+        width: 100%;
+      }
+
+      .login-button {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .login-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .cta-button {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: pulse 2s infinite;
+      }
+
+      .cta-button:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(74, 222, 128, 0.4);
+      }
+
+      .btn-primary {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(74, 222, 128, 0.4);
+      }
+
+      .btn-secondary {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .btn-secondary:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+      }
+
+      .feature-card {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .feature-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .step {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .step:hover .step-number {
+        transform: scale(1.1);
+        background: linear-gradient(135deg, #4ade80, #22c55e);
+      }
+
+      .step-number {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Scroll reveal animation */
+      .scroll-reveal {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .scroll-reveal.active {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Smooth background gradient animation */
+      body {
+        background: linear-gradient(-45deg, #667eea, #764ba2, #4f46e5, #7c3aed);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        min-height: 100vh;
+        color: white;
+      }
+
+      @keyframes gradientShift {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      /* Smooth text color transitions */
+      .testimonial {
+        opacity: 0.9;
+        transition: opacity 0.3s ease;
+      }
+
+      .testimonial:hover {
+        opacity: 1;
+      }
+
+      /* Smooth border transitions */
+      .footer-link {
+        position: relative;
+        transition: opacity 0.3s ease;
+      }
+
+      .footer-link::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background: #4ade80;
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .footer-link:hover::after {
+        width: 100%;
+      }
+
+      /* Mobile hamburger menu */
+      .hamburger-menu {
+        display: none;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.5rem;
+      }
+
+      @media (max-width: 768px) {
+        .hamburger-menu {
+          display: block;
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          z-index: 100;
+        }
+
+        .nav-links {
+          display: none;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          width: 100%;
+          background: rgba(102, 126, 234, 0.95);
+          backdrop-filter: blur(10px);
+          padding: 1rem;
+          flex-direction: column;
+          gap: 1rem;
+          z-index: 99;
+          border-radius: 0 0 10px 10px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-links.active {
+          display: flex;
+        }
+
+        .nav-link {
+          padding: 0.75rem;
+          text-align: center;
+          width: 100%;
+        }
+
+        .header-buttons {
+          margin-top: 1rem;
+        }
+
+        /* Disable hover effects on mobile for better touch experience */
+        @media (hover: none) and (pointer: coarse) {
+          .feature-card:hover,
+          .btn-primary:hover,
+          .btn-secondary:hover,
+          .cta-button:hover,
+          .login-button:hover,
+          .step:hover {
+            transform: none;
+            box-shadow: none;
+          }
+
+          .nav-link::after,
+          .footer-link::after {
+            display: none;
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="intro-container">
+      <header class="header">
+        <div class="logo">
+          <i class="fas fa-fire"></i>
+          <span>HabitHero</span>
+        </div>
+        <nav class="nav-links">
+          <a href="#features" class="nav-link">Features</a>
+          <a href="#how-it-works" class="nav-link">How it Works</a>
+          <a href="#testimonials" class="nav-link">Testimonials</a>
+        </nav>
+
+        <!-- Add this hamburger menu button here -->
+        <button class="hamburger-menu" id="hamburgerMenu">
+          <i class="fas fa-bars"></i>
+        </button>
+
+        <div class="header-buttons">
+          <a href="{{ url_for('login') }}" class="login-button">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </a>
+          <a href="{{ url_for('register') }}" class="cta-button">
+            <i class="fas fa-user-plus"></i> Get Started
+          </a>
+        </div>
+      </header>
+
+      <section class="hero">
+        <h1>Build Better Habits, Together</h1>
+        <p>
+          HabitHero combines habit tracking with social accountability. Track
+          your progress, share your journey, and stay motivated with friends.
+        </p>
+        <div class="hero-buttons">
+          <a href="{{ url_for('register') }}" class="btn-primary">
+            <i class="fas fa-user-plus"></i> Start Free
+          </a>
+          <a href="{{ url_for('login') }}" class="btn-secondary">
+            <i class="fas fa-sign-in-alt"></i> Already have an account?
+          </a>
+        </div>
+      </section>
+
+      <section id="features" class="features">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h3>Track Your Progress</h3>
+          <p>
+            Monitor your habits with detailed analytics, streak counters, and
+            progress charts. Stay on top of your goals with daily reminders.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <h3>Social Accountability</h3>
+          <p>
+            Share your progress with friends, send motivational snaps, and cheer
+            each other on. Build habits together and stay motivated.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-trophy"></i>
+          </div>
+          <h3>Gamified Experience</h3>
+          <p>
+            Earn streaks, unlock achievements, and compete with friends in a
+            friendly way. Make habit-building fun and rewarding.
+          </p>
+        </div>
+      </section>
+
+      <section id="how-it-works" class="how-it-works">
+        <h2>How HabitHero Works</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <h3>Create Habits</h3>
+            <p>
+              Define your daily goals and set reminders for your new habits.
+            </p>
+          </div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <h3>Track Daily</h3>
+            <p>
+              Mark habits as completed each day and watch your streaks grow.
+            </p>
+          </div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <h3>Share & Motivate</h3>
+            <p>
+              Send snaps to friends showing your progress and cheer them on.
+            </p>
+          </div>
+          <div class="step">
+            <div class="step-number">4</div>
+            <h3>See Results</h3>
+            <p>View detailed analytics and see how far you've come together.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="testimonials" class="testimonials">
+        <div class="testimonial">
+          <p>
+            "HabitHero helped me finally stick to my morning routine. The social
+            accountability made all the difference!"
+          </p>
+          <div class="testimonial-author">- Sarah M.</div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="logo">
+          <i class="fas fa-fire"></i>
+          <span>HabitHero</span>
+        </div>
+        <p>Transform your habits, transform your life.</p>
+        <div class="footer-links">
+          <a href="{{ url_for('privacy') }}" class="footer-link"
+            >Privacy Policy</a
+          >
+          <a href="{{ url_for('terms') }}" class="footer-link"
+            >Terms of Service</a
+          >
+          <a href="{{ url_for('contact') }}" class="footer-link">Contact</a>
+        </div>
+        <p style="margin-top: 2rem; opacity: 0.7">
+          © 2024 HabitHero. All rights reserved.
+        </p>
+      </footer>
+    </div>
+
+    <style>
+      /* Smooth scroll behavior for the whole page */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* Fade-in animation for page load */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Slide-in from left animation */
+      @keyframes slideInLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* Slide-in from right animation */
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* Scale-up animation */
+      @keyframes scaleUp {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      /* Pulse animation for CTA buttons */
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+        }
+        70% {
+          transform: scale(1.05);
+          box-shadow: 0 0 0 10px rgba(74, 222, 128, 0);
+        }
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+        }
+      }
+
+      /* Floating animation for feature cards */
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      /* Apply animations to elements */
+      .intro-container {
+        animation: fadeIn 0.8s ease-out;
+      }
+
+      .header {
+        animation: slideInLeft 0.8s ease-out 0.2s both;
+      }
+
+      .hero h1 {
+        animation: slideInLeft 0.8s ease-out 0.4s both;
+      }
+
+      .hero p {
+        animation: slideInRight 0.8s ease-out 0.6s both;
+      }
+
+      .hero-buttons {
+        animation: scaleUp 0.8s ease-out 0.8s both;
+      }
+
+      .feature-card {
+        animation: scaleUp 0.6s ease-out both;
+        animation-delay: calc(var(--index) * 0.1s + 0.8s);
+      }
+
+      .feature-card:hover {
+        animation: float 3s ease-in-out infinite;
+      }
+
+      .how-it-works h2 {
+        animation: fadeIn 0.8s ease-out 1.2s both;
+      }
+
+      .step {
+        animation: slideInLeft 0.6s ease-out both;
+        animation-delay: calc(var(--step-index) * 0.2s + 1.2s);
+      }
+
+      /* Add animation delay classes */
+      .delay-1 {
+        animation-delay: 0.1s !important;
+      }
+      .delay-2 {
+        animation-delay: 0.2s !important;
+      }
+      .delay-3 {
+        animation-delay: 0.3s !important;
+      }
+      .delay-4 {
+        animation-delay: 0.4s !important;
+      }
+      .delay-5 {
+        animation-delay: 0.5s !important;
+      }
+
+      /* Enhanced hover effects */
+      .nav-link {
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .nav-link::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #4ade80;
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .nav-link:hover::after {
+        width: 100%;
+      }
+
+      .login-button {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .login-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .cta-button {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: pulse 2s infinite;
+      }
+
+      .cta-button:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(74, 222, 128, 0.4);
+      }
+
+      .btn-primary {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(74, 222, 128, 0.4);
+      }
+
+      .btn-secondary {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .btn-secondary:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+      }
+
+      .feature-card {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .feature-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .step {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .step:hover .step-number {
+        transform: scale(1.1);
+        background: linear-gradient(135deg, #4ade80, #22c55e);
+      }
+
+      .step-number {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Scroll reveal animation */
+      .scroll-reveal {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .scroll-reveal.active {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Smooth background gradient animation */
+      body {
+        background: linear-gradient(-45deg, #667eea, #764ba2, #4f46e5, #7c3aed);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        min-height: 100vh;
+        color: white;
+      }
+
+      @keyframes gradientShift {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      /* Smooth text color transitions */
+      .testimonial {
+        opacity: 0.9;
+        transition: opacity 0.3s ease;
+      }
+
+      .testimonial:hover {
+        opacity: 1;
+      }
+
+      /* Smooth border transitions */
+      .footer-link {
+        position: relative;
+        transition: opacity 0.3s ease;
+      }
+
+      .footer-link::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background: #4ade80;
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .footer-link:hover::after {
+        width: 100%;
+      }
+
+      /* Mobile responsiveness with smooth transitions */
+      @media (max-width: 768px) {
+        .header-buttons {
+          transition: all 0.3s ease;
+        }
+
+        .hero-buttons {
+          flex-direction: column;
+          align-items: center;
+          transition: all 0.3s ease;
+        }
+
+        .hero-buttons a {
+          width: 100%;
+          max-width: 300px;
+          text-align: center;
+          margin-bottom: 1rem;
+          transition: all 0.3s ease;
+        }
+      }
+    </style>
+
+    <script>
+      // JavaScript for scroll reveal animations
+      document.addEventListener("DOMContentLoaded", function () {
+        // Add animation delay attributes to feature cards
+        const featureCards = document.querySelectorAll(".feature-card");
+        featureCards.forEach((card, index) => {
+          card.style.setProperty("--index", index);
+        });
+
+        // Add animation delay attributes to steps
+        const steps = document.querySelectorAll(".step");
+        steps.forEach((step, index) => {
+          step.style.setProperty("--step-index", index);
+        });
+
+        // Scroll reveal functionality
+        const scrollRevealElements =
+          document.querySelectorAll(".scroll-reveal");
+
+        const revealOnScroll = () => {
+          scrollRevealElements.forEach((element) => {
+            const elementTop = element.getBoundingClientRect().top;
+            const elementVisible = 150;
+
+            if (elementTop < window.innerHeight - elementVisible) {
+              element.classList.add("active");
+            }
+          });
+        };
+
+        // Initial check
+        revealOnScroll();
+
+        // Add scroll event listener
+        window.addEventListener("scroll", revealOnScroll);
+
+        // Smooth scroll for anchor links with offset for fixed header
+        document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+          anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            const targetId = this.getAttribute("href");
+            if (targetId === "#") return;
+
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+              const headerOffset = 80;
+              const elementPosition = targetElement.getBoundingClientRect().top;
+              const offsetPosition =
+                elementPosition + window.pageYOffset - headerOffset;
+
+              window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth",
+              });
+            }
+          });
+        });
+
+        // Add hover effect to CTA buttons
+        const ctaButtons = document.querySelectorAll(
+          ".cta-button, .btn-primary"
+        );
+        ctaButtons.forEach((button) => {
+          button.addEventListener("mouseenter", () => {
+            button.style.animation = "pulse 1s infinite";
+          });
+
+          button.addEventListener("mouseleave", () => {
+            button.style.animation = "pulse 2s infinite";
+          });
+        });
+      });
+
+      // Add CSS for smooth focus transitions
+      document.addEventListener("DOMContentLoaded", function () {
+        const style = document.createElement("style");
+        style.textContent = `
+            * {
+                scroll-margin-top: 80px;
+            }
+            
+            button, a {
+                outline: none;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            button:focus, a:focus {
+                outline: 2px solid #4ade80;
+                outline-offset: 4px;
+                transform: translateY(-1px);
+            }
+            
+            /* Smooth opacity transitions for all interactive elements */
+            .nav-link, .login-button, .cta-button, .btn-primary, .btn-secondary, .feature-card, .step {
+                will-change: transform, opacity;
+            }
+        `;
+        document.head.appendChild(style);
+      });
+    </script>
+
+    <script>
+      // Mobile hamburger menu toggle
+      document.addEventListener("DOMContentLoaded", function () {
+        const hamburgerMenu = document.getElementById("hamburgerMenu");
+        const navLinks = document.querySelector(".nav-links");
+
+        if (hamburgerMenu && navLinks) {
+          hamburgerMenu.addEventListener("click", function (e) {
+            e.stopPropagation();
+            navLinks.classList.toggle("active");
+            this.classList.toggle("active");
+          });
+
+          // Close menu when clicking outside
+          document.addEventListener("click", function (e) {
+            if (
+              !navLinks.contains(e.target) &&
+              !hamburgerMenu.contains(e.target)
+            ) {
+              navLinks.classList.remove("active");
+              hamburgerMenu.classList.remove("active");
+            }
+          });
+
+          // Close menu when clicking a link
+          document.querySelectorAll(".nav-link").forEach((link) => {
+            link.addEventListener("click", function () {
+              navLinks.classList.remove("active");
+              hamburgerMenu.classList.remove("active");
+            });
+          });
+        }
+
+        // Close menu on escape key
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && navLinks && hamburgerMenu) {
+            navLinks.classList.remove("active");
+            hamburgerMenu.classList.remove("active");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

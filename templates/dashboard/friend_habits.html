@@ -1,0 +1,267 @@
+{% extends "base.html" %} {% block title %}{{ friend.username }}'s Habits -
+HabitHero{% endblock %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dashboard.css') }}"
+/>
+<style>
+  .friend-habits-container {
+    padding: 1rem;
+    width: 100%;
+    margin-top: 60px;
+  }
+
+  .friend-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 180, 255, 0.2);
+  }
+
+  .friend-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00b4ff 0%, #0088cc 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0a0a0f;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .friend-info h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 0.25rem 0;
+  }
+
+  .friend-info p {
+    color: #8899aa;
+    margin: 0;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: rgba(10, 10, 15, 0.9);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    text-align: center;
+    border: 1px solid rgba(0, 180, 255, 0.1);
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #00b4ff;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: #8899aa;
+  }
+
+  .habits-section {
+    margin-top: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 1rem;
+  }
+
+  .habits-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .habit-card {
+    background: rgba(10, 10, 15, 0.9);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    border: 1px solid rgba(0, 180, 255, 0.1);
+  }
+
+  .habit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .habit-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+  }
+
+  .streak-badge {
+    background: rgba(0, 180, 255, 0.2);
+    color: #00b4ff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .habit-description {
+    color: #8899aa;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .habit-details {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: #8899aa;
+  }
+
+  .recent-completions {
+    margin-top: 2rem;
+  }
+
+  .completion-item {
+    background: rgba(10, 10, 15, 0.9);
+    border-radius: var(--border-radius);
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid #00b4ff;
+  }
+
+  .completion-text {
+    color: #ffffff;
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  .completion-time {
+    color: #8899aa;
+    font-size: 0.75rem;
+    margin: 0.25rem 0 0 0;
+  }
+
+  .back-button {
+    margin-top: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .friend-habits-container {
+      padding: 2rem;
+      margin-top: 0;
+    }
+
+    .friend-avatar {
+      width: 80px;
+      height: 80px;
+      font-size: 2rem;
+    }
+
+    .friend-info h1 {
+      font-size: 2rem;
+    }
+
+    .habits-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>
+{% endblock %} {% block content %} {% include 'components/navbar.html' %}
+
+<div class="friend-habits-container">
+  <div class="friend-header">
+    <div class="friend-avatar">{{ friend.username[:1].upper() }}</div>
+    <div class="friend-info">
+      <h1>{{ friend.username }}'s Habits</h1>
+      <p>View your friend's habits and progress</p>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">{{ habits|length }}</div>
+      <div class="stat-label">Total Habits</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ total_streak }}</div>
+      <div class="stat-label">Total Streak Days</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ best_streak }}</div>
+      <div class="stat-label">Best Streak</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ completion_rate }}%</div>
+      <div class="stat-label">Completion Rate</div>
+    </div>
+  </div>
+
+  <div class="habits-section">
+    <h2 class="section-title">Habits</h2>
+    {% if habits %}
+    <div class="habits-grid">
+      {% for habit in habits %}
+      <div class="habit-card">
+        <div class="habit-header">
+          <h3 class="habit-name">{{ habit.name }}</h3>
+          <span class="streak-badge">{{ habit.streak_count }} days</span>
+        </div>
+        {% if habit.description %}
+        <p class="habit-description">{{ habit.description }}</p>
+        {% endif %}
+        <div class="habit-details">
+          <span>Best: {{ habit.best_streak }} days</span>
+          <span>Frequency: {{ habit.frequency }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="fas fa-chart-line"></i>
+      <h3>No habits yet</h3>
+      <p>{{ friend.username }} hasn't created any habits yet.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if recent_completions %}
+  <div class="recent-completions">
+    <h2 class="section-title">Recent Activity</h2>
+    <div class="completions-list">
+      {% for completion in recent_completions %}
+      <div class="completion-item">
+        <p class="completion-text">Completed "{{ completion.habit.name }}"</p>
+        <p class="completion-time">{{ completion.completed_at|timesince }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="back-button">
+    <a href="{{ url_for('friends') }}" class="btn btn-outline">
+      <i class="fas fa-arrow-left"></i> Back to Friends
+    </a>
+  </div>
+</div>
+{% endblock %}

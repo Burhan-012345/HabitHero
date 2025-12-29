@@ -1,0 +1,588 @@
+{% extends "base.html" %} {% block title %}Profile - HabitHero{% endblock %} {%
+block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dashboard.css') }}"
+/>
+{% endblock %} {% block content %} {% include 'components/navbar.html' %}
+
+<div class="profile-container">
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <div class="profile-avatar">
+      <div class="avatar-large" id="current-avatar">
+        {% if avatar %} {{ avatar }} {% else %} {{
+        current_user.username[:1].upper() }} {% endif %}
+      </div>
+      <div class="avatar-edit" onclick="openAvatarModal()">
+        <i class="fas fa-camera"></i>
+      </div>
+    </div>
+
+    <div class="profile-info">
+      <h1>{{ current_user.username }}</h1>
+      <div class="profile-email">{{ current_user.email }}</div>
+      <div class="member-since">
+        <i class="fas fa-calendar-alt"></i> Member since {{
+        current_user.created_at.strftime('%B %d, %Y') }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="profile-stats">
+    <div class="stat-card">
+      <div class="stat-value">{{ total_habits }}</div>
+      <div class="stat-label">Total Habits</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ current_streak }} days</div>
+      <div class="stat-label">Current Streak</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ total_completions }}</div>
+      <div class="stat-label">30-Day Completions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ snaps_sent }}</div>
+      <div class="stat-label">Snaps Sent</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ friends_count }}</div>
+      <div class="stat-label">Friends</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ completion_rate }}%</div>
+      <div class="stat-label">Completion Rate</div>
+    </div>
+  </div>
+
+  <div class="profile-sections">
+    <!-- Left Column: Profile Info -->
+    <div class="left-column">
+      <!-- Personal Information -->
+      <div class="section-card">
+        <h2 class="section-title">
+          <i class="fas fa-user-circle"></i> Personal Information
+        </h2>
+        <form id="profile-form" onsubmit="updateProfile(event)">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              class="form-control"
+              value="{{ current_user.username }}"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              class="form-control"
+              value="{{ current_user.email }}"
+              disabled
+            />
+            <small class="text-muted"
+              >Email cannot be changed. Contact support if needed.</small
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="bio">Bio</label>
+            <textarea
+              id="bio"
+              class="form-control"
+              rows="3"
+              placeholder="Tell us about yourself..."
+            >
+{{ bio }}</textarea
+            >
+          </div>
+
+          <div class="btn-group">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save"></i> Save Changes
+            </button>
+            <button type="button" class="btn btn-outline" onclick="resetForm()">
+              <i class="fas fa-times"></i> Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Change Password -->
+      <div class="section-card" style="margin-top: 2rem">
+        <h2 class="section-title">
+          <i class="fas fa-lock"></i> Change Password
+        </h2>
+        <form id="password-form" onsubmit="changePassword(event)">
+          <div class="form-group">
+            <label for="current-password">Current Password</label>
+            <input
+              type="password"
+              id="current-password"
+              class="form-control"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="new-password">New Password</label>
+            <input
+              type="password"
+              id="new-password"
+              class="form-control"
+              required
+              oninput="checkPasswordStrength(this.value)"
+            />
+            <div class="password-strength">
+              <div class="strength-bar" id="password-strength-bar"></div>
+            </div>
+            <small class="text-muted">
+              Password must be at least 8 characters with uppercase, lowercase,
+              number, and special character.
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label for="confirm-password">Confirm New Password</label>
+            <input
+              type="password"
+              id="confirm-password"
+              class="form-control"
+              required
+            />
+          </div>
+
+          <div class="btn-group">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-key"></i> Change Password
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right Column: Preferences & Activity -->
+    <div class="right-column">
+      <!-- Preferences -->
+      <div class="section-card">
+        <h2 class="section-title">
+          <i class="fas fa-sliders-h"></i> Preferences
+        </h2>
+        <div class="preferences-grid">
+          <div class="preference-item">
+            <div class="preference-icon">
+              <i class="fas fa-bell"></i>
+            </div>
+            <div class="preference-content">
+              <div class="preference-title">Email Notifications</div>
+              <div class="preference-description">Receive email updates</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="preference-item">
+            <div class="preference-icon">
+              <i class="fas fa-moon"></i>
+            </div>
+            <div class="preference-content">
+              <div class="preference-title">Dark Mode</div>
+              <div class="preference-description">Use dark theme</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="preference-item">
+            <div class="preference-icon">
+              <i class="fas fa-globe"></i>
+            </div>
+            <div class="preference-content">
+              <div class="preference-title">Public Profile</div>
+              <div class="preference-description">Show profile to others</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="preference-item">
+            <div class="preference-icon">
+              <i class="fas fa-camera"></i>
+            </div>
+            <div class="preference-content">
+              <div class="preference-title">Snap Notifications</div>
+              <div class="preference-description">New snap alerts</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="section-card" style="margin-top: 2rem">
+        <h2 class="section-title">
+          <i class="fas fa-history"></i> Recent Activity
+        </h2>
+        <div class="recent-activity">
+          {% if recent_activity %} {% for activity in recent_activity %}
+          <div class="activity-item">
+            <div class="activity-icon">
+              <i class="{{ activity.icon }}"></i>
+            </div>
+            <div class="activity-content">
+              <div class="activity-title">{{ activity.title }}</div>
+              <div class="activity-time">{{ activity.time }}</div>
+            </div>
+          </div>
+          {% endfor %} {% else %}
+          <div class="empty-state">
+            <i class="fas fa-history"></i>
+            <p>No recent activity</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Avatar Change Modal -->
+<div id="avatar-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Change Avatar</h2>
+      <button class="close" onclick="closeAvatarModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Choose an avatar style</p>
+      <div class="avatar-options">
+        {% set avatar_letters = ['A', 'B', 'C', 'D', 'E', 'F'] %} {% set
+        avatar_colors = [ 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+        'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+        'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+        'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' ] %} {% for i in
+        range(6) %}
+        <div
+          class="avatar-option"
+          style="background: {{ avatar_colors[i] }}"
+          onclick="selectAvatar('{{ avatar_letters[i] }}')"
+        >
+          {{ avatar_letters[i] }}
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="form-group" style="margin-top: 1.5rem">
+        <label for="avatar-upload"
+          >Or upload your own image (coming soon)</label
+        >
+        <input
+          type="file"
+          id="avatar-upload"
+          class="form-control"
+          accept="image/*"
+          disabled
+        />
+        <small class="text-muted"
+          >Image upload feature will be available soon.</small
+        >
+      </div>
+
+      <div class="btn-group" style="margin-top: 2rem">
+        <button type="button" class="btn btn-primary" onclick="saveAvatar()">
+          <i class="fas fa-save"></i> Save Avatar
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline"
+          onclick="closeAvatarModal()"
+        >
+          <i class="fas fa-times"></i> Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success/Error Notification Container -->
+<div
+  id="notification-container"
+  style="position: fixed; top: 20px; right: 20px; z-index: 1000"
+></div>
+
+<script>
+  // Profile form handling
+  function updateProfile(event) {
+    event.preventDefault();
+
+    const username = document.getElementById("username").value.trim();
+    const bio = document.getElementById("bio").value.trim();
+
+    // Validate username
+    if (username.length < 3) {
+      showNotification("Username must be at least 3 characters long", "error");
+      return;
+    }
+
+    if (username.length > 20) {
+      showNotification("Username cannot exceed 20 characters", "error");
+      return;
+    }
+
+    // Send update request
+    fetch("/api/profile/update", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken(),
+      },
+      body: JSON.stringify({ username, bio }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          showNotification("Profile updated successfully!", "success");
+          // Update UI
+          document.querySelector(".profile-info h1").textContent =
+            data.new_username;
+          document.querySelectorAll(".user-toggle span").forEach((el) => {
+            el.textContent = data.new_username;
+          });
+          document.getElementById("current-avatar").textContent =
+            data.new_username[0].toUpperCase();
+        } else {
+          showNotification(data.message || "Failed to update profile", "error");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        showNotification("An error occurred. Please try again.", "error");
+      });
+  }
+
+  function resetForm() {
+    document.getElementById("username").value = "{{ current_user.username }}";
+    document.getElementById("bio").value = "{{ bio }}";
+  }
+
+  // Password strength checker
+  function checkPasswordStrength(password) {
+    const strengthBar = document.getElementById("password-strength-bar");
+    let strength = 0;
+
+    // Length
+    if (password.length >= 8) strength++;
+    if (password.length >= 12) strength++;
+
+    // Character types
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+    // Update UI
+    strengthBar.className = "strength-bar";
+    if (strength <= 2) {
+      strengthBar.classList.add("strength-weak");
+    } else if (strength === 3) {
+      strengthBar.classList.add("strength-medium");
+    } else if (strength === 4) {
+      strengthBar.classList.add("strength-strong");
+    } else {
+      strengthBar.classList.add("strength-very-strong");
+    }
+  }
+
+  // Change password
+  function changePassword(event) {
+    event.preventDefault();
+
+    const currentPassword = document.getElementById("current-password").value;
+    const newPassword = document.getElementById("new-password").value;
+    const confirmPassword = document.getElementById("confirm-password").value;
+
+    // Validation
+    if (newPassword !== confirmPassword) {
+      showNotification("New passwords do not match", "error");
+      return;
+    }
+
+    // Password strength validation
+    const errors = validatePassword(newPassword);
+    if (errors.length > 0) {
+      showNotification(errors[0], "error");
+      return;
+    }
+
+    // Send request
+    fetch("/api/profile/change-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken(),
+      },
+      body: JSON.stringify({
+        current_password: currentPassword,
+        new_password: newPassword,
+        confirm_password: confirmPassword,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          showNotification("Password changed successfully!", "success");
+          document.getElementById("password-form").reset();
+          document.getElementById("password-strength-bar").className =
+            "strength-bar";
+          document.getElementById("password-strength-bar").style.width = "0%";
+        } else {
+          showNotification(
+            data.message || "Failed to change password",
+            "error"
+          );
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        showNotification("An error occurred. Please try again.", "error");
+      });
+  }
+
+  // Password validation helper
+  function validatePassword(password) {
+    const errors = [];
+    if (password.length < 8) {
+      errors.push("Password must be at least 8 characters long");
+    }
+    if (!/[A-Z]/.test(password)) {
+      errors.push("Password must contain at least one uppercase letter");
+    }
+    if (!/[a-z]/.test(password)) {
+      errors.push("Password must contain at least one lowercase letter");
+    }
+    if (!/[0-9]/.test(password)) {
+      errors.push("Password must contain at least one number");
+    }
+    if (!/[^A-Za-z0-9]/.test(password)) {
+      errors.push("Password must contain at least one special character");
+    }
+    return errors;
+  }
+
+  // Avatar modal handling
+  let selectedAvatar = null;
+
+  function openAvatarModal() {
+    document.getElementById("avatar-modal").style.display = "flex";
+    selectedAvatar = null;
+    document.querySelectorAll(".avatar-option").forEach((option) => {
+      option.classList.remove("selected");
+    });
+  }
+
+  function closeAvatarModal() {
+    document.getElementById("avatar-modal").style.display = "none";
+  }
+
+  function selectAvatar(avatar) {
+    selectedAvatar = avatar;
+    document.querySelectorAll(".avatar-option").forEach((option) => {
+      option.classList.remove("selected");
+      if (option.textContent === avatar) {
+        option.classList.add("selected");
+      }
+    });
+  }
+
+  function saveAvatar() {
+    if (!selectedAvatar) {
+      showNotification("Please select an avatar", "error");
+      return;
+    }
+
+    fetch("/api/profile/update-avatar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken(),
+      },
+      body: JSON.stringify({ avatar: selectedAvatar }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          showNotification("Avatar updated successfully!", "success");
+          document.getElementById("current-avatar").textContent =
+            selectedAvatar;
+          closeAvatarModal();
+        } else {
+          showNotification(data.message || "Failed to update avatar", "error");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        showNotification("An error occurred. Please try again.", "error");
+      });
+  }
+
+  // Notification system
+  function showNotification(message, type = "info") {
+    const container = document.getElementById("notification-container");
+    const notification = document.createElement("div");
+
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-${
+                  type === "success" ? "check-circle" : "exclamation-circle"
+                }"></i>
+                <span>${message}</span>
+            </div>
+        `;
+
+    container.appendChild(notification);
+
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+      notification.style.opacity = "0";
+      notification.style.transform = "translateX(100%)";
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  // CSRF token helper
+  function getCSRFToken() {
+    const token = document.querySelector('meta[name="csrf-token"]');
+    return token ? token.getAttribute("content") : "";
+  }
+
+  // Close modal when clicking outside
+  window.addEventListener("click", function (event) {
+    const modal = document.getElementById("avatar-modal");
+    if (event.target === modal) {
+      closeAvatarModal();
+    }
+  });
+
+  // Initialize form
+  document.addEventListener("DOMContentLoaded", function () {
+    resetForm();
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,927 @@
+{% extends "base.html" %} {% block title %}Analytics - HabitHero{% endblock %}
+{% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dashboard.css') }}"
+/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  .analytics-container {
+    padding: 2rem;
+  }
+
+  .analytics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .analytics-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+  }
+
+  .date-range {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .date-range select {
+    padding: 0.5rem 1rem;
+    border: 2px solid rgba(0, 180, 255, 0.2);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background: rgba(10, 10, 15, 0.9);
+    color: #ffffff;
+  }
+
+  .stats-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-box {
+    background: rgba(10, 10, 15, 0.9);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 180, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s;
+    border: 1px solid rgba(0, 180, 255, 0.1);
+  }
+
+  .stat-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 180, 255, 0.1);
+    border-color: rgba(0, 180, 255, 0.3);
+  }
+
+  .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .stat-icon.fire {
+    background: linear-gradient(135deg, #00b4ff, #0088cc);
+    color: #0a0a0f;
+  }
+
+  .stat-icon.check {
+    background: linear-gradient(135deg, #00ff9d, #00cc7a);
+    color: #0a0a0f;
+  }
+
+  .stat-icon.users {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: #0a0a0f;
+  }
+
+  .stat-icon.trend {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #0a0a0f;
+  }
+
+  .stat-info {
+    flex: 1;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #00b4ff;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+    text-shadow: 0 0 10px rgba(0, 180, 255, 0.3);
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: #8899aa;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .charts-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .chart-card {
+    background: rgba(10, 10, 15, 0.9);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 180, 255, 0.1);
+    border: 1px solid rgba(0, 180, 255, 0.1);
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 300px;
+  }
+
+  .habits-list {
+    background: rgba(10, 10, 15, 0.9);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 180, 255, 0.1);
+    margin-bottom: 2rem;
+    border: 1px solid rgba(0, 180, 255, 0.1);
+  }
+
+  .habits-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .habits-list-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+  }
+
+  .habits-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .habits-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    color: #8899aa;
+    border-bottom: 2px solid rgba(0, 180, 255, 0.2);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+
+  .habits-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(0, 180, 255, 0.2);
+    color: #ffffff;
+  }
+
+  .habits-table tr:hover {
+    background: rgba(0, 180, 255, 0.05);
+  }
+
+  .streak-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .streak-fire {
+    color: #00ff9d;
+    text-shadow: 0 0 5px rgba(0, 255, 157, 0.5);
+  }
+
+  .progress-bar {
+    width: 100px;
+    height: 8px;
+    background: rgba(0, 180, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00ff9d, #00cc7a);
+    border-radius: 4px;
+    transition: width 0.3s;
+  }
+
+  .friends-comparison {
+    background: rgba(10, 10, 15, 0.9);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 180, 255, 0.1);
+    border: 1px solid rgba(0, 180, 255, 0.1);
+  }
+
+  .friends-comparison-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .friends-comparison-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+  }
+
+  .friends-rankings {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .friend-ranking {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(0, 180, 255, 0.05);
+    border-radius: 8px;
+  }
+
+  .rank {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #8899aa;
+    width: 40px;
+    text-align: center;
+  }
+
+  .rank-1 {
+    color: #00ff9d;
+    text-shadow: 0 0 5px rgba(0, 255, 157, 0.5);
+  }
+
+  .rank-2 {
+    color: #8899aa;
+  }
+
+  .rank-3 {
+    color: #ffaa00;
+  }
+
+  .friend-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00b4ff 0%, #0088cc 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0a0a0f;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .friend-info {
+    flex: 1;
+  }
+
+  .friend-info h4 {
+    margin: 0 0 0.25rem 0;
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  .friend-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: #8899aa;
+  }
+
+  .friend-score {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #00b4ff;
+  }
+
+  .export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(0, 180, 255, 0.1);
+    border: 2px solid rgba(0, 180, 255, 0.2);
+    border-radius: 8px;
+    color: #8899aa;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .export-btn:hover {
+    background: #00b4ff;
+    color: #0a0a0f;
+    border-color: #00b4ff;
+  }
+
+  .insights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .insight-card {
+    background: rgba(10, 10, 15, 0.9);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 180, 255, 0.1);
+    border: 1px solid rgba(0, 180, 255, 0.1);
+  }
+
+  .insight-card h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 1rem 0;
+  }
+
+  .insight-content {
+    font-size: 0.875rem;
+    color: #8899aa;
+    line-height: 1.5;
+  }
+
+  .trend-up {
+    color: #00ff9d;
+    text-shadow: 0 0 5px rgba(0, 255, 157, 0.5);
+  }
+
+  .trend-down {
+    color: #ff4757;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #8899aa;
+  }
+
+  .empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: rgba(0, 180, 255, 0.3);
+  }
+
+  .empty-state h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+  }
+
+  .empty-state p {
+    margin-bottom: 2rem;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .text-gray-600 {
+    color: #8899aa;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #00b4ff;
+    color: #0a0a0f;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn:hover {
+    background: #0088cc;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 180, 255, 0.3);
+  }
+
+  .btn-primary {
+    background: #00b4ff;
+    color: #0a0a0f;
+  }
+
+  .btn-primary:hover {
+    background: #0088cc;
+  }
+
+  .mt-3 {
+    margin-top: 1rem;
+  }
+
+  .small {
+    font-size: 0.875rem;
+  }
+</style>
+{% endblock %} {% block content %} {% include 'components/navbar.html' %}
+
+<div class="analytics-container">
+  <div class="analytics-header">
+    <h1>Analytics</h1>
+    <div class="date-range">
+      <select id="date-range" onchange="loadAnalyticsData()">
+        <option value="7">Last 7 days</option>
+        <option value="30" selected>Last 30 days</option>
+        <option value="90">Last 90 days</option>
+        <option value="365">Last year</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="stats-overview">
+    <div class="stat-box">
+      <div class="stat-icon fire">
+        <i class="fas fa-fire"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value" id="total-streak">0</div>
+        <div class="stat-label">Total Streak Days</div>
+      </div>
+    </div>
+
+    <div class="stat-box">
+      <div class="stat-icon check">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value" id="completion-rate">0%</div>
+        <div class="stat-label">Completion Rate</div>
+      </div>
+    </div>
+
+    <div class="stat-box">
+      <div class="stat-icon users">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value" id="active-friends">0</div>
+        <div class="stat-label">Active Friends</div>
+      </div>
+    </div>
+
+    <div class="stat-box">
+      <div class="stat-icon trend">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value" id="trend">0%</div>
+        <div class="stat-label">Weekly Trend</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>Habit Completion Trend</h3>
+      </div>
+      <div class="chart-container">
+        <canvas id="completion-chart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>Habit Distribution</h3>
+      </div>
+      <div class="chart-container">
+        <canvas id="distribution-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Habits Performance -->
+  <div class="habits-list">
+    <div class="habits-list-header">
+      <h3>Habit Performance</h3>
+      <button class="export-btn" onclick="exportHabitData()">
+        <i class="fas fa-download"></i> Export
+      </button>
+    </div>
+
+    {% if habit_stats %}
+    <div class="table-responsive">
+      <table class="habits-table">
+        <thead>
+          <tr>
+            <th>Habit</th>
+            <th>Current Streak</th>
+            <th>Completion Rate</th>
+            <th>Best Streak</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for habit in habit_stats %}
+          <tr>
+            <td>
+              <strong>{{ habit.name }}</strong>
+              {% if habit.description %}
+              <br /><small class="text-gray-600"
+                >{{ habit.description|truncate(50) }}</small
+              >
+              {% endif %}
+            </td>
+            <td>
+              <div class="streak-cell">
+                <i class="fas fa-fire streak-fire"></i>
+                <span>{{ habit.streak }} days</span>
+              </div>
+            </td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 1rem">
+                <span>{{ "%.1f"|format(habit.completion_rate) }}%</span>
+                <div class="progress-bar">
+                  <div
+                    class="progress-fill"
+                    style="width: {{ habit.completion_rate }}%"
+                  ></div>
+                </div>
+              </div>
+            </td>
+            <td>{{ habit.best_streak or habit.streak }} days</td>
+            <td>
+              {% if habit.completion_rate >= 80 %}
+              <span class="trend-up">Excellent</span>
+              {% elif habit.completion_rate >= 60 %}
+              <span style="color: #f59e0b">Good</span>
+              {% else %}
+              <span class="trend-down">Needs Improvement</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="fas fa-chart-bar"></i>
+      <h3>No habit data yet</h3>
+      <p>Complete some habits to see your analytics!</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Friends Comparison -->
+  <div class="friends-comparison">
+    <div class="friends-comparison-header">
+      <h3>Friend Leaderboard</h3>
+    </div>
+
+    {% if friend_comparison %}
+    {% for friend in friend_comparison[:10] %}
+<div class="friend-ranking">
+  <div class="rank {% if loop.index0 == 0 %}rank-1{% elif loop.index0 == 1 %}rank-2{% elif loop.index0 == 2 %}rank-3{% endif %}">
+    #{{ loop.index }}
+  </div>
+  <div class="friend-avatar">{{ friend.username[:1].upper() }}</div>
+  <div class="friend-info">
+    <h4>{{ friend.username }}</h4>
+    <div class="friend-stats">
+      <span>{{ friend.total_habits }} habits</span>
+      <span>•</span>
+      <span>{{ friend.total_streak }} streak days</span>
+    </div>
+  </div>
+  <div class="friend-score">
+    {{ (friend.total_streak * 10 + friend.total_habits * 5)|int }}
+  </div>
+</div>
+{% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="fas fa-trophy"></i>
+      <h3>No friend data yet</h3>
+      <p>Add friends to compare your progress!</p>
+      <a href="{{ url_for('friends') }}" class="btn btn-primary mt-3">
+        <i class="fas fa-user-plus"></i> Find Friends
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Insights -->
+  <div class="insights">
+    <div class="insight-card">
+      <h4>📈 Your Best Performing Habit</h4>
+      <div class="insight-content">
+        {% if habit_stats|length > 0 %} {% set best_habit =
+        habit_stats|sort(attribute='completion_rate', reverse=true)|first %}
+        <p>
+          <strong>{{ best_habit.name }}</strong> has the highest completion rate
+          at <strong>{{ "%.1f"|format(best_habit.completion_rate) }}%</strong>.
+        </p>
+        <p class="trend-up">
+          Keep up the great work! Your consistency is paying off.
+        </p>
+        {% else %}
+        <p>Complete more habits to get personalized insights!</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <h4>🔥 Streak Insights</h4>
+      <div class="insight-content">
+        {% set total_streak = habit_stats|sum(attribute='streak') %}
+        <p>
+          You have a total of <strong>{{ total_streak }}</strong> streak days
+          across all habits.
+        </p>
+        {% if habit_stats|length > 0 %} {% set avg_streak = total_streak /
+        habit_stats|length %}
+        <p>
+          Average streak per habit:
+          <strong>{{ "%.1f"|format(avg_streak) }} days</strong>.
+        </p>
+        {% endif %}
+        <p>
+          Try to maintain at least a 3-day streak for each habit to build
+          momentum!
+        </p>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <h4>👥 Community Comparison</h4>
+      <div class="insight-content">
+        {% if friend_comparison|length > 0 %} {% set avg_friend_streak =
+        friend_comparison|sum(attribute='total_streak') /
+        friend_comparison|length %} {% set user_streak =
+        habit_stats|sum(attribute='streak') %} {% if user_streak >
+        avg_friend_streak %}
+        <p class="trend-up">
+          You're ahead of your friends by
+          <strong>{{ (user_streak - avg_friend_streak)|int }}</strong> streak
+          days!
+        </p>
+        {% else %}
+        <p>
+          Your friends have an average of
+          <strong>{{ "%.1f"|format(avg_friend_streak) }}</strong> streak days.
+        </p>
+        <p>Keep pushing to catch up!</p>
+        {% endif %} {% else %}
+        <p>Add friends to see how you compare!</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <h4>💡 Recommendations</h4>
+      <div class="insight-content">
+        {% if habit_stats|length > 0 %} {% set worst_habit =
+        habit_stats|sort(attribute='completion_rate')|first %} {% if
+        worst_habit.completion_rate < 50 %}
+        <p>
+          Focus on improving <strong>{{ worst_habit.name }}</strong> - it has
+          the lowest completion rate at {{
+          "%.1f"|format(worst_habit.completion_rate) }}%.
+        </p>
+        <p>Try setting a specific time each day for this habit.</p>
+        {% else %}
+        <p>
+          All your habits are performing well! Consider adding a new challenge.
+        </p>
+        {% endif %} {% else %}
+        <p>Start with one habit and build from there. Consistency is key!</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+  // Initialize charts
+  let completionChart, distributionChart;
+
+  async function loadAnalyticsData() {
+    const dateRange = document.getElementById("date-range").value;
+
+    try {
+      const response = await fetch(`/api/analytics?range=${dateRange}`);
+      const data = await response.json();
+
+      updateStats(data.stats);
+      updateCharts(data.charts);
+      updateHabitsTable(data.habits);
+      updateFriendComparison(data.friends);
+      updateInsights(data.insights);
+    } catch (error) {
+      console.error("Error loading analytics data:", error);
+    }
+  }
+
+  function updateStats(stats) {
+    document.getElementById("total-streak").textContent =
+      stats.totalStreak || 0;
+    document.getElementById("completion-rate").textContent = `${
+      stats.completionRate || 0
+    }%`;
+    document.getElementById("active-friends").textContent =
+      stats.activeFriends || 0;
+    document.getElementById("trend").textContent = `${stats.trend || 0}%`;
+  }
+
+  function updateCharts(chartData) {
+    // Completion Trend Chart
+    const completionCtx = document
+      .getElementById("completion-chart")
+      .getContext("2d");
+
+    if (completionChart) {
+      completionChart.destroy();
+    }
+
+    completionChart = new Chart(completionCtx, {
+      type: "line",
+      data: {
+        labels: chartData.completion.labels || [],
+        datasets: [
+          {
+            label: "Completion Rate",
+            data: chartData.completion.data || [],
+            borderColor: "#4f46e5",
+            backgroundColor: "rgba(79, 70, 229, 0.1)",
+            fill: true,
+            tension: 0.4,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              callback: function (value) {
+                return value + "%";
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Distribution Chart
+    const distributionCtx = document
+      .getElementById("distribution-chart")
+      .getContext("2d");
+
+    if (distributionChart) {
+      distributionChart.destroy();
+    }
+
+    distributionChart = new Chart(distributionCtx, {
+      type: "doughnut",
+      data: {
+        labels: chartData.distribution.labels || [],
+        datasets: [
+          {
+            data: chartData.distribution.data || [],
+            backgroundColor: [
+              "#4f46e5",
+              "#7c3aed",
+              "#8b5cf6",
+              "#a78bfa",
+              "#c4b5fd",
+              "#ddd6fe",
+            ],
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "right",
+          },
+        },
+      },
+    });
+  }
+
+  function updateHabitsTable(habits) {
+    // This would update the habits table with new data
+    // For now, we'll just use the server-rendered data
+  }
+
+  function updateFriendComparison(friends) {
+    // This would update the friend comparison section
+    // For now, we'll just use the server-rendered data
+  }
+
+  function updateInsights(insights) {
+    // This would update the insights section
+    // For now, we'll just use the server-rendered data
+  }
+
+  function exportHabitData() {
+    const table = document.querySelector(".habits-table");
+    const rows = Array.from(table.querySelectorAll("tr"));
+    const csv = [];
+
+    rows.forEach((row) => {
+      const cols = Array.from(row.querySelectorAll("th, td"));
+      const rowData = cols
+        .map((col) => {
+          let text = col.textContent.trim();
+          // Handle commas in text
+          if (text.includes(",")) {
+            text = `"${text}"`;
+          }
+          return text;
+        })
+        .join(",");
+      csv.push(rowData);
+    });
+
+    const csvString = csv.join("\n");
+    const blob = new Blob([csvString], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "habithero-analytics.csv";
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  // Initialize analytics on page load
+  document.addEventListener("DOMContentLoaded", function () {
+    loadAnalyticsData();
+
+    // Sample data for charts (replace with actual API call)
+    const sampleChartData = {
+      completion: {
+        labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+        data: [65, 75, 80, 85],
+      },
+      distribution: {
+        labels: ["Exercise", "Read", "Meditate", "Code", "Learn"],
+        data: [30, 25, 20, 15, 10],
+      },
+    };
+
+    updateCharts(sampleChartData);
+  });
+</script>
+{% endblock %}

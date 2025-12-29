@@ -1,0 +1,2017 @@
+{% extends "base.html" %} {% block title %}Snaps - HabitHero{% endblock %} {%
+block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/snaps.css') }}"
+/>
+<style>
+  /* Additional inline styles */
+  .reaction-badge {
+    background: rgba(0, 180, 255, 0.1);
+    border: 1px solid rgba(0, 180, 255, 0.2);
+    border-radius: 12px;
+    padding: 0.125rem 0.375rem;
+    font-size: 0.75rem;
+    color: #00b4ff;
+    display: inline-block;
+    margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .more-reactions {
+    color: #8899aa;
+    font-size: 0.75rem;
+    margin-left: 0.25rem;
+  }
+
+  /* Snap content styles */
+  .snap-content {
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #f5f5f5;
+    margin-bottom: 10px;
+  }
+
+  .snap-content img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .video-container {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: #000;
+  }
+
+  .video-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .play-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+  }
+
+  .text-snap-content {
+    padding: 30px 20px;
+    text-align: center;
+    font-size: 18px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    border-radius: 10px;
+    background: #4ecdc4; /* Default background, can be overridden */
+  }
+
+  .unviewed-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ff4757;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .caption {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 3px solid #4ecdc4;
+    font-size: 14px;
+    color: #555;
+  }
+
+  /* Preview styles */
+  .preview-image,
+  .preview-video {
+    max-width: 100%;
+    max-height: 60vh;
+    display: block;
+    margin: 0 auto;
+    border-radius: 8px;
+  }
+
+  .text-snap-preview {
+    padding: 40px 20px;
+    text-align: center;
+    font-size: 24px;
+    line-height: 1.6;
+    border-radius: 12px;
+    color: white;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #4ecdc4;
+  }
+
+  /* Camera styles */
+  .camera-preview-container {
+    position: relative;
+    width: 100%;
+    height: 70vh;
+    background: #000;
+    overflow: hidden;
+  }
+
+  .camera-preview-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .emoji-overlay {
+    position: absolute;
+    font-size: 40px;
+    pointer-events: none;
+  }
+
+  /* Status badges */
+  .status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .status-badge.viewed {
+    background: #4ecdc4;
+    color: white;
+  }
+
+  .status-badge.pending {
+    background: #ffd166;
+    color: #333;
+  }
+
+  /* Notification */
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    animation: slideIn 0.3s ease;
+    border-left: 4px solid #4ecdc4;
+  }
+
+  .notification-success {
+    border-left-color: #06d6a0;
+  }
+
+  .notification-error {
+    border-left-color: #ef476f;
+  }
+
+  .notification-info {
+    border-left-color: #118ab2;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* Friend selection */
+  .friend-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 4px;
+  }
+
+  .friend-item:hover {
+    background: #f8f9fa;
+  }
+
+  .friend-item.selected {
+    background: #e3f2fd;
+    border-left: 3px solid #2196f3;
+  }
+
+  .friend-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .friend-item.selected .friend-checkbox {
+    background: #2196f3;
+    border-color: #2196f3;
+  }
+
+  .friend-item.selected .friend-checkbox:after {
+    content: "✓";
+    color: white;
+    font-size: 14px;
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+
+  .status-dot.online {
+    background: #06d6a0;
+  }
+
+  .status-dot.offline {
+    background: #adb5bd;
+  }
+
+  /* Modal styles */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .modal.hidden {
+    display: none;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .modal-footer {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+  }
+
+  .empty-state i {
+    font-size: 48px;
+    color: #ccc;
+    margin-bottom: 20px;
+  }
+
+  .empty-state h3 {
+    margin: 10px 0;
+    color: #333;
+  }
+
+  /* Snap grid */
+  .snaps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+  }
+
+  .snap-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .snap-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .snap-card.unviewed {
+    border: 2px solid #ff4757;
+  }
+
+  .snap-card-header {
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #4ecdc4;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+  .user-details h4 {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  .user-details .time {
+    font-size: 12px;
+    color: #888;
+  }
+
+  .snap-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .habit-badge {
+    background: #e3f2fd;
+    color: #2196f3;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .action-btn {
+    background: none;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #666;
+    transition: background 0.2s;
+  }
+
+  .action-btn:hover {
+    background: #f5f5f5;
+  }
+
+  .action-btn i {
+    font-size: 16px;
+  }
+
+  .download-btn {
+    color: #4ecdc4;
+  }
+
+  .download-btn:hover {
+    color: #3dbdb4;
+    background: rgba(78, 205, 196, 0.1);
+  }
+
+  .snap-card-footer {
+    padding: 15px;
+  }
+
+  .snap-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .reactions-preview {
+    margin-top: 10px;
+  }
+
+  /* Tabs */
+  .snaps-tabs {
+    display: flex;
+    border-bottom: 2px solid #eee;
+    margin-bottom: 20px;
+  }
+
+  .tab-btn {
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 16px;
+    color: #666;
+    position: relative;
+  }
+
+  .tab-btn.active {
+    color: #4ecdc4;
+    border-bottom-color: #4ecdc4;
+    font-weight: 500;
+  }
+
+  .tab-btn .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4757;
+    color: white;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+  }
+
+  .tab-pane {
+    display: none;
+  }
+
+  .tab-pane.active {
+    display: block;
+  }
+
+  /* Camera interface */
+  .camera-interface {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    z-index: 2000;
+  }
+
+  .camera-interface.hidden {
+    display: none;
+  }
+
+  .camera-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
+  }
+
+  .camera-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+  }
+
+  .camera-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .camera-action-buttons {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+  }
+
+  .capture-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: white;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .capture-circle {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: white;
+  }
+
+  /* Text snap interface */
+  .text-snap-interface {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    z-index: 2000;
+  }
+
+  .text-snap-interface.hidden {
+    display: none;
+  }
+
+  .text-snap-header {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+  }
+
+  .text-snap-title {
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .text-snap-editor {
+    padding: 40px 20px;
+    height: calc(100% - 80px);
+  }
+
+  #snap-text {
+    width: 100%;
+    height: 200px;
+    border: none;
+    outline: none;
+    font-size: 24px;
+    text-align: center;
+    resize: none;
+    background: #4ecdc4;
+    color: white;
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .text-snap-backgrounds {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 30px;
+  }
+
+  .bg-option {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 3px solid transparent;
+  }
+
+  .bg-option.active {
+    border-color: #333;
+    transform: scale(1.1);
+  }
+
+  /* Button styles */
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: #4ecdc4;
+    color: white;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: #3dbdb4;
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-outline {
+    background: white;
+    color: #666;
+    border: 2px solid #ddd;
+  }
+
+  .btn-outline:hover {
+    border-color: #4ecdc4;
+    color: #4ecdc4;
+  }
+
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+
+  /* Download modal styles */
+  .download-content {
+    max-width: 500px;
+  }
+
+  .download-preview {
+    margin-bottom: 20px;
+  }
+
+  .image-preview img,
+  .video-preview video {
+    max-width: 100%;
+    max-height: 200px;
+    display: block;
+    margin: 0 auto;
+    border-radius: 8px;
+  }
+
+  .text-preview {
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    text-align: center;
+  }
+
+  .snap-info {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+
+  .info-row {
+    display: flex;
+    margin-bottom: 8px;
+  }
+
+  .info-row .label {
+    font-weight: 600;
+    min-width: 80px;
+    color: #666;
+  }
+
+  .info-row .value {
+    flex: 1;
+    color: #333;
+  }
+
+  .download-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .download-option {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .download-option:hover {
+    border-color: #4ecdc4;
+    background: #f8f9fa;
+  }
+
+  .download-option.selected {
+    border-color: #4ecdc4;
+    background: #e3f2fd;
+  }
+
+  .download-option i {
+    font-size: 24px;
+    color: #4ecdc4;
+    margin-right: 15px;
+    width: 40px;
+    text-align: center;
+  }
+
+  .download-option h4 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+  }
+
+  .download-option p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+  }
+
+  .download-customization {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+
+  .customization-option {
+    margin-bottom: 10px;
+  }
+
+  .customization-option:last-child {
+    margin-bottom: 0;
+  }
+
+  .customization-option label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .customization-option input[type="checkbox"] {
+    margin-right: 10px;
+  }
+
+  /* Camera options */
+  .camera-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .camera-option {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .camera-option:hover {
+    border-color: #4ecdc4;
+    background: #f8f9fa;
+  }
+
+  .camera-option-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: #4ecdc4;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-right: 20px;
+  }
+
+  .camera-option-content h3 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+  }
+
+  .camera-option-content p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+  }
+
+  /* Emoji picker */
+  .emoji-picker {
+    position: absolute;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 20px;
+    padding: 15px;
+    backdrop-filter: blur(10px);
+  }
+
+  .emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+
+  .emoji-item {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+
+  .emoji-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Recording indicator */
+  .recording-indicator {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 0, 0, 0.8);
+    padding: 8px 15px;
+    border-radius: 20px;
+    color: white;
+    font-size: 14px;
+    backdrop-filter: blur(10px);
+  }
+
+  .recording-dot {
+    width: 10px;
+    height: 10px;
+    background: #ff4757;
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse 1s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  /* Camera controls */
+  .camera-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+  }
+
+  .action-btn.secondary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+
+  .action-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .capture-btn.video.recording .capture-circle {
+    background: #ff4757;
+  }
+
+  /* Reply modal styles */
+  .reply-preview {
+    margin-bottom: 20px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 15px;
+  }
+
+  .reply-type-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .reply-type-btn {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    background: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .reply-type-btn.active {
+    border-color: #4ecdc4;
+    background: #e3f2fd;
+  }
+
+  .reply-input-container {
+    margin-bottom: 20px;
+  }
+
+  .reply-input {
+    display: none;
+  }
+
+  .reply-input.active {
+    display: block;
+  }
+
+  .photo-reply-controls,
+  .video-reply-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+
+  /* Quick reply */
+  .replies-input {
+    display: flex;
+    gap: 10px;
+    padding: 15px;
+    border-top: 1px solid #eee;
+  }
+
+  .replies-input input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+  }
+
+  /* Add to the existing notification styles */
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    animation: slideIn 0.3s ease;
+    border-left: 4px solid #4ecdc4;
+    /* Add text color */
+    color: #333; /* Dark text for contrast */
+  }
+
+  /* Or add a specific rule for the notification content */
+  .notification-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #333; /* Ensure text is dark */
+  }
+
+  .notification-content i {
+    color: inherit; /* Icons inherit text color */
+  }
+
+  .notification-content span {
+    color: inherit; /* Text inherits color */
+  }
+
+  /* Add filter styles */
+  .filter-selector {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .filter-option {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 3px solid transparent;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .filter-option.active {
+    border-color: #4ecdc4;
+    transform: scale(1.1);
+  }
+
+  .filter-option img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .filter-preview {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .emoji-filter-options {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+
+  .emoji-filter-option {
+    width: 50px;
+    height: 50px;
+    font-size: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.2s;
+  }
+
+  .emoji-filter-option:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+  }
+
+  .emoji-filter-option.active {
+    background: rgba(78, 205, 196, 0.3);
+    border: 2px solid #4ecdc4;
+  }
+
+  .face-detection-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
+
+  /* Filter effects */
+  .filter-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .vintage-filter {
+    background: linear-gradient(rgba(255, 165, 0, 0.1), rgba(255, 165, 0, 0.1));
+    mix-blend-mode: multiply;
+  }
+
+  .cool-filter {
+    background: linear-gradient(rgba(0, 191, 255, 0.1), rgba(0, 191, 255, 0.1));
+    mix-blend-mode: screen;
+  }
+
+  .warm-filter {
+    background: linear-gradient(rgba(255, 69, 0, 0.1), rgba(255, 69, 0, 0.1));
+    mix-blend-mode: overlay;
+  }
+
+  .blackwhite-filter {
+    filter: grayscale(100%);
+  }
+
+  .emoji-face-overlay {
+    position: absolute;
+    font-size: 50px;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  /* Add this to your existing CSS in snaps.html */
+  .modal-content {
+    background: white;
+    color: #333; /* Ensure text is dark */
+  }
+
+  .download-content {
+    background: white;
+    color: #333;
+  }
+
+  .download-option h4 {
+    color: #333; /* Dark text for headings */
+  }
+
+  .download-option p {
+    color: #666; /* Dark gray for paragraph text */
+  }
+
+  .snap-info .label {
+    color: #666; /* Dark gray for labels */
+  }
+
+  .snap-info .value {
+    color: #333; /* Dark for values */
+  }
+
+  .customization-option label {
+    color: #333; /* Dark text for checkboxes */
+  }
+
+  /* Ensure all text inside the download modal is visible */
+  .download-preview,
+  .download-options,
+  .download-customization,
+  .modal-footer {
+    color: #333;
+  }
+
+  /* Fix for the download modal specifically */
+  #download-modal .modal-content {
+    background: white;
+    color: #333;
+  }
+
+  #download-modal .modal-header h2 {
+    color: #333;
+  }
+
+  #download-modal .modal-body {
+    color: #333;
+  }
+
+  #download-modal .modal-footer {
+    color: #333;
+  }
+
+  /* Fix for notification text color */
+  .notification-content {
+    color: #333;
+  }
+
+  .notification-content i {
+    color: inherit;
+  }
+
+  .notification-content span {
+    color: inherit;
+  }
+</style>
+{% endblock %} {% block content %} {% include 'components/navbar.html' %}
+
+<!-- Camera Selection Modal -->
+<div id="camera-selection-modal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Create Snap</h2>
+      <button class="close-btn" onclick="snapManager.closeCameraSelection()">
+        &times;
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="camera-options">
+        <div class="camera-option" onclick="snapManager.startPhotoCamera()">
+          <div class="camera-option-icon">
+            <i class="fas fa-camera"></i>
+          </div>
+          <div class="camera-option-content">
+            <h3>Take Photo</h3>
+            <p>Capture a photo with filters & emojis</p>
+          </div>
+        </div>
+
+        <div class="camera-option" onclick="snapManager.startVideoCamera()">
+          <div class="camera-option-icon">
+            <i class="fas fa-video"></i>
+          </div>
+          <div class="camera-option-content">
+            <h3>Record Video</h3>
+            <p>Record video snap (up to 60 seconds)</p>
+          </div>
+        </div>
+
+        <div class="camera-option" onclick="snapManager.openTextSnap()">
+          <div class="camera-option-icon">
+            <i class="fas fa-font"></i>
+          </div>
+          <div class="camera-option-content">
+            <h3>Text Snap</h3>
+            <p>Send a text message with background</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Camera Interface -->
+<div id="camera-interface" class="camera-interface hidden">
+  <div class="camera-header">
+    <button class="camera-btn" onclick="snapManager.closeCamera()">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="camera-title">Camera</div>
+    <button class="camera-btn" onclick="snapManager.toggleCameraMode()">
+      <i class="fas fa-sync-alt"></i>
+    </button>
+  </div>
+
+  <div class="camera-preview-container">
+    <video id="camera-video" autoplay playsinline></video>
+    <canvas id="camera-canvas" class="hidden"></canvas>
+    <div id="emoji-overlays"></div>
+  </div>
+
+  <div class="camera-controls">
+    <div class="camera-action-buttons">
+      <button class="action-btn secondary" onclick="snapManager.toggleFlash()">
+        <i class="fas fa-bolt"></i>
+      </button>
+
+      <button
+        class="capture-btn"
+        onclick="snapManager.capturePhoto()"
+        id="capture-btn"
+      >
+        <div class="capture-circle"></div>
+      </button>
+
+      <button
+        class="action-btn secondary"
+        onclick="snapManager.toggleEmojiPicker()"
+      >
+        <i class="far fa-smile"></i>
+      </button>
+    </div>
+
+    <div id="emoji-picker" class="emoji-picker hidden">
+      <div class="emoji-grid">
+        <div class="emoji-item" onclick="snapManager.addEmoji('😀')">😀</div>
+        <div class="emoji-item" onclick="snapManager.addEmoji('😂')">😂</div>
+        <div class="emoji-item" onclick="snapManager.addEmoji('😍')">😍</div>
+        <div class="emoji-item" onclick="snapManager.addEmoji('🔥')">🔥</div>
+        <div class="emoji-item" onclick="snapManager.addEmoji('💯')">💯</div>
+        <div class="emoji-item" onclick="snapManager.addEmoji('👍')">👍</div>
+        <div class="emoji-item" onclick="snapManager.addEmoji('❤️')">❤️</div>
+        <div class="emoji-item" onclick="snapManager.addEmoji('👀')">👀</div>
+        <div class="emoji-item" onclick="snapManager.addEmoji('🎉')">🎉</div>
+        <div class="emoji-item" onclick="snapManager.addEmoji('✨')">✨</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Video Camera Interface -->
+<div id="video-interface" class="camera-interface hidden">
+  <div class="camera-header">
+    <button class="camera-btn" onclick="snapManager.closeVideoCamera()">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="camera-title">
+      <span id="recording-timer" class="hidden">00:00</span>
+    </div>
+    <button class="camera-btn" onclick="snapManager.toggleVideoCamera()">
+      <i class="fas fa-sync-alt"></i>
+    </button>
+  </div>
+
+  <div class="camera-preview-container">
+    <video id="video-camera-video" autoplay playsinline muted></video>
+    <div id="recording-indicator" class="recording-indicator hidden">
+      <div class="recording-dot"></div>
+      <span>Recording</span>
+    </div>
+  </div>
+
+  <div class="camera-controls">
+    <div class="camera-action-buttons">
+      <button
+        class="action-btn secondary"
+        onclick="snapManager.toggleVideoFlash()"
+      >
+        <i class="fas fa-bolt"></i>
+      </button>
+
+      <button
+        class="capture-btn video"
+        onclick="snapManager.toggleVideoRecording()"
+        id="record-btn"
+      >
+        <div class="capture-circle"></div>
+      </button>
+
+      <button
+        class="action-btn secondary"
+        onclick="snapManager.toggleVideoEmojiPicker()"
+      >
+        <i class="far fa-smile"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Text Snap Interface -->
+<div id="text-snap-interface" class="text-snap-interface hidden">
+  <div class="text-snap-header">
+    <button class="camera-btn" onclick="snapManager.closeTextSnap()">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="text-snap-title">Text Snap</div>
+    <button class="camera-btn" onclick="snapManager.sendTextSnap()">
+      <i class="fas fa-paper-plane"></i>
+    </button>
+  </div>
+
+  <div class="text-snap-editor">
+    <textarea
+      id="snap-text"
+      placeholder="Type your message here..."
+      maxlength="500"
+    ></textarea>
+
+    <div class="text-snap-backgrounds">
+      <div
+        class="bg-option"
+        style="background: #ff6b6b"
+        onclick="snapManager.setTextBackground('#FF6B6B')"
+      ></div>
+      <div
+        class="bg-option"
+        style="background: #4ecdc4"
+        onclick="snapManager.setTextBackground('#4ECDC4')"
+      ></div>
+      <div
+        class="bg-option"
+        style="background: #ffd166"
+        onclick="snapManager.setTextBackground('#FFD166')"
+      ></div>
+      <div
+        class="bg-option"
+        style="background: #06d6a0"
+        onclick="snapManager.setTextBackground('#06D6A0')"
+      ></div>
+      <div
+        class="bg-option"
+        style="background: #118ab2"
+        onclick="snapManager.setTextBackground('#118AB2')"
+      ></div>
+      <div
+        class="bg-option"
+        style="background: #ef476f"
+        onclick="snapManager.setTextBackground('#EF476F')"
+      ></div>
+      <div
+        class="bg-option"
+        style="background: #073b4c"
+        onclick="snapManager.setTextBackground('#073B4C')"
+      ></div>
+    </div>
+  </div>
+</div>
+
+<!-- Preview Modal -->
+<div id="preview-modal" class="modal hidden">
+  <div class="modal-content preview-content">
+    <div class="preview-header">
+      <h3>Preview</h3>
+      <button class="close-btn" onclick="snapManager.closePreview()">
+        &times;
+      </button>
+    </div>
+
+    <div class="preview-body">
+      <div id="preview-container"></div>
+      <div class="preview-caption">
+        <input
+          type="text"
+          id="preview-caption-input"
+          placeholder="Add a caption (optional)"
+          maxlength="200"
+        />
+      </div>
+    </div>
+
+    <div class="preview-actions">
+      <button class="btn btn-outline" onclick="snapManager.retake()">
+        <i class="fas fa-redo"></i> Retake
+      </button>
+      <button
+        class="btn btn-primary"
+        onclick="snapManager.openFriendSelection()"
+      >
+        <i class="fas fa-paper-plane"></i> Send Snap
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Friend Selection Modal -->
+<div id="friend-selection-modal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Send To</h2>
+      <button class="close-btn" onclick="snapManager.closeFriendSelection()">
+        &times;
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="friend-search">
+        <input type="text" id="friend-search" placeholder="Search friends..." />
+      </div>
+
+      <div class="friend-list" id="friend-list">
+        <div class="loading">Loading friends...</div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <div class="selected-count">
+        <span id="selected-count">0</span> selected
+      </div>
+      <button
+        class="btn btn-primary"
+        id="send-snap-btn"
+        disabled
+        onclick="snapManager.sendSnap()"
+      >
+        Send Snap
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Reply Modal -->
+<div id="reply-modal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Reply to Snap</h2>
+      <button class="close-btn" onclick="snapManager.closeReplyModal()">
+        &times;
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div id="reply-preview" class="reply-preview">
+        <!-- Parent snap will be loaded here -->
+      </div>
+
+      <div class="reply-type-selector">
+        <button
+          class="reply-type-btn active"
+          data-type="text"
+          onclick="snapManager.setReplyType('text')"
+        >
+          <i class="fas fa-font"></i> Text
+        </button>
+        <button
+          class="reply-type-btn"
+          data-type="photo"
+          onclick="snapManager.setReplyType('photo')"
+        >
+          <i class="fas fa-camera"></i> Photo
+        </button>
+        <button
+          class="reply-type-btn"
+          data-type="video"
+          onclick="snapManager.setReplyType('video')"
+        >
+          <i class="fas fa-video"></i> Video
+        </button>
+      </div>
+
+      <div class="reply-input-container">
+        <!-- Text Reply -->
+        <div id="text-reply-input" class="reply-input active">
+          <textarea
+            id="reply-text"
+            placeholder="Type your reply..."
+            maxlength="500"
+          ></textarea>
+        </div>
+
+        <!-- Photo Reply -->
+        <div id="photo-reply-input" class="reply-input">
+          <div class="photo-reply-controls">
+            <button
+              class="btn btn-outline"
+              onclick="snapManager.openReplyCamera()"
+            >
+              <i class="fas fa-camera"></i> Take Photo
+            </button>
+            <button
+              class="btn btn-outline"
+              onclick="snapManager.uploadReplyPhoto()"
+            >
+              <i class="fas fa-upload"></i> Upload Photo
+            </button>
+          </div>
+          <div id="photo-reply-preview" class="hidden">
+            <img id="reply-photo-preview" alt="Reply photo" />
+            <button
+              class="btn btn-outline btn-sm"
+              onclick="snapManager.removeReplyPhoto()"
+            >
+              <i class="fas fa-times"></i> Remove
+            </button>
+          </div>
+        </div>
+
+        <!-- Video Reply -->
+        <div id="video-reply-input" class="reply-input">
+          <div class="video-reply-controls">
+            <button
+              class="btn btn-outline"
+              onclick="snapManager.startReplyVideoRecording()"
+            >
+              <i class="fas fa-video"></i> Record Video
+            </button>
+            <button
+              class="btn btn-outline"
+              onclick="snapManager.uploadReplyVideo()"
+            >
+              <i class="fas fa-upload"></i> Upload Video
+            </button>
+          </div>
+          <div id="video-reply-preview" class="hidden">
+            <video id="reply-video-preview" controls></video>
+            <button
+              class="btn btn-outline btn-sm"
+              onclick="snapManager.removeReplyVideo()"
+            >
+              <i class="fas fa-times"></i> Remove
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="reply-caption">
+        <input
+          type="text"
+          id="reply-caption-input"
+          placeholder="Add a caption (optional)"
+          maxlength="200"
+        />
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="snapManager.closeReplyModal()">
+        Cancel
+      </button>
+      <button
+        class="btn btn-primary"
+        id="send-reply-btn"
+        onclick="snapManager.sendReply()"
+      >
+        <i class="fas fa-paper-plane"></i> Send Reply
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- View Snap Modal -->
+<div id="view-snap-modal" class="modal hidden">
+  <div class="modal-content view-snap-content">
+    <div class="view-snap-header">
+      <button class="close-btn" onclick="snapManager.closeViewSnapModal()">
+        &times;
+      </button>
+    </div>
+
+    <div class="view-snap-body" id="view-snap-body">
+      <!-- Snap content will be loaded here -->
+    </div>
+  </div>
+</div>
+
+<!-- Replies Thread Modal -->
+<div id="replies-modal" class="modal hidden">
+  <div class="modal-content replies-content">
+    <div class="replies-header">
+      <h3>Replies</h3>
+      <button class="close-btn" onclick="snapManager.closeRepliesModal()">
+        &times;
+      </button>
+    </div>
+
+    <div class="replies-body" id="replies-body">
+      <!-- Replies will be loaded here -->
+    </div>
+
+    <div class="replies-input">
+      <input
+        type="text"
+        id="quick-reply-input"
+        placeholder="Type a quick reply..."
+        maxlength="500"
+      />
+      <button class="btn btn-primary" onclick="snapManager.sendQuickReply()">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="snaps-page">
+  <div class="snaps-header">
+    <h1>Snaps</h1>
+    <button class="btn btn-primary" onclick="snapManager.openCameraSelection()">
+      <i class="fas fa-camera"></i> New Snap
+    </button>
+  </div>
+
+  <div class="snaps-tabs">
+    <button class="tab-btn active" data-tab="received">
+      Received {% if received_snaps %} {% set unviewed_count = 0 %} {% for snap
+      in received_snaps %} {% if not snap.is_viewed %} {% set unviewed_count =
+      unviewed_count + 1 %} {% endif %} {% endfor %} {% if unviewed_count > 0 %}
+      <span class="badge">{{ unviewed_count }}</span>
+      {% endif %} {% endif %}
+    </button>
+    <button class="tab-btn" data-tab="sent">
+      Sent {% if sent_snaps %}
+      <span class="badge">{{ sent_snaps|length }}</span>
+      {% endif %}
+    </button>
+  </div>
+
+  <div class="snaps-content">
+    <!-- Received Snaps -->
+    <div class="tab-pane active" id="received-tab">
+      {% if received_snaps %}
+      <div class="snaps-grid">
+        {% for snap in received_snaps %}
+        <div
+          class="snap-card {% if not snap.is_viewed %}unviewed{% endif %}"
+          data-snap-id="{{ snap.id }}"
+          data-type="received"
+          data-content-type="{{ snap.content_type }}"
+        >
+          <div class="snap-card-header">
+            <div class="user-info">
+              <div class="avatar">{{ snap.sender.username[0]|upper }}</div>
+              <div class="user-details">
+                <h4>{{ snap.sender.username }}</h4>
+                <span class="time">
+                  {{ snap.created_at.strftime('%b %d, %I:%M %p') }}
+                </span>
+              </div>
+            </div>
+            <div class="snap-header-actions">
+              {% if snap.habit %}
+              <span class="habit-badge">{{ snap.habit.name }}</span>
+              {% endif %}
+              <!-- Download button instead of save -->
+              <button
+                class="action-btn download-btn"
+                onclick="snapManager.downloadSnap({{ snap.id }})"
+                title="Download snap"
+              >
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="snap-content"
+            onclick="snapManager.viewSnap({{ snap.id }})"
+          >
+            {% if snap.content_type == 'image' %}
+            <!-- Image Snap -->
+            <img
+              src="{{ url_for('uploaded_file', filename=snap.content) }}"
+              alt="Snap from {{ snap.sender.username }}"
+              loading="lazy"
+              onerror="this.src='{{ url_for('static', filename='images/default-snap.jpg') }}'"
+            />
+            {% elif snap.content_type == 'video' %}
+            <!-- Video Snap -->
+            <div class="video-container">
+              <video preload="metadata">
+                <source
+                  src="{{ url_for('uploaded_file', filename=snap.content) }}"
+                  type="video/mp4"
+                />
+              </video>
+              <div class="play-overlay">
+                <i class="fas fa-play"></i>
+              </div>
+            </div>
+            {% else %}
+            <!-- Text Snap (plain text only) -->
+            <div class="text-snap-content">{{ snap.content }}</div>
+            {% endif %} {% if not snap.is_viewed %}
+            <div class="unviewed-indicator">NEW</div>
+            {% endif %}
+          </div>
+
+          <div class="snap-card-footer">
+            <!-- Display caption only if it exists and is different from content -->
+            {% if snap.caption and snap.caption != snap.content %}
+            <p class="caption">{{ snap.caption }}</p>
+            {% endif %}
+
+            <div class="snap-actions">
+              <button
+                class="action-btn"
+                onclick="snapManager.reactToSnap({{ snap.id }}, '❤️')"
+              >
+                <i class="far fa-heart"></i>
+              </button>
+              <button
+                class="action-btn"
+                onclick="snapManager.openReplyModal({{ snap.id }})"
+              >
+                <i class="far fa-comment"></i>
+              </button>
+              <button
+                class="action-btn"
+                onclick="snapManager.viewReplies({{ snap.id }})"
+              >
+                <i class="fas fa-comments"></i>
+              </button>
+            </div>
+
+            {% if snap.reactions %}
+            <div class="reactions-preview">
+              {% set unique_emojis = [] %} {% for reaction in snap.reactions %}
+              {% if reaction.emoji not in unique_emojis %} {% set _ =
+              unique_emojis.append(reaction.emoji) %} {% endif %} {% endfor %}
+              {% for emoji in unique_emojis[:3] %}
+              <span class="reaction-badge">{{ emoji }}</span>
+              {% endfor %} {% if snap.reactions|length > 3 %}
+              <span class="more-reactions"
+                >+{{ snap.reactions|length - 3 }}</span
+              >
+              {% endif %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-camera"></i>
+        <h3>No snaps received yet</h3>
+        <p>When friends send you snaps, they'll appear here.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Sent Snaps -->
+    <div class="tab-pane" id="sent-tab">
+      {% if sent_snaps %}
+      <div class="snaps-grid" id="sent-snaps-grid">
+        {% for snap in sent_snaps %}
+        <div
+          class="snap-card"
+          data-snap-id="{{ snap.id }}"
+          data-type="sent"
+          data-content-type="{{ snap.content_type }}"
+        >
+          <div class="snap-card-header">
+            <div class="user-info">
+              <div class="avatar">{{ snap.receiver.username[0]|upper }}</div>
+              <div class="user-details">
+                <h4>To: {{ snap.receiver.username }}</h4>
+                <span class="time">
+                  {{ snap.created_at.strftime('%b %d, %I:%M %p') }}
+                </span>
+              </div>
+            </div>
+            <div class="snap-header-actions">
+              <div
+                class="status-badge {% if snap.is_viewed %}viewed{% else %}pending{% endif %}"
+              >
+                {% if snap.is_viewed %}Viewed{% else %}Pending{% endif %}
+              </div>
+              <!-- Download button for sent snaps too -->
+              <button
+                class="action-btn download-btn"
+                onclick="snapManager.downloadSnap({{ snap.id }})"
+                title="Download snap"
+              >
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="snap-content"
+            onclick="snapManager.viewSnap({{ snap.id }})"
+          >
+            {% if snap.content_type == 'image' %}
+            <!-- Image Snap -->
+            <img
+              src="{{ url_for('uploaded_file', filename=snap.content) }}"
+              alt="Snap to {{ snap.receiver.username }}"
+              loading="lazy"
+              onerror="this.src='{{ url_for('static', filename='images/default-snap.jpg') }}'"
+            />
+            {% elif snap.content_type == 'video' %}
+            <!-- Video Snap -->
+            <div class="video-container">
+              <video preload="metadata">
+                <source
+                  src="{{ url_for('uploaded_file', filename=snap.content) }}"
+                  type="video/mp4"
+                />
+              </video>
+              <div class="play-overlay">
+                <i class="fas fa-play"></i>
+              </div>
+            </div>
+            {% else %}
+            <!-- Text Snap (plain text only) -->
+            <div class="text-snap-content">{{ snap.content }}</div>
+            {% endif %}
+          </div>
+
+          <div class="snap-card-footer">
+            <!-- Display caption only if it exists and is different from content -->
+            {% if snap.caption and snap.caption != snap.content %}
+            <p class="caption">{{ snap.caption }}</p>
+            {% endif %} {% if snap.reactions %}
+            <div class="reactions-preview">
+              {% set unique_emojis = [] %} {% for reaction in snap.reactions %}
+              {% if reaction.emoji not in unique_emojis %} {% set _ =
+              unique_emojis.append(reaction.emoji) %} {% endif %} {% endfor %}
+              {% for emoji in unique_emojis[:3] %}
+              <span class="reaction-badge">{{ emoji }}</span>
+              {% endfor %} {% if snap.reactions|length > 3 %}
+              <span class="more-reactions"
+                >+{{ snap.reactions|length - 3 }}</span
+              >
+              {% endif %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-paper-plane"></i>
+        <h3>No snaps sent</h3>
+        <p>Create and send your first snap to friends!</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/snaps.js') }}"></script>
+<script>
+  // Tab switching
+  document.addEventListener("DOMContentLoaded", function () {
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const tabPanes = document.querySelectorAll(".tab-pane");
+
+    tabButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const targetTab = this.getAttribute("data-tab");
+
+        // Update active tab button
+        tabButtons.forEach((btn) => btn.classList.remove("active"));
+        this.classList.add("active");
+
+        // Show target tab pane
+        tabPanes.forEach((pane) => {
+          pane.classList.remove("active");
+          if (pane.id === targetTab + "-tab") {
+            pane.classList.add("active");
+          }
+        });
+      });
+    });
+
+    // Add click handlers for video play buttons
+    document.querySelectorAll(".video-container").forEach((container) => {
+      container.addEventListener("click", function (e) {
+        if (!e.target.closest(".play-overlay")) return;
+
+        const video = this.querySelector("video");
+        if (video) {
+          if (video.paused) {
+            video.play();
+            this.querySelector(".play-overlay").style.display = "none";
+          } else {
+            video.pause();
+            this.querySelector(".play-overlay").style.display = "flex";
+          }
+        }
+      });
+    });
+
+    // Handle video pause/end events
+    document.querySelectorAll("video").forEach((video) => {
+      video.addEventListener("pause", function () {
+        const container = this.closest(".video-container");
+        if (container) {
+          container.querySelector(".play-overlay").style.display = "flex";
+        }
+      });
+
+      video.addEventListener("ended", function () {
+        const container = this.closest(".video-container");
+        if (container) {
+          container.querySelector(".play-overlay").style.display = "flex";
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,641 @@
+{% extends "base.html" %} {% block title %}Chat with {{ other_user.username }} -
+HabitHero{% endblock %} {% block content %}
+<div
+  class="chat-container"
+  data-chat-user-id="{{ other_user.id }}"
+  data-current-user-id="{{ current_user.id }}"
+  data-current-username="{{ current_user.username }}"
+  data-chat-username="{{ other_user.username }}"
+>
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <a href="{{ url_for('chat_index') }}" class="back-button">
+      <i class="fas fa-arrow-left"></i>
+    </a>
+    <div class="user-info">
+      <div class="chat-avatar">{{ other_user.username[:1].upper() }}</div>
+      <div class="user-details">
+        <h3>{{ other_user.username }}</h3>
+        <div class="user-status">
+          <span
+            class="status-indicator {{ 'online' if other_user.is_online else 'offline' }}"
+          ></span>
+          <span>{{ 'Online' if other_user.is_online else 'Offline' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages Container -->
+  <div class="messages-container" id="messagesContainer">
+    {% if messages %} {% for message in messages %}
+    <div
+      class="message {{ 'sent' if message.sender_id == current_user.id else 'received' }}"
+    >
+      <div class="message-bubble">
+        <div class="message-content">{{ message.content }}</div>
+        <div class="message-time">{{ message.timestamp|timesince }}</div>
+      </div>
+    </div>
+    {% endfor %} {% else %}
+    <div class="no-messages">
+      <i class="fas fa-comments"></i>
+      <h4>No messages yet</h4>
+      <p>Start the conversation!</p>
+    </div>
+    {% endif %}
+
+    <!-- Typing Indicator -->
+    <div class="typing-indicator" id="typingIndicator">
+      <div class="typing-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <span id="typingText">{{ other_user.username }} is typing...</span>
+    </div>
+
+    <!-- Loading Indicator for older messages -->
+    <div class="load-more-container" id="loadMoreContainer">
+      <button id="loadMoreBtn" class="btn-load-more">
+        <i class="fas fa-history"></i>
+        <span>Load older messages</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Message Input -->
+  <div class="message-input-container">
+    <div class="input-wrapper">
+      <textarea
+        id="messageInput"
+        placeholder="Type a message..."
+        rows="1"
+        maxlength="1000"
+      ></textarea>
+      <button id="sendMessageBtn" class="send-button">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+    <div class="input-hint">Press Enter to send, Shift+Enter for new line</div>
+  </div>
+</div>
+
+<!-- Connection Status Indicator (will be added by JavaScript) -->
+<div id="connectionStatus"></div>
+
+<style>
+  .chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 60px);
+    max-width: 800px;
+    margin: 0 auto;
+    background: #0a0a0f;
+  }
+
+  .chat-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(10, 10, 15, 0.95);
+    border-bottom: 1px solid rgba(0, 180, 255, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .back-button {
+    color: #00b4ff;
+    font-size: 1.25rem;
+    margin-right: 1rem;
+    text-decoration: none;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background 0.3s;
+  }
+
+  .back-button:hover {
+    background: rgba(0, 180, 255, 0.1);
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+
+  .chat-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00b4ff 0%, #0088cc 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0a0a0f;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-right: 1rem;
+    box-shadow: 0 0 10px rgba(0, 180, 255, 0.5);
+  }
+
+  .user-details h3 {
+    color: #ffffff;
+    font-size: 1.1rem;
+    margin: 0 0 0.25rem 0;
+  }
+
+  .user-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .status-indicator.online {
+    background: #00ff9d;
+    box-shadow: 0 0 8px rgba(0, 255, 157, 0.7);
+  }
+
+  .status-indicator.offline {
+    background: #8899aa;
+  }
+
+  .user-status span:last-child {
+    color: #8899aa;
+    font-size: 0.875rem;
+  }
+
+  .messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    scroll-behavior: smooth;
+  }
+
+  .message {
+    display: flex;
+    max-width: 75%;
+    animation: messageAppear 0.3s ease;
+  }
+
+  @keyframes messageAppear {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .message.sent {
+    align-self: flex-end;
+  }
+
+  .message.received {
+    align-self: flex-start;
+  }
+
+  .message-bubble {
+    padding: 0.75rem 1rem;
+    border-radius: 18px;
+    position: relative;
+    word-break: break-word;
+  }
+
+  .message.sent .message-bubble {
+    background: linear-gradient(135deg, #00b4ff 0%, #0088cc 100%);
+    color: #0a0a0f;
+    border-bottom-right-radius: 4px;
+  }
+
+  .message.received .message-bubble {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border-bottom-left-radius: 4px;
+  }
+
+  .message-content {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    margin-bottom: 0.25rem;
+    white-space: pre-wrap;
+  }
+
+  .message-time {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    text-align: right;
+  }
+
+  .message.received .message-time {
+    text-align: left;
+  }
+
+  .no-messages {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #8899aa;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .no-messages i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: rgba(0, 180, 255, 0.3);
+  }
+
+  .no-messages h4 {
+    color: #ffffff;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .typing-indicator {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    width: fit-content;
+    margin-top: 0.5rem;
+  }
+
+  .typing-indicator.active {
+    display: flex;
+  }
+
+  .typing-dots {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .typing-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #00b4ff;
+    animation: typingBounce 1.4s infinite;
+  }
+
+  .typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes typingBounce {
+    0%,
+    60%,
+    100% {
+      transform: translateY(0);
+    }
+    30% {
+      transform: translateY(-6px);
+    }
+  }
+
+  #typingText {
+    color: #8899aa;
+    font-size: 0.875rem;
+  }
+
+  .load-more-container {
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .btn-load-more {
+    background: rgba(0, 180, 255, 0.1);
+    border: 1px solid rgba(0, 180, 255, 0.3);
+    color: #00b4ff;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+  }
+
+  .btn-load-more:hover:not(:disabled) {
+    background: rgba(0, 180, 255, 0.2);
+    border-color: rgba(0, 180, 255, 0.5);
+  }
+
+  .btn-load-more:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .message-input-container {
+    padding: 1rem;
+    background: rgba(10, 10, 15, 0.95);
+    border-top: 1px solid rgba(0, 180, 255, 0.2);
+  }
+
+  .input-wrapper {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-end;
+  }
+
+  #messageInput {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(0, 180, 255, 0.2);
+    border-radius: 24px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    resize: none;
+    min-height: 20px;
+    max-height: 120px;
+    font-family: inherit;
+    line-height: 1.4;
+    transition: border-color 0.3s;
+  }
+
+  #messageInput:focus {
+    outline: none;
+    border-color: #00b4ff;
+  }
+
+  #messageInput::placeholder {
+    color: #8899aa;
+  }
+
+  .send-button {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00b4ff 0%, #0088cc 100%);
+    border: none;
+    color: #0a0a0f;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.3s;
+    flex-shrink: 0;
+  }
+
+  .send-button:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 180, 255, 0.3);
+  }
+
+  .send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .input-hint {
+    text-align: center;
+    color: #8899aa;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+    opacity: 0.7;
+  }
+
+  /* Message Status Indicators - Removed pseudo-elements since JS adds them */
+
+  .message.temp .message-bubble {
+    opacity: 0.7;
+  }
+
+  .message.failed .message-bubble {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  }
+
+  /* Connection Status */
+  .connection-status {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    z-index: 1000;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    animation: slideIn 0.3s ease;
+    opacity: 0.9;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 0.9;
+    }
+  }
+
+  .connection-status.connected {
+    background: rgba(0, 255, 157, 0.1);
+    border: 1px solid rgba(0, 255, 157, 0.3);
+    color: #00ff9d;
+  }
+
+  .connection-status.disconnected {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    color: #ffc107;
+  }
+
+  .connection-status.error {
+    background: rgba(255, 107, 107, 0.1);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    color: #ff6b6b;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .chat-container {
+      height: calc(100vh - 60px);
+    }
+
+    .message {
+      max-width: 85%;
+    }
+
+    .chat-header {
+      padding: 0.75rem;
+    }
+
+    .chat-avatar {
+      width: 40px;
+      height: 40px;
+      font-size: 1rem;
+    }
+
+    .message-input-container {
+      padding: 0.75rem;
+    }
+  }
+
+  /* Message Read Status */
+  .message.sent .message-bubble .read-status {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 4px;
+    font-size: 0.7rem;
+  }
+
+  .message.sent .message-bubble.sent .read-status {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .message.sent .message-bubble.delivered .read-status {
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .message.sent .message-bubble.read .read-status {
+    color: #00ff9d;
+  }
+
+  /* Tick icons */
+  .message.sent .message-bubble .tick {
+    display: inline-block;
+    font-size: 0.7rem;
+    line-height: 1;
+  }
+
+  .message.sent .message-bubble.sent .tick {
+    opacity: 0.5;
+  }
+
+  .message.sent .message-bubble.delivered .tick {
+    opacity: 0.7;
+  }
+
+  .message.sent .message-bubble.read .tick {
+    color: #00ff9d;
+    text-shadow: 0 0 5px rgba(0, 255, 157, 0.5);
+  }
+  .status-indicator.online.pulse {
+    animation: pulse 1.5s ease-in-out;
+    box-shadow: 0 0 0 8px rgba(0, 255, 157, 0.4);
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(0, 255, 157, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(0, 255, 157, 0);
+    }
+  }
+
+  /* Context Menu Styles */
+  .context-menu-item:hover {
+    background: rgba(0, 180, 255, 0.2) !important;
+  }
+
+  .context-menu-item.delete-item:hover {
+    background: rgba(255, 107, 107, 0.2) !important;
+    color: #ff6b6b !important;
+  }
+
+  .context-menu-item.delete-item:hover i {
+    color: #ff6b6b !important;
+  }
+
+  .context-menu-item.edit-item:hover {
+    background: rgba(0, 255, 157, 0.2) !important;
+    color: #00ff9d !important;
+  }
+
+  .context-menu-item.edit-item:hover i {
+    color: #00ff9d !important;
+  }
+
+  .context-menu-item.forward-item:hover {
+    background: rgba(0, 180, 255, 0.2) !important;
+    color: #00b4ff !important;
+  }
+
+  .context-menu-item.forward-item:hover i {
+    color: #00b4ff !important;
+  }
+
+  /* Delete confirmation modal animations */
+  @keyframes modalSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .delete-confirmation-modal > div,
+  .forward-message-modal > div {
+    animation: modalSlideIn 0.3s ease;
+  }
+
+  /* Friend selection in forward modal */
+  .friend-item:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    transform: translateX(5px);
+  }
+
+  .friend-item.selected {
+    background: rgba(0, 255, 157, 0.1) !important;
+    border-color: #00ff9d !important;
+  }
+
+  /* Edited message indicator */
+  .message-bubble.edited::after {
+    content: "(edited)";
+    display: inline-block;
+    color: #00ff9d;
+    font-size: 0.75rem;
+    margin-left: 8px;
+    font-style: italic;
+  }
+</style>
+{% endblock %} {% block scripts %}
+<script>
+  // Global chat configuration - FIXED VERSION
+  window.CHAT_CONFIG = {
+    currentUserId: parseInt("{{ current_user.id }}"),
+    currentUsername: "{{ current_user.username }}",
+    chatUserId: parseInt("{{ other_user.id }}"),
+    chatUsername: "{{ other_user.username }}",
+    csrfToken: "{{ csrf_token() if csrf_token else '' }}",
+  };
+
+  console.log("📋 CHAT_CONFIG loaded:", window.CHAT_CONFIG);
+</script>
+<script src="/static/js/chat.js"></script>
+{% endblock %}

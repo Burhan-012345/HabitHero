@@ -1,0 +1,1113 @@
+{% extends "base.html" %} {% block title %}Dashboard - HabitHero{% endblock %}
+{% block extra_css %}
+<style>
+  /* Only mobile-specific styles here */
+  .dashboard-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #0a0a0f;
+  }
+
+  .mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #0a0a0f;
+    border-bottom: 1px solid rgba(0, 180, 255, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: 60px;
+  }
+
+  .mobile-header h1 {
+    font-size: 1.25rem;
+    color: #00b4ff;
+    text-shadow: 0 0 10px rgba(0, 180, 255, 0.3);
+  }
+
+  .menu-toggle {
+    background: none;
+    border: none;
+    color: #00b4ff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 60px);
+    background: linear-gradient(180deg, #0a0a0f 0%, #05050a 100%);
+    color: #00b4ff;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 999;
+    overflow-y: auto;
+    padding: 1rem;
+    border-right: 1px solid rgba(0, 180, 255, 0.2);
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .sidebar-header {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 180, 255, 0.2);
+    margin-bottom: 1rem;
+  }
+
+  .sidebar-header h2 {
+    color: #00b4ff;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(0, 180, 255, 0.3);
+  }
+
+  .sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .sidebar-nav li {
+    margin-bottom: 0.5rem;
+  }
+
+  .sidebar-nav a {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: #8899aa;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-weight: 500;
+    font-size: 0.875rem;
+    min-height: 44px;
+  }
+
+  .sidebar-nav a:hover {
+    background-color: rgba(0, 180, 255, 0.1);
+    color: #00b4ff;
+  }
+
+  .sidebar-nav a.active {
+    background-color: rgba(0, 180, 255, 0.15);
+    color: #00b4ff;
+    box-shadow: 0 2px 4px rgba(0, 180, 255, 0.2);
+    text-shadow: 0 0 10px rgba(0, 180, 255, 0.3);
+  }
+
+  .sidebar-nav i {
+    margin-right: 0.75rem;
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+  }
+
+  .sidebar-footer {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+  }
+
+  .user-profile {
+    padding: 1rem;
+    background: rgba(0, 180, 255, 0.05);
+    border-radius: 8px;
+  }
+
+  .main-content {
+    flex: 1;
+    padding: 1rem;
+    margin-top: 60px;
+    overflow-y: auto;
+  }
+
+  .dashboard-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 180, 255, 0.2);
+  }
+
+  .dashboard-header h1 {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  /* Mobile-specific button sizes */
+  .btn {
+    display: inline-block;
+    padding: 0.625rem 1.25rem;
+    background: #00b4ff;
+    color: #0a0a0f;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.875rem;
+    min-height: 36px;
+  }
+
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .complete-btn {
+    background: #00ff9d;
+    color: #0a0a0f;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-size: 0.875rem;
+    min-height: 36px;
+    min-width: 100px;
+  }
+
+  /* Desktop styles will override these in media queries */
+  @media (min-width: 768px) {
+    .dashboard-container {
+      flex-direction: row;
+    }
+
+    .mobile-header {
+      display: none;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 250px;
+      height: 100vh;
+      transform: translateX(0);
+      padding: 1.5rem;
+    }
+
+    .main-content {
+      margin-left: 250px;
+      margin-top: 0;
+      padding: 2rem;
+    }
+
+    .dashboard-header {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Desktop-specific button sizes - FIXED */
+    .btn {
+      padding: 0.5rem 1.25rem;
+      font-size: 0.875rem;
+      min-height: 36px;
+    }
+
+    .btn-sm {
+      padding: 0.375rem 0.875rem;
+      font-size: 0.8125rem;
+    }
+
+    .complete-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      min-height: 36px;
+      min-width: 100px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    /* Even larger screens can have slightly bigger buttons */
+    .btn {
+      padding: 0.625rem 1.5rem;
+      font-size: 0.9375rem;
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  /* Rest of your styles remain the same... */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    background: rgba(10, 10, 15, 0.9);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 180, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(0, 180, 255, 0.1);
+    text-align: center;
+  }
+
+  .stat-card h3 {
+    color: #8899aa;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-card .value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #00b4ff;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 10px rgba(0, 180, 255, 0.3);
+  }
+
+  .stat-card .trend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+  }
+
+  .trend.up {
+    color: #00ff9d;
+    text-shadow: 0 0 5px rgba(0, 255, 157, 0.5);
+  }
+
+  .trend.down {
+    color: #ff4757;
+  }
+
+  .habits-section,
+  .snaps-section,
+  .activity-section {
+    background: rgba(10, 10, 15, 0.9);
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 180, 255, 0.1);
+    margin-bottom: 1rem;
+    border: 1px solid rgba(0, 180, 255, 0.1);
+  }
+
+  .section-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 180, 255, 0.2);
+  }
+
+  .section-header h2 {
+    color: #ffffff;
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .habits-list,
+  .activity-list {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .habit-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(0, 180, 255, 0.05);
+    border-radius: 8px;
+    border-left: 4px solid #00b4ff;
+  }
+
+  .habit-info h4 {
+    margin: 0 0 0.25rem 0;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .habit-info p {
+    margin: 0;
+    color: #8899aa;
+    font-size: 0.875rem;
+  }
+
+  .habit-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .habit-streak {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #00ff9d;
+    font-weight: 600;
+    text-shadow: 0 0 5px rgba(0, 255, 157, 0.5);
+    font-size: 0.875rem;
+  }
+
+  .complete-btn:hover {
+    background: #00cc7a;
+  }
+
+  .complete-btn.completed {
+    background: rgba(0, 255, 157, 0.2);
+    color: #00ff9d;
+  }
+
+  .activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(0, 180, 255, 0.05);
+    border-radius: 8px;
+  }
+
+  .activity-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00b4ff 0%, #0088cc 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0a0a0f;
+    font-weight: 600;
+    flex-shrink: 0;
+    font-size: 0.875rem;
+  }
+
+  .activity-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .activity-content p {
+    margin: 0;
+    color: #ffffff;
+    font-size: 0.875rem;
+    word-wrap: break-word;
+  }
+
+  .activity-time {
+    font-size: 0.75rem;
+    color: #8899aa;
+    margin-top: 0.25rem;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.125rem 0.375rem;
+    background: #00b4ff;
+    color: #0a0a0f;
+    border-radius: 999px;
+    font-size: 0.625rem;
+    font-weight: 600;
+    margin-left: 0.25rem;
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4757;
+    color: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 0.625rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-item {
+    position: relative;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #8899aa;
+  }
+
+  .empty-state i {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: rgba(0, 180, 255, 0.3);
+  }
+
+  .empty-state p {
+    margin: 0.5rem 0;
+    font-size: 0.875rem;
+  }
+
+  .btn:hover {
+    background: #0088cc;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 180, 255, 0.3);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: #00b4ff;
+    border: 2px solid #00b4ff;
+  }
+
+  .btn-outline:hover {
+    background: #00b4ff;
+    color: #0a0a0f;
+  }
+
+  .text-gray-400 {
+    color: #8899aa;
+  }
+
+  .text-gray-600 {
+    color: #8899aa;
+  }
+
+  .text-sm {
+    font-size: 0.875rem;
+  }
+
+  .text-blue-500 {
+    color: #00b4ff;
+  }
+
+  .text-purple-500 {
+    color: #8b5cf6;
+  }
+
+  .text-green-500 {
+    color: #00ff9d;
+  }
+
+  .mt-3 {
+    margin-top: 0.75rem;
+  }
+
+  .w-full {
+    width: 100%;
+  }
+
+  .flex {
+    display: flex;
+  }
+
+  .items-center {
+    align-items: center;
+  }
+
+  .gap-3 {
+    gap: 0.75rem;
+  }
+
+  .font-medium {
+    font-weight: 500;
+  }
+
+  .text-white {
+    color: #ffffff;
+  }
+
+  .online-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: #00ff9d;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    box-shadow: 0 0 5px #00ff9d;
+  }
+
+  @media (min-width: 768px) {
+    .stats-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+
+    .stat-card {
+      padding: 1.5rem;
+    }
+
+    .stat-card .value {
+      font-size: 2rem;
+    }
+
+    .habit-card {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem;
+    }
+
+    .section-header {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .dashboard-header h1 {
+      font-size: 1.25rem;
+    }
+
+    .section-header h2 {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-height: 500px) and (orientation: landscape) {
+    .sidebar {
+      height: 100vh;
+      top: 0;
+    }
+
+    .main-content {
+      margin-top: 0;
+    }
+
+    .mobile-header {
+      height: 50px;
+    }
+
+    .habit-card,
+    .activity-item {
+      padding: 0.5rem;
+    }
+  }
+
+  /* Mobile-specific styles only */
+  @media (max-width: 767px) {
+    .mobile-header {
+      display: flex;
+    }
+
+    .desktop-header {
+      display: none;
+    }
+
+    .sidebar {
+      transform: translateX(-100%);
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Desktop-specific styles */
+  @media (min-width: 768px) {
+    .mobile-header {
+      display: none;
+    }
+
+    .desktop-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: #0a0a0f;
+      border-bottom: 1px solid rgba(0, 180, 255, 0.1);
+      margin-left: 250px;
+    }
+
+    .sidebar {
+      transform: translateX(0);
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="dashboard-container">
+  <!-- Mobile Header -->
+  <div class="mobile-header">
+    <h1>HabitHero</h1>
+    <button class="menu-toggle" onclick="toggleSidebar()">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>HabitHero</h2>
+      <p class="text-sm text-gray-400">Build habits together</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <ul>
+        <li class="nav-item">
+          <a href="{{ url_for('dashboard') }}" class="active">
+            <i class="fas fa-home"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('habits') }}">
+            <i class="fas fa-tasks"></i> My Habits {% if habits|length > 0 %}
+            <span class="badge">{{ habits|length }}</span>
+            {% endif %}
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('snaps') }}">
+            <i class="fas fa-camera"></i> Snaps {% if recent_snaps and
+            recent_snaps|length > 0 %}
+            <span class="badge">{{ recent_snaps|length }}</span>
+            {% endif %}
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('friends') }}">
+            <i class="fas fa-users"></i> Friends {% if pending_requests_count
+            and pending_requests_count > 0 %}
+            <span class="notification-badge">{{ pending_requests_count }}</span>
+            {% endif %}
+          </a>
+        </li>
+        <!-- Add Chat Navigation Item -->
+        <li class="nav-item">
+          <a href="{{ url_for('chat_index') }}">
+            <i class="fas fa-comments"></i> Messages {% if unread_message_count
+            and unread_message_count > 0 %}
+            <span class="notification-badge">{{ unread_message_count }}</span>
+            {% endif %}
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('analytics') }}">
+            <i class="fas fa-chart-line"></i> Analytics
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-profile">
+        <div class="flex items-center gap-3">
+          <div class="activity-avatar">
+            {{ current_user.username[:1].upper() }}
+          </div>
+          <div>
+            <p class="font-medium text-white">{{ current_user.username }}</p>
+            <p class="text-sm text-gray-400">{{ current_user.email }}</p>
+          </div>
+        </div>
+        <a
+          href="{{ url_for('logout') }}"
+          class="btn btn-outline btn-sm mt-3 w-full"
+        >
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="dashboard-header">
+      <div>
+        <h1>Welcome back, {{ current_user.username }}! 👋</h1>
+        <p class="text-gray-600">
+          Here's what's happening with your habits today.
+        </p>
+      </div>
+      <div class="user-info">
+        <span class="online-indicator"></span>
+        <span class="text-sm text-gray-600">Online</span>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Active Streaks</h3>
+        <div class="value">{{ active_streaks }}</div>
+        <div class="trend up">
+          <i class="fas fa-fire"></i>
+          Keep going!
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <h3>Total Habits</h3>
+        <div class="value">{{ total_habits }}</div>
+        <div class="trend up">
+          <i class="fas fa-chart-line"></i>
+          {{ (total_habits / 10 * 100)|round|int }}% of goal
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <h3>Friends</h3>
+        <div class="value">
+          {% set friend_count = friendships|length if friendships else 0 %} {{
+          friend_count }}
+        </div>
+        <div class="trend up">
+          <i class="fas fa-users"></i>
+          {{ (friend_count / 20 * 100)|round|int }}% active
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <h3>Snaps Today</h3>
+        <div class="value">
+          {{ recent_snaps|length if recent_snaps else 0 }}
+        </div>
+        <div class="trend up">
+          <i class="fas fa-bolt"></i>
+          +{{ (recent_snaps|length / 5 * 100)|round|int if recent_snaps else 0
+          }}%
+        </div>
+      </div>
+    </div>
+
+    <!-- Today's Habits -->
+    <div class="habits-section">
+      <div class="section-header">
+        <h2>Today's Habits</h2>
+        <a href="{{ url_for('habits') }}" class="btn btn-sm">View All</a>
+      </div>
+
+      {% if habits %}
+      <div class="habits-list">
+        {% for habit in habits %}
+        <div class="habit-card">
+          <div class="habit-info">
+            <h4>{{ habit.name }}</h4>
+            <p>{{ habit.description or 'No description' }}</p>
+          </div>
+          <div class="habit-actions">
+            <div class="habit-streak">
+              <i class="fas fa-fire"></i>
+              <span
+                >{{ habit.streak_count }} day{% if habit.streak_count != 1 %}s{%
+                endif %}</span
+              >
+            </div>
+            <button
+              class="complete-btn"
+              onclick="completeHabit({{ habit.id }})"
+            >
+              {% if habit.last_completed and habit.last_completed.date() ==
+              today %}
+              <i class="fas fa-check"></i> Done {% else %}
+              <i class="fas fa-check-circle"></i> Complete {% endif %}
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-tasks"></i>
+        <p>No habits yet!</p>
+        <p class="text-sm">Create your first habit to get started.</p>
+        <a href="{{ url_for('habits') }}" class="btn btn-sm mt-3"
+          >Create Habit</a
+        >
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Recent Snaps -->
+    <div class="snaps-section">
+      <div class="section-header">
+        <h2>Recent Snaps</h2>
+        <a href="{{ url_for('snaps') }}" class="btn btn-sm">View All</a>
+      </div>
+
+      {% if recent_snaps %}
+      <div class="activity-list">
+        {% for snap in recent_snaps[:3] %}
+        <div class="activity-item">
+          <div class="activity-avatar">
+            {{ snap.sender.username[:1].upper() }}
+          </div>
+          <div class="activity-content">
+            <p>
+              <strong>{{ snap.sender.username }}</strong>
+              {% if snap.habit %} shared a snap for
+              <em>{{ snap.habit.name }}</em>
+              {% else %} sent you a snap {% endif %}
+            </p>
+            <div class="activity-time">
+              {{ snap.created_at.strftime('%I:%M %p') }} {% if not
+              snap.is_viewed %}
+              <span class="badge">New</span>
+              {% endif %}
+            </div>
+          </div>
+          {% if snap.content_type == 'image' %}
+          <i class="fas fa-image text-blue-500"></i>
+          {% elif snap.content_type == 'video' %}
+          <i class="fas fa-video text-purple-500"></i>
+          {% else %}
+          <i class="fas fa-comment text-green-500"></i>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-camera"></i>
+        <p>No snaps yet!</p>
+        <p class="text-sm">Send a snap to a friend to get started.</p>
+        <a href="{{ url_for('snaps') }}" class="btn btn-sm mt-3">Send Snap</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Friend Activity -->
+    <div class="activity-section">
+      <div class="section-header">
+        <h2>Friend Activity</h2>
+        <a href="{{ url_for('friends') }}" class="btn btn-sm">View All</a>
+      </div>
+
+      {% if friend_activity %}
+      <div class="activity-list">
+        {% for activity in friend_activity[:3] %}
+        <div class="activity-item">
+          <div class="activity-avatar">
+            {{ activity.sender.username[:1].upper() }}
+          </div>
+          <div class="activity-content">
+            <p>
+              <strong>{{ activity.sender.username }}</strong>
+              {% if activity.habit %} completed
+              <em>{{ activity.habit.name }}</em> ({{ activity.habit.streak_count
+              }} day streak!) {% else %} sent a snap {% endif %}
+            </p>
+            <div class="activity-time">{{ activity.created_at|timesince }}</div>
+          </div>
+          <div class="activity-reaction">
+            {% set reactions = activity.reactions|list %} {% if reactions %}
+            <span class="text-xl">{{ reactions[0].emoji }}</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-users"></i>
+        <p>No friend activity yet!</p>
+        <p class="text-sm">Add friends to see their progress.</p>
+        <a href="{{ url_for('friends') }}" class="btn btn-sm mt-3"
+          >Find Friends</a
+        >
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toggle sidebar for mobile
+  function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    sidebar.classList.toggle("active");
+  }
+
+  // Close sidebar when clicking outside on mobile
+  document.addEventListener("click", function (event) {
+    const sidebar = document.getElementById("sidebar");
+    const menuToggle = document.querySelector(".menu-toggle");
+
+    if (window.innerWidth <= 768) {
+      if (
+        !sidebar.contains(event.target) &&
+        !menuToggle.contains(event.target)
+      ) {
+        sidebar.classList.remove("active");
+      }
+    }
+  });
+
+  // Handle window resize
+  window.addEventListener("resize", function () {
+    const sidebar = document.getElementById("sidebar");
+    if (window.innerWidth > 768) {
+      sidebar.classList.remove("active");
+    }
+  });
+
+  async function completeHabit(habitId) {
+    try {
+      const response = await fetch(`/habits/${habitId}/complete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update UI
+        const btn = event.target;
+        btn.innerHTML = '<i class="fas fa-check"></i> Completed';
+        btn.classList.add("completed");
+        btn.disabled = true;
+
+        // Update streak count
+        const streakElement = btn.previousElementSibling.querySelector("span");
+        if (streakElement) {
+          streakElement.textContent = `${data.streak} day${
+            data.streak !== 1 ? "s" : ""
+          }`;
+        }
+
+        // Show success message
+        showNotification("Habit completed! Streak updated.");
+      }
+    } catch (error) {
+      console.error("Error completing habit:", error);
+      showNotification("Error completing habit. Please try again.", "error");
+    }
+  }
+
+  function showNotification(message, type = "success") {
+    // Create notification element
+    const notification = document.createElement("div");
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-${
+                  type === "success" ? "check-circle" : "exclamation-circle"
+                }"></i>
+                <span>${message}</span>
+            </div>
+        `;
+
+    // Add styles
+    notification.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            left: 20px;
+            background: ${
+              type === "success"
+                ? "rgba(16, 185, 129, 0.9)"
+                : "rgba(239, 68, 68, 0.9)"
+            };
+            color: white;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid ${
+              type === "success"
+                ? "rgba(16, 185, 129, 0.3)"
+                : "rgba(239, 68, 68, 0.3)"
+            };
+        `;
+
+    // Add to page
+    document.body.appendChild(notification);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+      notification.style.animation = "slideOut 0.3s ease";
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  // Add CSS animations
+  const style = document.createElement("style");
+  style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+        }
+        
+        /* Touch improvements */
+        @media (hover: none) and (pointer: coarse) {
+          .complete-btn,
+          .btn,
+          .sidebar-nav a,
+          .menu-toggle {
+            min-height: 44px;
+            min-width: 44px;
+          }
+          
+          .complete-btn:active,
+          .btn:active {
+            transform: scale(0.95);
+          }
+        }
+    `;
+  document.head.appendChild(style);
+</script>
+{% endblock %}

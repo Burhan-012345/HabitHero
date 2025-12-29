@@ -1,0 +1,738 @@
+{% extends "base.html" %} {% block title %}Send Snap - HabitHero{% endblock %}
+{% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dashboard.css') }}"
+/>
+<style>
+  .send-snap-container {
+    padding: 2rem;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+  }
+
+  .send-snap-header {
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .send-snap-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(90deg, #00b4ff, #0088cc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .send-snap-header p {
+    color: #8899aa;
+    font-size: 1rem;
+  }
+
+  .send-snap-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+  }
+
+  @media (max-width: 1024px) {
+    .send-snap-content {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .friends-selection-section {
+    background: rgba(20, 20, 30, 0.8);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(0, 180, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .selection-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 180, 255, 0.2);
+  }
+
+  .friends-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+
+  .friends-grid::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .friends-grid::-webkit-scrollbar-track {
+    background: rgba(0, 180, 255, 0.1);
+    border-radius: 4px;
+  }
+
+  .friends-grid::-webkit-scrollbar-thumb {
+    background: #00b4ff;
+    border-radius: 4px;
+  }
+
+  .friend-selection-card {
+    background: rgba(10, 10, 15, 0.8);
+    border-radius: 12px;
+    padding: 1rem;
+    border: 2px solid rgba(0, 180, 255, 0.1);
+    transition: all 0.3s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .friend-selection-card:hover {
+    border-color: #00b4ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 180, 255, 0.2);
+  }
+
+  .friend-selection-card.selected {
+    border-color: #00b4ff;
+    background: rgba(0, 180, 255, 0.1);
+  }
+
+  .friend-checkbox {
+    flex-shrink: 0;
+  }
+
+  .friend-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(0, 180, 255, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    appearance: none;
+    background: transparent;
+    transition: all 0.3s;
+  }
+
+  .friend-checkbox input[type="checkbox"]:checked {
+    background: #00b4ff;
+    border-color: #00b4ff;
+  }
+
+  .friend-checkbox input[type="checkbox"]:checked::after {
+    content: "✓";
+    display: block;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 16px;
+  }
+
+  .friend-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00b4ff 0%, #0088cc 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    box-shadow: 0 0 15px rgba(0, 180, 255, 0.3);
+  }
+
+  .friend-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .friend-info h4 {
+    margin: 0 0 0.25rem 0;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .friend-status {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+    color: #8899aa;
+  }
+
+  .online-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .online-indicator.online {
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
+  }
+
+  .online-indicator.offline {
+    background: #6b7280;
+  }
+
+  .snap-details-section {
+    background: rgba(20, 20, 30, 0.8);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(0, 180, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    position: sticky;
+    top: 2rem;
+  }
+
+  .selected-count {
+    background: #00b4ff;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: #8899aa;
+    grid-column: 1 / -1;
+  }
+
+  .empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: rgba(0, 180, 255, 0.3);
+  }
+
+  .empty-state h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+  }
+
+  .empty-state p {
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+  }
+
+  .snap-preview {
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .snap-preview img,
+  .snap-preview video {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 12px;
+    border: 2px solid rgba(0, 180, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 180, 255, 0.2);
+  }
+
+  .snap-preview-placeholder {
+    width: 100%;
+    height: 150px;
+    background: rgba(0, 180, 255, 0.1);
+    border: 2px dashed rgba(0, 180, 255, 0.3);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #00b4ff;
+    font-size: 3rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 0.9375rem;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid rgba(0, 180, 255, 0.2);
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    transition: all 0.3s;
+    background: rgba(10, 10, 15, 0.9);
+    color: #ffffff;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: #00b4ff;
+    box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.1);
+  }
+
+  .form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(0, 180, 255, 0.2);
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.9375rem;
+    border: none;
+    flex: 1;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #00b4ff 0%, #0088cc 100%);
+    color: white;
+    border: 1px solid rgba(0, 180, 255, 0.3);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0088cc 0%, #006699 100%);
+    box-shadow: 0 0 15px rgba(0, 180, 255, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: #00b4ff;
+    border: 1px solid rgba(0, 180, 255, 0.3);
+  }
+
+  .btn-outline:hover {
+    background: rgba(0, 180, 255, 0.1);
+    box-shadow: 0 0 10px rgba(0, 180, 255, 0.2);
+    transform: translateY(-2px);
+  }
+
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .send-snap-container {
+      padding: 1rem;
+    }
+
+    .send-snap-header h1 {
+      font-size: 1.75rem;
+    }
+
+    .friends-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    .friend-selection-card {
+      padding: 0.75rem;
+    }
+
+    .friend-avatar {
+      width: 40px;
+      height: 40px;
+      font-size: 1rem;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .send-snap-header h1 {
+      font-size: 1.5rem;
+    }
+
+    .friends-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .selection-actions {
+      flex-wrap: wrap;
+    }
+  }
+</style>
+{% endblock %} {% block content %} {% include 'components/navbar.html' %}
+
+<div class="send-snap-container">
+  <div class="send-snap-header">
+    <h1>Send Snap to Friends</h1>
+    <p>Select friends to share your snap with</p>
+  </div>
+
+  {% if friends %}
+  <div class="send-snap-content">
+    <!-- Friends Selection Section -->
+    <div class="friends-selection-section">
+      <div class="selection-actions">
+        <button class="btn btn-outline" onclick="selectAllFriends()">
+          <i class="fas fa-check-double"></i> Select All
+        </button>
+        <button class="btn btn-outline" onclick="deselectAllFriends()">
+          <i class="fas fa-times-circle"></i> Deselect All
+        </button>
+        <div style="margin-left: auto; display: flex; align-items: center">
+          <span style="color: #8899aa; font-size: 0.875rem">
+            Selected:
+            <span id="selected-count" class="selected-count">0</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="friends-grid" id="friends-grid">
+        {% for friend in friends %}
+        <div class="friend-selection-card" data-friend-id="{{ friend.id }}">
+          <div class="friend-checkbox">
+            <input
+              type="checkbox"
+              id="friend-{{ friend.id }}"
+              data-friend-id="{{ friend.id }}"
+              onchange="toggleFriendSelection({{ friend.id }})"
+            />
+          </div>
+          <div class="friend-avatar">{{ friend.username[:1].upper() }}</div>
+          <div class="friend-info">
+            <h4>{{ friend.username }}</h4>
+            <div class="friend-status">
+              <span
+                class="online-indicator {% if friend.is_online %}online{% else %}offline{% endif %}"
+              ></span>
+              {{ 'Online' if friend.is_online else 'Offline' }}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Snap Details Section -->
+    <div class="snap-details-section">
+      <div class="snap-preview" id="snap-preview">
+        <!-- Snap preview will be loaded here -->
+      </div>
+
+      <form id="send-snap-form">
+        <div class="form-group">
+          <label for="snap-caption">Caption (Optional)</label>
+          <textarea
+            id="snap-caption"
+            placeholder="Add a caption to your snap..."
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="snap-habit">Link to Habit (Optional)</label>
+          <select id="snap-habit">
+            <option value="">No habit</option>
+            {% for habit in habits %}
+            <option value="{{ habit.id }}">{{ habit.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="action-buttons">
+          <button type="button" class="btn btn-outline" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i> Back
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            id="send-btn"
+            onclick="sendSnapToFriends()"
+            disabled
+          >
+            <i class="fas fa-paper-plane"></i> Send Snap
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-user-friends"></i>
+    <h3>No Friends Yet</h3>
+    <p>You need to add friends before you can send snaps.</p>
+    <button
+      class="btn btn-primary"
+      onclick="window.location.href='{{ url_for('friends') }}'"
+    >
+      <i class="fas fa-user-plus"></i> Add Friends
+    </button>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  let selectedFriends = new Set();
+
+  document.addEventListener("DOMContentLoaded", function () {
+    // Load snap preview from session storage
+    loadSnapPreview();
+
+    // Update send button state
+    updateSendButton();
+
+    // Add event listener for friend selection cards
+    document.querySelectorAll(".friend-selection-card").forEach((card) => {
+      card.addEventListener("click", function (e) {
+        if (!e.target.closest(".friend-checkbox")) {
+          const friendId = this.dataset.friendId;
+          const checkbox = this.querySelector('input[type="checkbox"]');
+          checkbox.checked = !checkbox.checked;
+          toggleFriendSelection(friendId);
+        }
+      });
+    });
+  });
+
+  function loadSnapPreview() {
+    const previewContainer = document.getElementById("snap-preview");
+    const snapData = sessionStorage.getItem("pendingSnap");
+
+    if (!snapData) {
+      previewContainer.innerHTML = `
+                <div class="snap-preview-placeholder">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <p style="color: #8899aa; margin-top: 0.5rem;">No snap data found</p>
+            `;
+      return;
+    }
+
+    try {
+      const snap = JSON.parse(snapData);
+      if (snap.type === "image") {
+        previewContainer.innerHTML = `
+                    <img src="${snap.data}" alt="Snap Preview" />
+                    <p style="color: #8899aa; margin-top: 0.5rem;">Photo Snap</p>
+                `;
+      } else if (snap.type === "video") {
+        previewContainer.innerHTML = `
+                    <video controls style="max-width: 100%; max-height: 200px;">
+                        <source src="${snap.data}" type="${snap.mimeType}">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p style="color: #8899aa; margin-top: 0.5rem;">Video Snap</p>
+                `;
+      }
+    } catch (error) {
+      console.error("Error loading snap preview:", error);
+      previewContainer.innerHTML = `
+                <div class="snap-preview-placeholder">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <p style="color: #ff4757; margin-top: 0.5rem;">Error loading snap</p>
+            `;
+    }
+  }
+
+  function toggleFriendSelection(friendId) {
+    const checkbox = document.querySelector(`#friend-${friendId}`);
+    const card = document.querySelector(`[data-friend-id="${friendId}"]`);
+
+    if (checkbox.checked) {
+      selectedFriends.add(friendId);
+      card.classList.add("selected");
+    } else {
+      selectedFriends.delete(friendId);
+      card.classList.remove("selected");
+    }
+
+    updateSelectedCount();
+    updateSendButton();
+  }
+
+  function selectAllFriends() {
+    const checkboxes = document.querySelectorAll(
+      '.friend-checkbox input[type="checkbox"]'
+    );
+    checkboxes.forEach((checkbox) => {
+      checkbox.checked = true;
+      const friendId = checkbox.dataset.friendId;
+      selectedFriends.add(friendId);
+      const card = document.querySelector(`[data-friend-id="${friendId}"]`);
+      card.classList.add("selected");
+    });
+    updateSelectedCount();
+    updateSendButton();
+  }
+
+  function deselectAllFriends() {
+    const checkboxes = document.querySelectorAll(
+      '.friend-checkbox input[type="checkbox"]'
+    );
+    checkboxes.forEach((checkbox) => {
+      checkbox.checked = false;
+      const friendId = checkbox.dataset.friendId;
+      selectedFriends.delete(friendId);
+      const card = document.querySelector(`[data-friend-id="${friendId}"]`);
+      card.classList.remove("selected");
+    });
+    updateSelectedCount();
+    updateSendButton();
+  }
+
+  function updateSelectedCount() {
+    const countElement = document.getElementById("selected-count");
+    if (countElement) {
+      countElement.textContent = selectedFriends.size;
+    }
+  }
+
+  function updateSendButton() {
+    const sendBtn = document.getElementById("send-btn");
+    if (sendBtn) {
+      sendBtn.disabled = selectedFriends.size === 0;
+    }
+  }
+
+  function goBack() {
+    // Clear session storage and go back to snaps page
+    sessionStorage.removeItem("pendingSnap");
+    window.location.href = '{{ url_for("snaps") }}';
+  }
+
+  async function sendSnapToFriends() {
+    const snapData = sessionStorage.getItem("pendingSnap");
+    if (!snapData) {
+      alert("No snap data found. Please create a snap first.");
+      return;
+    }
+
+    const caption = document.getElementById("snap-caption").value;
+    const habitId = document.getElementById("snap-habit").value;
+
+    if (selectedFriends.size === 0) {
+      alert("Please select at least one friend to send the snap to.");
+      return;
+    }
+
+    // Show loading state
+    const sendBtn = document.getElementById("send-btn");
+    const originalText = sendBtn.innerHTML;
+    sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    sendBtn.disabled = true;
+
+    try {
+      const snap = JSON.parse(snapData);
+      const errors = [];
+      let successCount = 0;
+
+      // Send to each selected friend
+      for (const friendId of selectedFriends) {
+        try {
+          // Convert base64 to blob
+          const response = await fetch(snap.data);
+          const blob = await response.blob();
+
+          const formData = new FormData();
+          formData.append("receiver_id", friendId);
+          if (habitId) formData.append("habit_id", habitId);
+          if (caption) formData.append("caption", caption);
+
+          // Create file
+          const extension = snap.type === "image" ? ".jpg" : ".webm";
+          const filename = `snap_${Date.now()}_${friendId}${extension}`;
+          formData.append("snap_file", blob, filename);
+
+          const responseSend = await fetch("/snaps/send", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (responseSend.ok) {
+            successCount++;
+          } else {
+            const errorData = await responseSend.json();
+            errors.push(
+              `Friend ${friendId}: ${errorData.message || "Failed to send"}`
+            );
+          }
+        } catch (error) {
+          errors.push(`Friend ${friendId}: ${error.message}`);
+        }
+      }
+
+      // Show results
+      if (successCount > 0) {
+        alert(`Successfully sent snap to ${successCount} friend(s)!`);
+
+        // Clear session storage and redirect
+        sessionStorage.removeItem("pendingSnap");
+        window.location.href = '{{ url_for("snaps") }}';
+      }
+
+      if (errors.length > 0) {
+        console.error("Errors sending snaps:", errors);
+        alert(
+          `Failed to send to ${errors.length} friend(s). Check console for details.`
+        );
+      }
+    } catch (error) {
+      console.error("Error sending snaps:", error);
+      alert("Error sending snaps. Please try again.");
+    } finally {
+      // Reset button
+      sendBtn.innerHTML = originalText;
+      sendBtn.disabled = false;
+    }
+  }
+
+  // Handle beforeunload to clear session storage if needed
+  window.addEventListener("beforeunload", function (e) {
+    const snapData = sessionStorage.getItem("pendingSnap");
+    if (snapData) {
+      const snap = JSON.parse(snapData);
+      // Clear old snaps (older than 5 minutes)
+      if (Date.now() - snap.timestamp > 5 * 60 * 1000) {
+        sessionStorage.removeItem("pendingSnap");
+      }
+    }
+  });
+</script>
+{% endblock %}

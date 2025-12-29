@@ -1,0 +1,466 @@
+{% extends "base.html" %} {% block title %}Notifications - HabitHero{% endblock
+%} {% block content %}
+<div class="notifications-page">
+  <div class="page-header">
+    <h1 class="page-title">
+      <i class="fas fa-bell"></i>
+      Notifications {% if unread_count > 0 %}
+      <span class="notification-count-badge">{{ unread_count }}</span>
+      {% endif %}
+    </h1>
+
+    <div class="header-actions">
+      {% if notifications %}
+      <button class="btn btn-primary" id="markAllReadBtn">
+        <i class="fas fa-check-double"></i> Mark all as read
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="notifications-container">
+    {% if notifications %}
+    <div class="notifications-list" id="notificationsList">
+      {% for notification in notifications %}
+      <div
+        class="notification-card {% if not notification.is_read %}unread{% endif %}"
+        data-id="{{ notification.id }}"
+        {%
+        if
+        notification.link
+        %}data-link="{{ notification.link }}"
+        {%
+        endif
+        %}
+      >
+        <div class="notification-icon">
+          <i class="fas fa-{{ notification.text | get_notification_icon }}"></i>
+        </div>
+        <div class="notification-content">
+          <p class="notification-text">{{ notification.text }}</p>
+          <div class="notification-meta">
+            <span class="notification-time">
+              <i class="far fa-clock"></i> {{ notification.timestamp|timesince
+              }}
+            </span>
+            {% if not notification.is_read %}
+            <span class="unread-dot"></span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="notification-actions">
+          {% if not notification.is_read %}
+          <button
+            class="btn-mark-read"
+            data-id="{{ notification.id }}"
+            title="Mark as read"
+          >
+            <i class="fas fa-check"></i>
+          </button>
+          {% endif %} {% if notification.link %}
+          <a
+            href="{{ notification.link }}"
+            class="btn-view-link"
+            title="Go to notification"
+          >
+            <i class="fas fa-external-link-alt"></i>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i class="fas fa-bell-slash"></i>
+      </div>
+      <h3>No notifications yet</h3>
+      <p>
+        You'll see notifications here when you receive friend requests,
+        messages, or other updates.
+      </p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  .notifications-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 180, 255, 0.2);
+  }
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #ffffff;
+    font-size: 1.75rem;
+    margin: 0;
+  }
+
+  .page-title i {
+    color: #00b4ff;
+    font-size: 1.5rem;
+  }
+
+  .notification-count-badge {
+    background: #ff4757;
+    color: white;
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+  }
+
+  .header-actions .btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: rgba(0, 180, 255, 0.1);
+    border: 1px solid rgba(0, 180, 255, 0.3);
+    color: #00b4ff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 500;
+  }
+
+  .header-actions .btn:hover {
+    background: rgba(0, 180, 255, 0.2);
+    transform: translateY(-1px);
+  }
+
+  .notifications-container {
+    background: rgba(15, 15, 20, 0.6);
+    border-radius: 16px;
+    border: 1px solid rgba(0, 180, 255, 0.1);
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+
+  .notifications-list {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  .notification-card {
+    display: flex;
+    align-items: flex-start;
+    padding: 1.25rem;
+    border-bottom: 1px solid rgba(0, 180, 255, 0.1);
+    transition: all 0.3s;
+    gap: 1rem;
+  }
+
+  .notification-card:hover {
+    background: rgba(0, 180, 255, 0.05);
+  }
+
+  .notification-card.unread {
+    background: rgba(0, 180, 255, 0.08);
+  }
+
+  .notification-icon {
+    color: #00b4ff;
+    font-size: 1.25rem;
+    margin-top: 0.25rem;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 180, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .notification-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .notification-text {
+    color: #ffffff;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 0 0 0.5rem 0;
+    word-break: break-word;
+  }
+
+  .notification-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .notification-time {
+    color: #8899aa;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .unread-dot {
+    width: 8px;
+    height: 8px;
+    background: #00b4ff;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.5;
+      transform: scale(1.1);
+    }
+  }
+
+  .notification-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .btn-mark-read,
+  .btn-view-link {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 180, 255, 0.1);
+    border: 1px solid rgba(0, 180, 255, 0.2);
+    border-radius: 8px;
+    color: #00b4ff;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+  }
+
+  .btn-mark-read:hover {
+    background: rgba(0, 180, 255, 0.2);
+    transform: scale(1.1);
+  }
+
+  .btn-view-link:hover {
+    background: rgba(0, 180, 255, 0.2);
+    transform: scale(1.1);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    color: rgba(136, 153, 170, 0.3);
+    margin-bottom: 1.5rem;
+  }
+
+  .empty-state h3 {
+    color: #ffffff;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state p {
+    color: #8899aa;
+    font-size: 1rem;
+    max-width: 400px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .notifications-page {
+      padding: 1rem;
+    }
+
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+    }
+
+    .notification-card {
+      padding: 1rem;
+    }
+
+    .notifications-list {
+      max-height: 60vh;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .page-title {
+      font-size: 1.25rem;
+    }
+
+    .notification-card {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .notification-actions {
+      align-self: flex-end;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const notificationsList = document.getElementById("notificationsList");
+    const markAllReadBtn = document.getElementById("markAllReadBtn");
+
+    // Function to mark a notification as read
+    async function markNotificationAsRead(notificationId) {
+      try {
+        const response = await fetch(
+          `/api/notifications/${notificationId}/read`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": getCSRFToken(),
+            },
+          }
+        );
+
+        if (response.ok) {
+          const notificationCard = document.querySelector(
+            `[data-id="${notificationId}"]`
+          );
+          if (notificationCard) {
+            notificationCard.classList.remove("unread");
+            notificationCard.querySelector(".unread-dot")?.remove();
+
+            // Update mark as read button
+            const markBtn = notificationCard.querySelector(".btn-mark-read");
+            if (markBtn) {
+              markBtn.remove();
+            }
+
+            // Update notification count
+            updateNotificationBadge();
+          }
+        }
+      } catch (error) {
+        console.error("Error marking notification as read:", error);
+      }
+    }
+
+    // Function to mark all notifications as read
+    async function markAllNotificationsAsRead() {
+      if (!confirm("Mark all notifications as read?")) return;
+
+      try {
+        const response = await fetch("/api/notifications/read-all", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken(),
+          },
+        });
+
+        if (response.ok) {
+          // Update all notification cards
+          document
+            .querySelectorAll(".notification-card.unread")
+            .forEach((card) => {
+              card.classList.remove("unread");
+              card.querySelector(".unread-dot")?.remove();
+              card.querySelector(".btn-mark-read")?.remove();
+            });
+
+          // Update notification count
+          updateNotificationBadge();
+
+          // Hide the mark all button if all are read
+          if (
+            document.querySelectorAll(".notification-card.unread").length === 0
+          ) {
+            markAllReadBtn.style.display = "none";
+          }
+        }
+      } catch (error) {
+        console.error("Error marking all notifications as read:", error);
+      }
+    }
+
+    // Add click handlers to notification cards
+    if (notificationsList) {
+      notificationsList.addEventListener("click", function (e) {
+        const notificationCard = e.target.closest(".notification-card");
+        if (notificationCard) {
+          const notificationId = notificationCard.dataset.id;
+          const link = notificationCard.dataset.link;
+
+          // If clicking on the card (not on buttons), mark as read and navigate
+          if (!e.target.closest(".notification-actions")) {
+            if (notificationCard.classList.contains("unread")) {
+              markNotificationAsRead(notificationId);
+            }
+
+            if (link) {
+              window.location.href = link;
+            }
+          }
+        }
+
+        // Handle mark as read button click
+        const markReadBtn = e.target.closest(".btn-mark-read");
+        if (markReadBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const notificationId = markReadBtn.dataset.id;
+          markNotificationAsRead(notificationId);
+        }
+      });
+    }
+
+    // Handle mark all as read button
+    if (markAllReadBtn) {
+      markAllReadBtn.addEventListener("click", markAllNotificationsAsRead);
+    }
+
+    // Helper function to get CSRF token
+    function getCSRFToken() {
+      const metaTag = document.querySelector('meta[name="csrf-token"]');
+      return metaTag ? metaTag.content : "";
+    }
+
+    // Function to update notification badge (assumes this function exists globally)
+    function updateNotificationBadge() {
+      if (typeof window.updateNotificationBadge === "function") {
+        window.updateNotificationBadge();
+      }
+    }
+  });
+</script>
+{% endblock %}

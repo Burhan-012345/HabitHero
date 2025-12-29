@@ -1,0 +1,1126 @@
+{% extends "base.html" %} {% block title %}Friends - HabitHero{% endblock %} {%
+block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dashboard.css') }}"
+/>
+<style>
+  /* Friends page styles - Mobile First */
+  .friends-container {
+    padding: 1rem;
+    width: 100%;
+    margin-top: 60px; /* Space for mobile header */
+  }
+
+  .friends-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .friends-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    order: 1;
+  }
+
+  .friends-header .btn {
+    order: 2;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .friends-tabs {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(0, 180, 255, 0.2);
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .friends-tabs::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+
+  .friends-tab {
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-weight: 600;
+    color: #8899aa;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.875rem;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .friends-tab.active {
+    color: #00b4ff;
+    border-bottom-color: #00b4ff;
+    text-shadow: 0 0 10px rgba(0, 180, 255, 0.3);
+  }
+
+  .friends-tab:hover:not(.active) {
+    color: #ffffff;
+  }
+
+  .friends-tab-badge {
+    background: #ff4757;
+    color: white;
+    border-radius: 12px;
+    padding: 0.125rem 0.375rem;
+    font-size: 0.625rem;
+    margin-left: 0.25rem;
+    min-width: 18px;
+    display: inline-block;
+    text-align: center;
+  }
+
+  .friends-content {
+    display: none;
+  }
+
+  .friends-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .friends-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .friend-card {
+    background: rgba(10, 10, 15, 0.9);
+    border-radius: var(--border-radius);
+    padding: 1.25rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 180, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: all 0.3s;
+    border: 1px solid rgba(0, 180, 255, 0.1);
+    position: relative;
+  }
+
+  .friend-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .friend-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00b4ff 0%, #0088cc 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0a0a0f;
+    font-size: 1.25rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .friend-info {
+    flex: 1;
+    min-width: 0; /* Prevents text overflow */
+  }
+
+  .friend-info h3 {
+    margin: 0 0 0.25rem 0;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .friend-info p {
+    margin: 0 0 0.5rem 0;
+    color: #8899aa;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .friend-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .status-indicator.online {
+    background: #00ff9d;
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 5px #00ff9d;
+  }
+
+  .status-indicator.offline {
+    background: #8899aa;
+  }
+
+  .friend-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 180, 255, 0.1);
+  }
+
+  .btn-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(0, 180, 255, 0.1);
+    color: #8899aa;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    font-size: 1rem;
+    flex: 1;
+  }
+
+  .btn-icon:hover {
+    background: #00b4ff;
+    color: #0a0a0f;
+  }
+
+  .btn-icon.btn-danger:hover {
+    background: #ff4757;
+  }
+
+  .btn-icon.btn-success:hover {
+    background: #00ff9d;
+    color: #0a0a0f;
+  }
+
+  .search-box {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 0.875rem 0.875rem 0.875rem 3rem;
+    border: 2px solid rgba(0, 180, 255, 0.2);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: all 0.3s;
+    background: rgba(10, 10, 15, 0.9);
+    color: #ffffff;
+    min-height: 44px;
+  }
+
+  .search-box input:focus {
+    outline: none;
+    border-color: #00b4ff;
+    box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.1);
+  }
+
+  .search-box i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8899aa;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #8899aa;
+  }
+
+  .empty-state i {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: rgba(0, 180, 255, 0.3);
+  }
+
+  .empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+  }
+
+  .empty-state p {
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  /* Modal styles */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .modal-content {
+    background: #0a0a0f;
+    border-radius: var(--border-radius);
+    width: 100%;
+    max-width: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+    border: 1px solid rgba(0, 180, 255, 0.2);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid rgba(0, 180, 255, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: #0a0a0f;
+  }
+
+  .modal-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+  }
+
+  .close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #8899aa;
+    cursor: pointer;
+    padding: 0.25rem;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .close:hover {
+    color: #00b4ff;
+  }
+
+  .modal-body {
+    padding: 1.25rem;
+  }
+
+  .modal-actions {
+    padding: 1.25rem;
+    border-top: 1px solid rgba(0, 180, 255, 0.2);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    position: sticky;
+    bottom: 0;
+    background: #0a0a0f;
+  }
+
+  /* Button styles */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: #00b4ff;
+    color: #0a0a0f;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.875rem;
+    min-height: 44px;
+  }
+
+  .btn:hover {
+    background: #0088cc;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 180, 255, 0.3);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #00b4ff 0%, #0088cc 100%);
+    color: #0a0a0f;
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: #00b4ff;
+    border: 2px solid #00b4ff;
+  }
+
+  .btn-outline:hover {
+    background: #00b4ff;
+    color: #0a0a0f;
+  }
+
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  /* Form styles */
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 0.875rem;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid rgba(0, 180, 255, 0.2);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: rgba(10, 10, 15, 0.9);
+    color: #ffffff;
+    min-height: 44px;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: #00b4ff;
+    box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.1);
+  }
+
+  .text-muted {
+    color: #8899aa;
+    font-size: 0.75rem;
+  }
+
+  .text-sm {
+    font-size: 0.75rem;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Tablet Styles (768px and up) */
+  @media (min-width: 768px) {
+    .friends-container {
+      padding: 2rem;
+      margin-top: 0; /* No need for header offset on tablet */
+    }
+
+    .friends-header {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+    }
+
+    .friends-header h1 {
+      font-size: 2rem;
+      order: 1;
+    }
+
+    .friends-header .btn {
+      order: 2;
+      width: auto;
+    }
+
+    .friends-tabs {
+      gap: 0.5rem;
+      padding-bottom: 0;
+    }
+
+    .friends-tab {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+    }
+
+    .friends-tab-badge {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .friends-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .friend-card {
+      flex-direction: row;
+      padding: 1.5rem;
+    }
+
+    .friend-card-header {
+      flex: 1;
+    }
+
+    .friend-avatar {
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
+    }
+
+    .friend-info h3 {
+      font-size: 1.125rem;
+    }
+
+    .friend-info p {
+      font-size: 0.875rem;
+    }
+
+    .friend-actions {
+      flex-direction: column;
+      justify-content: flex-start;
+      padding-top: 0;
+      padding-left: 1rem;
+      border-top: none;
+      border-left: 1px solid rgba(0, 180, 255, 0.1);
+    }
+
+    .btn-icon {
+      width: 44px;
+      height: 44px;
+    }
+
+    .empty-state {
+      padding: 4rem 2rem;
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+    }
+
+    .empty-state h3 {
+      font-size: 1.5rem;
+    }
+  }
+
+  /* Desktop Styles (1024px and up) */
+  @media (min-width: 1024px) {
+    .friends-grid {
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+  }
+
+  /* Large Desktop Styles (1400px and up) */
+  @media (min-width: 1400px) {
+    .friends-grid {
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+  }
+
+  /* Touch device optimizations */
+  @media (hover: none) and (pointer: coarse) {
+    .btn,
+    .btn-icon,
+    .friends-tab {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Remove hover effects on touch devices */
+    .btn:hover,
+    .btn-icon:hover,
+    .friend-card:hover {
+      transform: none;
+    }
+  }
+
+  /* Landscape mobile optimizations */
+  @media (max-height: 500px) and (orientation: landscape) {
+    .friends-tabs {
+      margin-bottom: 1rem;
+    }
+
+    .empty-state {
+      padding: 1.5rem 1rem;
+    }
+
+    .empty-state i {
+      font-size: 2rem;
+    }
+
+    .modal-content {
+      max-height: 80vh;
+    }
+  }
+</style>
+{% endblock %} {% block content %} {% include 'components/navbar.html' %}
+
+<div class="friends-container">
+  <div class="friends-header">
+    <h1>Friends</h1>
+    <button class="btn btn-primary" onclick="openAddFriendModal()">
+      <i class="fas fa-user-plus"></i> Add Friend
+    </button>
+  </div>
+
+  <div class="friends-tabs">
+    <button class="friends-tab active" data-tab="friends">
+      Friends {% if friends %}
+      <span class="friends-tab-badge">{{ friends|length }}</span>
+      {% endif %}
+    </button>
+    <button class="friends-tab" data-tab="requests">
+      Requests {% if pending_requests %}
+      <span class="friends-tab-badge">{{ pending_requests|length }}</span>
+      {% endif %}
+    </button>
+    <button class="friends-tab" data-tab="sent">
+      Sent Requests {% if sent_requests %}
+      <span class="friends-tab-badge">{{ sent_requests|length }}</span>
+      {% endif %}
+    </button>
+    <button class="friends-tab" data-tab="suggested">
+      Suggested {% if suggested %}
+      <span class="friends-tab-badge">{{ suggested|length }}</span>
+      {% endif %}
+    </button>
+  </div>
+
+  <!-- Friends Tab -->
+  <div class="friends-content active" id="friends-tab">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        id="search-friends"
+        placeholder="Search friends..."
+        oninput="searchFriends()"
+      />
+    </div>
+
+    {% if friends %}
+    <div class="friends-grid" id="friends-list">
+      {% for friend in friends %}
+      <div class="friend-card" data-user-id="{{ friend.id }}">
+        <div class="friend-avatar">{{ friend.username[:1].upper() }}</div>
+        <div class="friend-info">
+          <h3>{{ friend.username }}</h3>
+          <p>{{ friend.email }}</p>
+          <div class="friend-status">
+            <span
+              class="status-indicator {% if friend.is_online %}online{% else %}offline{% endif %}"
+            ></span>
+            <span
+              >{% if friend.is_online %}Online{% else %}Offline{% endif %}</span
+            >
+          </div>
+        </div>
+        <div class="friend-actions">
+          <a
+            href="{{ url_for('chat', user_id=friend.id) }}"
+            class="btn-icon"
+            title="Message"
+            style="
+              text-decoration: none;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <i class="fas fa-comment"></i>
+          </a>
+          <button
+            class="btn-icon"
+            onclick="viewFriendHabits({{ friend.id }})"
+            title="View Habits"
+          >
+            <i class="fas fa-chart-line"></i>
+          </button>
+          <button
+            class="btn-icon btn-danger"
+            onclick="removeFriend({{ friend.id }})"
+            title="Remove Friend"
+          >
+            <i class="fas fa-user-minus"></i>
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="fas fa-users"></i>
+      <h3>No friends yet</h3>
+      <p>Add friends to share habits and compete in streaks!</p>
+      <button class="btn btn-primary" onclick="openAddFriendModal()">
+        <i class="fas fa-user-plus"></i> Find Friends
+      </button>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Requests Tab -->
+  <div class="friends-content" id="requests-tab">
+    {% if pending_requests %}
+    <div class="friends-grid">
+      {% for request in pending_requests %}
+      <div class="friend-card">
+        <div class="friend-avatar">
+          {{ request.sender.username[:1].upper() }}
+        </div>
+        <div class="friend-info">
+          <h3>{{ request.sender.username }}</h3>
+          <p>{{ request.sender.email }}</p>
+          <p class="text-sm text-gray-600">
+            Sent {{ request.created_at.strftime('%b %d') }}
+          </p>
+        </div>
+        <div class="friend-actions">
+          <button
+            class="btn-icon btn-success"
+            onclick="acceptRequest({{ request.id }})"
+            title="Accept"
+          >
+            <i class="fas fa-check"></i>
+          </button>
+          <button
+            class="btn-icon btn-danger"
+            onclick="rejectRequest({{ request.id }})"
+            title="Reject"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="fas fa-inbox"></i>
+      <h3>No pending requests</h3>
+      <p>When someone sends you a friend request, it will appear here.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Sent Requests Tab -->
+  <div class="friends-content" id="sent-tab">
+    {% if sent_requests %}
+    <div class="friends-grid">
+      {% for request in sent_requests %}
+      <div class="friend-card">
+        <div class="friend-avatar">
+          {{ request.receiver.username[:1].upper() }}
+        </div>
+        <div class="friend-info">
+          <h3>{{ request.receiver.username }}</h3>
+          <p>{{ request.receiver.email }}</p>
+          <p class="text-sm text-gray-600">
+            Sent {{ request.created_at.strftime('%b %d') }}
+          </p>
+        </div>
+        <div class="friend-actions">
+          <button
+            class="btn-icon btn-danger"
+            onclick="cancelRequest({{ request.id }})"
+            title="Cancel Request"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="fas fa-paper-plane"></i>
+      <h3>No sent requests</h3>
+      <p>When you send friend requests, they will appear here.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Suggested Tab -->
+  <div class="friends-content" id="suggested-tab">
+    {% if suggested %}
+    <div class="friends-grid">
+      {% for user in suggested %}
+      <div class="friend-card">
+        <div class="friend-avatar">{{ user.username[:1].upper() }}</div>
+        <div class="friend-info">
+          <h3>{{ user.username }}</h3>
+          <p>{{ user.email }}</p>
+          <p class="text-sm text-gray-600">
+            {{ user.habits|length }} habits • {{ user.streak_total }} day streak
+          </p>
+        </div>
+        <div class="friend-actions">
+          <button
+            class="btn btn-primary btn-sm"
+            onclick="sendFriendRequest({{ user.id }})"
+          >
+            <i class="fas fa-user-plus"></i> Add
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="fas fa-user-friends"></i>
+      <h3>No suggestions</h3>
+      <p>We'll suggest friends based on your activity.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Add Friend Modal -->
+<div id="add-friend-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Add Friend</h2>
+      <button class="close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="friend-email">Email Address</label>
+        <input
+          type="email"
+          id="friend-email"
+          placeholder="Enter friend's email"
+        />
+      </div>
+      <div class="form-group">
+        <label for="friend-username">Username</label>
+        <input
+          type="text"
+          id="friend-username"
+          placeholder="Enter friend's username"
+        />
+        <small class="text-muted">Enter either email or username</small>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" onclick="closeModal()">
+        Cancel
+      </button>
+      <button type="button" class="btn btn-primary" onclick="addFriend()">
+        Send Request
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+  // Tab switching
+  document.querySelectorAll(".friends-tab").forEach((tab) => {
+    tab.addEventListener("click", function () {
+      // Update active tab
+      document
+        .querySelectorAll(".friends-tab")
+        .forEach((t) => t.classList.remove("active"));
+      this.classList.add("active");
+
+      // Show corresponding content
+      const tabId = this.dataset.tab;
+      document.querySelectorAll(".friends-content").forEach((content) => {
+        content.classList.remove("active");
+      });
+      document.getElementById(`${tabId}-tab`).classList.add("active");
+    });
+  });
+
+  // Search functionality
+  function searchFriends() {
+    const searchTerm = document
+      .getElementById("search-friends")
+      .value.toLowerCase();
+    const friends = document.querySelectorAll("#friends-list .friend-card");
+
+    friends.forEach((friend) => {
+      const name = friend.querySelector("h3").textContent.toLowerCase();
+      const email = friend.querySelector("p").textContent.toLowerCase();
+
+      if (name.includes(searchTerm) || email.includes(searchTerm)) {
+        friend.style.display = "flex";
+      } else {
+        friend.style.display = "none";
+      }
+    });
+  }
+
+  // Modal functions
+  function openAddFriendModal() {
+    document.getElementById("add-friend-modal").style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("add-friend-modal").style.display = "none";
+  }
+
+  // Friend actions
+  async function addFriend() {
+    const email = document.getElementById("friend-email").value;
+    const username = document.getElementById("friend-username").value;
+
+    if (!email && !username) {
+      alert("Please enter either email or username");
+      return;
+    }
+
+    try {
+      const response = await fetch("/friends/send-request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": window.HabitHero?.getCSRFToken() || "",
+        },
+        body: JSON.stringify({
+          email: email || null,
+          username: username || null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        window.HabitHero?.showNotification("Friend request sent!", "success");
+        closeModal();
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        alert(data.message || "Failed to send friend request");
+      }
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+      alert("An error occurred. Please try again.");
+    }
+  }
+
+  async function sendFriendRequest(userId) {
+    try {
+      const response = await fetch("/friends/send-request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": window.HabitHero?.getCSRFToken() || "",
+        },
+        body: JSON.stringify({ user_id: userId }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        window.HabitHero?.showNotification("Friend request sent!", "success");
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        alert(data.message || "Failed to send friend request");
+      }
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+      alert("An error occurred. Please try again.");
+    }
+  }
+
+  async function acceptRequest(requestId) {
+    try {
+      const response = await fetch(`/friends/accept/${requestId}`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": window.HabitHero?.getCSRFToken() || "",
+        },
+      });
+
+      if (response.ok) {
+        window.HabitHero?.showNotification(
+          "Friend request accepted!",
+          "success"
+        );
+        setTimeout(() => location.reload(), 1000);
+      }
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
+      alert("An error occurred. Please try again.");
+    }
+  }
+
+  async function rejectRequest(requestId) {
+    if (!confirm("Are you sure you want to reject this friend request?"))
+      return;
+
+    try {
+      const response = await fetch(`/friends/reject/${requestId}`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": window.HabitHero?.getCSRFToken() || "",
+        },
+      });
+
+      if (response.ok) {
+        window.HabitHero?.showNotification("Friend request rejected", "info");
+        setTimeout(() => location.reload(), 1000);
+      }
+    } catch (error) {
+      console.error("Error rejecting friend request:", error);
+      alert("An error occurred. Please try again.");
+    }
+  }
+
+  async function cancelRequest(requestId) {
+    if (!confirm("Are you sure you want to cancel this friend request?"))
+      return;
+
+    try {
+      const response = await fetch(`/friends/cancel/${requestId}`, {
+        method: "DELETE",
+        headers: {
+          "X-CSRFToken": window.HabitHero?.getCSRFToken() || "",
+        },
+      });
+
+      if (response.ok) {
+        window.HabitHero?.showNotification("Friend request cancelled", "info");
+        setTimeout(() => location.reload(), 1000);
+      }
+    } catch (error) {
+      console.error("Error cancelling friend request:", error);
+      alert("An error occurred. Please try again.");
+    }
+  }
+
+  async function removeFriend(friendId) {
+    if (!confirm("Are you sure you want to remove this friend?")) return;
+
+    try {
+      const response = await fetch(`/friends/remove/${friendId}`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": window.HabitHero?.getCSRFToken() || "",
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        window.HabitHero?.showNotification("Friend removed", "info");
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        alert(data.message || "Failed to remove friend");
+      }
+    } catch (error) {
+      console.error("Error removing friend:", error);
+      alert("An error occurred. Please try again.");
+    }
+  }
+
+  async function blockUser(userId) {
+    if (
+      !confirm(
+        "Are you sure you want to block this user? You won't be able to see each other's activity."
+      )
+    )
+      return;
+
+    try {
+      const response = await fetch(`/friends/block/${userId}`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": window.HabitHero?.getCSRFToken() || "",
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        window.HabitHero?.showNotification("User blocked", "info");
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        alert(data.message || "Failed to block user");
+      }
+    } catch (error) {
+      console.error("Error blocking user:", error);
+      alert("An error occurred. Please try again.");
+    }
+  }
+
+  function messageFriend(friendId) {
+    // Open chat with friend
+    alert("Chat functionality coming soon!");
+  }
+
+  function viewFriendHabits(friendId) {
+    window.location.href = `/friends/${friendId}/habits`;
+  }
+
+  // Close modal when clicking outside
+  window.addEventListener("click", function (event) {
+    const modal = document.getElementById("add-friend-modal");
+    if (event.target === modal) {
+      closeModal();
+    }
+  });
+</script>
+{% endblock %}
