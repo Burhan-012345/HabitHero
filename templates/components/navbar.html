@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<!-- templates/components/navbar.html -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <a href="{{ url_for('dashboard') }}">
+      <i class="fas fa-fire"></i>
+      <span class="brand-text">HabitHero</span>
+    </a>
+  </div>
+
+  <!-- Hamburger menu for mobile -->
+  <button class="navbar-toggle" id="navbarToggle">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <div class="navbar-content" id="navbarContent">
+    <!-- Close button for mobile -->
+    <button class="navbar-close" id="navbarClose">
+      <i class="fas fa-times"></i>
+    </button>
+
+    <!-- Search Bar -->
+    <div class="navbar-search">
+      <input
+        type="text"
+        placeholder="Search habits, friends..."
+        id="navbarSearchInput"
+      />
+      <i class="fas fa-search"></i>
+      <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <!-- Main Navigation Menu -->
+    <div class="navbar-menu">
+      <a
+        href="{{ url_for('dashboard') }}"
+        class="nav-link"
+        data-path="/dashboard"
+      >
+        <i class="fas fa-home"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="{{ url_for('habits') }}" class="nav-link" data-path="/habits">
+        <i class="fas fa-tasks"></i>
+        <span>Habits</span>
+      </a>
+      <a href="{{ url_for('chat_index') }}" class="nav-link" data-path="/chat">
+        <i class="fas fa-comments"></i>
+        <span>Chat</span>
+        {% if unread_notifications > 0 %}
+        <span class="badge chat-badge">{{ unread_notifications }}</span>
+        {% else %}
+        <span class="badge chat-badge" style="display: none">0</span>
+        {% endif %}
+      </a>
+      <a href="{{ url_for('snaps') }}" class="nav-link" data-path="/snaps">
+        <i class="fas fa-camera"></i>
+        <span>Snaps</span>
+        {% if unviewed_snaps_count > 0 %}
+        <span class="badge snap-badge">{{ unviewed_snaps_count }}</span>
+        {% else %}
+        <span class="badge snap-badge" style="display: none">0</span>
+        {% endif %}
+      </a>
+      <a href="{{ url_for('friends') }}" class="nav-link" data-path="/friends">
+        <i class="fas fa-users"></i>
+        <span>Friends</span>
+        {% if pending_friend_requests > 0 %}
+        <span class="badge friend-badge">{{ pending_friend_requests }}</span>
+        {% else %}
+        <span class="badge friend-badge" style="display: none">0</span>
+        {% endif %}
+      </a>
+      <!-- Notifications Link -->
+      <a
+        href="{{ url_for('notifications_page') }}"
+        class="nav-link"
+        data-path="/notifications"
+      >
+        <i class="fas fa-bell"></i>
+        <span>Notifications</span>
+        {% if unread_notifications > 0 %}
+        <span class="badge notification-nav-badge"
+          >{{ unread_notifications }}</span
+        >
+        {% else %}
+        <span class="badge notification-nav-badge" style="display: none"
+          >0</span
+        >
+        {% endif %}
+      </a>
+    </div>
+
+    <!-- User Controls Section -->
+    <div class="navbar-user">
+      <!-- Notification Bell (Desktop only) - DIRECT LINK -->
+      <div class="notification-link">
+        <a
+          href="{{ url_for('notifications_page') }}"
+          class="notification-toggle"
+          id="notificationLink"
+        >
+          <i class="fas fa-bell"></i>
+          {% if unread_notifications > 0 %}
+          <span class="notification-badge">{{ unread_notifications }}</span>
+          {% else %}
+          <span class="notification-badge" style="display: none">0</span>
+          {% endif %}
+        </a>
+      </div>
+
+      <!-- Quick Chat Preview (Desktop only) -->
+      <div class="quick-chat-dropdown" id="quickChatDropdown">
+        <button class="quick-chat-toggle" id="quickChatToggle">
+          <!-- Chat Icon Button (styled as button but acts as link) -->
+          <a
+            href="{{ url_for('chat_index') }}"
+            class="quick-chat-button"
+            id="quickChatButton"
+          >
+            <i class="fas fa-comment-dots"></i>
+            {% if unread_notifications > 0 %}
+            <span class="quick-chat-badge">{{ unread_notifications }}</span>
+            {% else %}
+            <span class="quick-chat-badge" style="display: none">0</span>
+            {% endif %}
+          </a>
+        </button>
+        <div class="quick-chat-menu" id="quickChatMenu">
+          <div class="quick-chat-header">
+            <h4>Quick Chat</h4>
+            <a href="{{ url_for('chat_index') }}" class="view-all-chats">
+              <i class="fas fa-external-link-alt"></i> Open Chat
+            </a>
+          </div>
+          <div class="quick-chat-list" id="quickChatList">
+            <!-- Recent chats will be loaded here -->
+            <div class="loading-chats">
+              <i class="fas fa-spinner fa-spin"></i> Loading chats...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Dropdown -->
+      <div class="user-dropdown">
+        <button class="user-toggle" id="userToggle">
+          <div class="user-avatar">
+            {% if current_user.avatar %}
+            <i class="fas fa-{{ current_user.avatar }}"></i>
+            {% else %} {{ current_user.username[:1].upper() }} {% endif %}
+          </div>
+          <span class="username">{{ current_user.username }}</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="dropdown-menu" id="userDropdown">
+          <a href="{{ url_for('profile') }}" class="dropdown-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+          </a>
+          <a href="{{ url_for('analytics') }}" class="dropdown-item">
+            <i class="fas fa-chart-line"></i>
+            <span>Analytics</span>
+          </a>
+          <a href="{{ url_for('chat_index') }}" class="dropdown-item">
+            <i class="fas fa-comments"></i>
+            <span>Messages</span>
+            {% if unread_notifications > 0 %}
+            <span class="dropdown-badge">{{ unread_notifications }}</span>
+            {% endif %}
+          </a>
+          <a href="{{ url_for('notifications_page') }}" class="dropdown-item">
+            <i class="fas fa-bell"></i>
+            <span>Notifications</span>
+            {% if unread_notifications > 0 %}
+            <span class="dropdown-badge">{{ unread_notifications }}</span>
+            {% endif %}
+          </a>
+          <div class="dropdown-divider"></div>
+          <a href="{{ url_for('settings') }}" class="dropdown-item">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+          </a>
+          <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay for mobile menu -->
+  <div class="menu-overlay" id="menuOverlay"></div>
+</nav>
+
+<style>
+  /* Navbar Base Styles */
+  .navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: rgba(10, 10, 15, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 20px rgba(0, 180, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(0, 180, 255, 0.2);
+    min-height: 60px;
+  }
+
+  .navbar-brand a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #00b4ff;
+    text-decoration: none;
+    text-shadow: 0 0 15px rgba(0, 180, 255, 0.4);
+    transition: all 0.3s ease;
+    padding: 0.5rem;
+    border-radius: 8px;
+  }
+
+  .navbar-brand a:hover {
+    background: rgba(0, 180, 255, 0.1);
+    transform: translateY(-1px);
+  }
+
+  .navbar-brand i {
+    color: #00ff9d;
+    font-size: 1.75rem;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.1);
+    }
+  }
+
+  .brand-text {
+    display: none;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+
+  /* Mobile Toggle Buttons */
+  .navbar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: #00b4ff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 1002;
+    transition: all 0.3s;
+    border-radius: 8px;
+  }
+
+  .navbar-toggle:hover {
+    background: rgba(0, 180, 255, 0.1);
+    transform: scale(1.1);
+  }
+
+  .navbar-close {
+    display: none;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: #00b4ff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 1003;
+    transition: all 0.3s;
+    border-radius: 8px;
+  }
+
+  .navbar-close:hover {
+    background: rgba(0, 180, 255, 0.1);
+    transform: rotate(90deg);
+  }
+
+  /* Navbar Content */
+  .navbar-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    transition: all 0.3s ease;
+  }
+
+  /* Search Bar */
+  .navbar-search {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+    margin: 0 1.5rem;
+  }
+
+  .navbar-search input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    border: 2px solid rgba(0, 180, 255, 0.2);
+    border-radius: 25px;
+    font-size: 0.875rem;
+    background: rgba(10, 10, 15, 0.8);
+    color: #ffffff;
+    transition: all 0.3s;
+    backdrop-filter: blur(10px);
+  }
+
+  .navbar-search input:focus {
+    outline: none;
+    border-color: #00b4ff;
+    box-shadow: 0 0 15px rgba(0, 180, 255, 0.3);
+    background: rgba(10, 10, 15, 0.9);
+  }
+
+  .navbar-search input::placeholder {
+    color: rgba(136, 153, 170, 0.7);
+  }
+
+  .navbar-search i {
+    position: absolute;
+    left: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8899aa;
+    font-size: 0.875rem;
+  }
+
+  .search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 15, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 180, 255, 0.2);
+    margin-top: 0.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1001;
+    backdrop-filter: blur(10px);
+  }
+
+  .search-results.active {
+    display: block;
+  }
+
+  .search-result-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(0, 180, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .search-result-item:hover {
+    background: rgba(0, 180, 255, 0.1);
+  }
+
+  .search-result-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00b4ff 0%, #0088cc 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0a0a0f;
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+
+  .search-result-info h5 {
+    color: #ffffff;
+    font-size: 0.875rem;
+    margin-bottom: 0.125rem;
+  }
+
+  .search-result-info p {
+    color: #8899aa;
+    font-size: 0.75rem;
+    margin: 0;
+  }
+
+  /* Navigation Menu */
+  .navbar-menu {
+    display: flex;
+    gap: 0.75rem;
+    margin-right: 1.5rem;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: #8899aa;
+    text-decoration: none;
+    border-radius: 12px;
+    position: relative;
+    transition: all 0.3s;
+    font-weight: 500;
+    font-size: 0.875rem;
+  }
+
+  .nav-link:hover {
+    background: rgba(0, 180, 255, 0.1);
+    color: #00b4ff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 180, 255, 0.1);
+  }
+
+  .nav-link.active {
+    background: rgba(0, 180, 255, 0.15);
+    color: #00b4ff;
+    text-shadow: 0 0 10px rgba(0, 180, 255, 0.3);
+  }
+
+  .nav-link i {
+    font-size: 1.125rem;
+  }
+
+  .nav-link span {
+    display: inline;
+    white-space: nowrap;
+  }
+
+  /* Badges */
+  .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4757;
+    color: white;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.25rem;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(255, 71, 87, 0.3);
+    animation: badgePulse 2s infinite;
+  }
+
+  @keyframes badgePulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+  }
+
+  /* User Controls Section */
+  .navbar-user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  /* Notification Link (Direct link to notifications page) */
+  .notification-link {
+    position: relative;
+  }
+
+  .notification-toggle {
+    background: none;
+    border: none;
+    color: #8899aa;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.75rem;
+    position: relative;
+    transition: all 0.3s;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+  }
+
+  .notification-toggle:hover {
+    background: rgba(0, 180, 255, 0.1);
+    color: #00b4ff;
+    transform: translateY(-2px);
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
+    color: white;
+    border-radius: 50%;
+    min-width: 20px;
+    height: 20px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.25rem;
+    font-weight: 600;
+    box-shadow: 0 3px 10px rgba(255, 71, 87, 0.4);
+    animation: badgePulse 2s infinite;
+  }
+
+  /* Quick Chat Dropdown */
+  .quick-chat-dropdown {
+    position: relative;
+    display: none;
+  }
+
+  .quick-chat-toggle {
+    background: none;
+    border: none;
+    color: #8899aa;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.75rem;
+    position: relative;
+    transition: all 0.3s;
+    border-radius: 12px;
+  }
+
+  .quick-chat-toggle:hover {
+    background: rgba(0, 180, 255, 0.1);
+    color: #00b4ff;
+  }
+
+  .quick-chat-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #00ff9d;
+    color: #0a0a0f;
+    border-radius: 50%;
+    min-width: 16px;
+    height: 16px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.25rem;
+    font-weight: 600;
+  }
+
+  .quick-chat-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(10, 10, 15, 0.98);
+    border-radius: 16px;
+    box-shadow: 0 15px 40px rgba(0, 180, 255, 0.2);
+    width: 320px;
+    display: none;
+    overflow: hidden;
+    z-index: 1002;
+    border: 1px solid rgba(0, 180, 255, 0.3);
+    backdrop-filter: blur(10px);
+    margin-top: 0.5rem;
+  }
+
+  .quick-chat-dropdown:hover .quick-chat-menu {
+    display: block;
+  }
+
+  .quick-chat-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid rgba(0, 180, 255, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 180, 255, 0.05);
+  }
+
+  .quick-chat-header h4 {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .view-all-chats {
+    color: #00b4ff;
+    text-decoration: none;
+    font-size: 0.75rem;
+    transition: all 0.3s;
+  }
+
+  .view-all-chats:hover {
+    text-decoration: underline;
+  }
+
+  .quick-chat-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 0.5rem 0;
+  }
+
+  .chat-preview-item {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(0, 180, 255, 0.1);
+    transition: all 0.3s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .chat-preview-item:hover {
+    background: rgba(0, 180, 255, 0.05);
+  }
+
+  .chat-preview-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00b4ff 0%, #0088cc 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0a0a0f;
+    font-weight: 600;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+  }
+
+  .chat-preview-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .chat-preview-info h5 {
+    color: #ffffff;
+    font-size: 0.875rem;
+    margin-bottom: 0.125rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .chat-preview-info p {
+    color: #8899aa;
+    font-size: 0.75rem;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .chat-preview-time {
+    font-size: 0.7rem;
+    color: #8899aa;
+    margin-top: 0.25rem;
+  }
+
+  /* User Dropdown */
+  .user-dropdown {
+    position: relative;
+  }
+
+  .user-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: #ffffff;
+    transition: all 0.3s;
+    border-radius: 12px;
+  }
+
+  .user-toggle:hover {
+    background: rgba(0, 180, 255, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00b4ff 0%, #0088cc 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0a0a0f;
+    font-weight: 600;
+    box-shadow: 0 0 15px rgba(0, 180, 255, 0.5);
+    font-size: 1rem;
+  }
+
+  .user-avatar i {
+    font-size: 1.125rem;
+  }
+
+  .username {
+    display: inline;
+    font-weight: 500;
+    font-size: 0.875rem;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .user-toggle i {
+    font-size: 0.875rem;
+    color: #8899aa;
+    transition: transform 0.3s;
+  }
+
+  .user-dropdown:hover .user-toggle i {
+    transform: rotate(180deg);
+  }
+
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(10, 10, 15, 0.98);
+    border-radius: 16px;
+    box-shadow: 0 15px 40px rgba(0, 180, 255, 0.2);
+    min-width: 220px;
+    display: none;
+    overflow: hidden;
+    z-index: 1001;
+    border: 1px solid rgba(0, 180, 255, 0.3);
+    backdrop-filter: blur(10px);
+    margin-top: 0.5rem;
+  }
+
+  .user-dropdown:hover .dropdown-menu {
+    display: block;
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    color: #ffffff;
+    text-decoration: none;
+    transition: all 0.3s;
+    position: relative;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .dropdown-item:hover {
+    background: rgba(0, 180, 255, 0.1);
+    color: #00b4ff;
+    padding-left: 1.5rem;
+  }
+
+  .dropdown-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 1rem;
+  }
+
+  .dropdown-item span {
+    flex: 1;
+  }
+
+  .dropdown-badge {
+    background: #ff4757;
+    color: white;
+    border-radius: 10px;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+  }
+
+  .dropdown-divider {
+    height: 1px;
+    background: rgba(0, 180, 255, 0.2);
+    margin: 0.5rem 0;
+  }
+
+  .logout-item {
+    color: #ff4757;
+  }
+
+  .logout-item:hover {
+    background: rgba(255, 71, 87, 0.1);
+    color: #ff4757;
+  }
+
+  /* Overlay for mobile menu */
+  .menu-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 999;
+    backdrop-filter: blur(5px);
+  }
+
+  /* Loading States */
+  .loading-chats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem;
+    color: #8899aa;
+    font-size: 0.875rem;
+  }
+
+  .loading-chats i {
+    font-size: 1rem;
+  }
+
+  /* Responsive Styles */
+  @media (min-width: 1025px) {
+    .quick-chat-dropdown {
+      display: block;
+    }
+
+    .brand-text {
+      display: inline;
+    }
+
+    .navbar-search {
+      max-width: 350px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .navbar-search {
+      max-width: 300px;
+      margin: 0 1rem;
+    }
+
+    .navbar-menu {
+      gap: 0.5rem;
+      margin-right: 1rem;
+    }
+
+    .nav-link span {
+      font-size: 0.85rem;
+    }
+
+    .username {
+      max-width: 100px;
+    }
+  }
+
+  /* MOBILE STYLES - FIXED: COMPLETELY HIDDEN by default */
+  @media (max-width: 768px) {
+    /* Show hamburger menu button */
+    .navbar-toggle {
+      display: block;
+    }
+
+    /* Show close button */
+    .navbar-close {
+      display: block;
+    }
+
+    /* CRITICAL FIX: Mobile menu should be COMPLETELY HIDDEN (display: none) */
+    .navbar-content {
+      display: none; /* Completely hidden by default */
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 85%;
+      max-width: 350px;
+      height: 100vh;
+      background: rgba(10, 10, 15, 0.98);
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 4rem 1.5rem 1.5rem;
+      overflow-y: auto;
+      z-index: 1001;
+      backdrop-filter: blur(10px);
+      box-shadow: -5px 0 25px rgba(0, 0, 0, 0.3);
+      border-left: 1px solid rgba(0, 180, 255, 0.2);
+    }
+
+    /* Only show when active class is added via JavaScript */
+    .navbar-content.active {
+      display: flex; /* Show when active */
+    }
+
+    /* Show overlay when menu is active */
+    .menu-overlay.active {
+      display: block;
+    }
+
+    .navbar-search {
+      max-width: 100%;
+      margin: 1.5rem 0;
+      order: 3;
+      width: 100%;
+    }
+
+    .navbar-menu {
+      flex-direction: column;
+      width: 100%;
+      margin: 1rem 0;
+      order: 1;
+      gap: 0.5rem;
+    }
+
+    .nav-link {
+      padding: 1rem 1.25rem;
+      justify-content: flex-start;
+      width: 100%;
+      border-radius: 12px;
+    }
+
+    .nav-link span {
+      font-size: 1rem;
+    }
+
+    .navbar-user {
+      order: 2;
+      width: 100%;
+      margin: 1rem 0;
+      position: static;
+      justify-content: flex-start;
+      gap: 1.5rem;
+      padding: 1rem 0;
+      border-top: 1px solid rgba(0, 180, 255, 0.2);
+      border-bottom: 1px solid rgba(0, 180, 255, 0.2);
+    }
+
+    .user-toggle {
+      width: 100%;
+      justify-content: flex-start;
+      padding: 1rem;
+      position: relative;
+      background: rgba(0, 180, 255, 0.1);
+      border-radius: 12px;
+    }
+
+    .brand-text {
+      display: inline;
+    }
+
+    .username {
+      display: inline;
+      max-width: none;
+    }
+
+    /* Mobile dropdown styles */
+    .dropdown-menu {
+      position: static !important;
+      top: auto !important;
+      right: auto !important;
+      left: auto !important;
+      width: 100% !important;
+      min-width: auto !important;
+      margin-top: 1rem;
+      display: none;
+      border: 1px solid rgba(0, 180, 255, 0.2);
+      box-shadow: none;
+      background: rgba(15, 15, 20, 0.98);
+      border-radius: 12px;
+    }
+
+    .user-dropdown.active .dropdown-menu {
+      display: block !important;
+    }
+
+    /* Hide notification link on mobile (it's in the menu) */
+    .notification-link {
+      display: none !important;
+    }
+
+    .quick-chat-dropdown {
+      display: block;
+    }
+
+    .quick-chat-menu {
+      position: fixed !important;
+      top: 70px !important;
+      right: 10px !important;
+      left: 10px !important;
+      width: calc(100% - 20px) !important;
+      max-width: none !important;
+      display: none !important;
+      max-height: 70vh !important;
+      overflow-y: auto !important;
+      z-index: 1003 !important;
+      border-radius: 12px !important;
+      margin-top: 5px !important;
+    }
+
+    .quick-chat-dropdown.active .quick-chat-menu {
+      display: block !important;
+    }
+
+    .quick-chat-dropdown:hover .quick-chat-menu {
+      display: none !important;
+    }
+
+    .quick-chat-list {
+      max-height: 50vh !important;
+      overflow-y: auto !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .navbar {
+      padding: 0.75rem;
+    }
+
+    .navbar-brand a {
+      font-size: 1.25rem;
+    }
+
+    .navbar-content {
+      width: 90%;
+    }
+
+    .nav-link {
+      padding: 0.875rem 1rem;
+    }
+
+    .user-toggle {
+      padding: 0.875rem;
+    }
+
+    .quick-chat-menu {
+      width: calc(100% - 16px) !important;
+      right: 8px !important;
+      left: 8px !important;
+      top: 65px !important;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .navbar {
+      padding: 0.5rem;
+    }
+
+    .navbar-brand a {
+      font-size: 1.1rem;
+    }
+
+    .quick-chat-menu {
+      width: calc(100% - 10px) !important;
+      right: 5px !important;
+      left: 5px !important;
+      top: 60px !important;
+    }
+  }
+
+  /* Prevent swipe gestures from opening menu */
+  body {
+    overflow-x: hidden;
+    touch-action: pan-y;
+  }
+
+  .navbar-content {
+    touch-action: pan-y;
+  }
+</style>
+
+<script>
+  // Navbar JavaScript functionality - FIXED CLOSE BUTTON OVERLAP
+  document.addEventListener("DOMContentLoaded", function () {
+    // DOM Elements
+    const navbarToggle = document.getElementById("navbarToggle");
+    const navbarClose = document.getElementById("navbarClose");
+    const navbarContent = document.getElementById("navbarContent");
+    const menuOverlay = document.getElementById("menuOverlay");
+    const userToggle = document.getElementById("userToggle");
+    const userDropdownContainer = document.querySelector(".user-dropdown");
+    const quickChatToggle = document.getElementById("quickChatToggle");
+    const quickChatDropdown = document.querySelector(".quick-chat-dropdown");
+    const navbarSearchInput = document.getElementById("navbarSearchInput");
+    const searchResults = document.getElementById("searchResults");
+
+    // Initialize menu state
+    function initializeMobileMenu() {
+      // Ensure hamburger is visible and close button is hidden
+      if (navbarToggle) {
+        navbarToggle.style.display = "block";
+        navbarToggle.style.opacity = "1";
+        navbarToggle.style.visibility = "visible";
+      }
+
+      if (navbarClose) {
+        navbarClose.style.display = "none";
+      }
+
+      // Ensure menu is closed
+      navbarContent.classList.remove("active");
+      menuOverlay.classList.remove("active");
+      document.body.style.overflow = "";
+
+      // Hide mobile menu on mobile
+      if (window.innerWidth <= 768) {
+        navbarContent.style.display = "none";
+      }
+    }
+
+    // Active navigation highlighting
+    function highlightActiveNav() {
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll(".nav-link");
+
+      navLinks.forEach((link) => {
+        const linkPath = link.dataset.path;
+        if (currentPath.includes(linkPath)) {
+          link.classList.add("active");
+        } else {
+          link.classList.remove("active");
+        }
+      });
+    }
+
+    // Initialize
+    initializeMobileMenu();
+    highlightActiveNav();
+
+    // Mobile menu functionality
+    function openMobileMenu() {
+      // Show close button, hide hamburger
+      if (navbarClose) navbarClose.style.display = "block";
+      if (navbarToggle) navbarToggle.style.display = "none";
+
+      // Show menu with animation
+      navbarContent.style.display = "flex";
+      setTimeout(() => {
+        navbarContent.classList.add("active");
+      }, 10);
+
+      menuOverlay.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeMobileMenu() {
+      // Hide close button, show hamburger
+      if (navbarClose) navbarClose.style.display = "none";
+      if (navbarToggle) {
+        navbarToggle.style.display = "block";
+        navbarToggle.style.opacity = "1";
+        navbarToggle.style.visibility = "visible";
+      }
+
+      // Close menu with animation
+      navbarContent.classList.remove("active");
+      menuOverlay.classList.remove("active");
+      document.body.style.overflow = "";
+
+      // Hide menu completely after animation
+      setTimeout(() => {
+        if (!navbarContent.classList.contains("active")) {
+          navbarContent.style.display = "none";
+        }
+      }, 300);
+    }
+
+    // Open mobile menu when hamburger is clicked
+    if (navbarToggle) {
+      navbarToggle.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openMobileMenu();
+      });
+    }
+
+    // Close mobile menu when close button is clicked
+    if (navbarClose) {
+      navbarClose.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeMobileMenu();
+      });
+    }
+
+    // Close mobile menu when clicking overlay
+    if (menuOverlay) {
+      menuOverlay.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeMobileMenu();
+      });
+    }
+
+    // Handle user dropdown on mobile
+    if (userToggle) {
+      userToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        if (window.innerWidth <= 768) {
+          userDropdownContainer.classList.toggle("active");
+          quickChatDropdown.classList.remove("active");
+        }
+      });
+    }
+
+    // Handle quick chat dropdown
+    if (quickChatToggle) {
+      quickChatToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        if (window.innerWidth <= 768) {
+          quickChatDropdown.classList.toggle("active");
+          userDropdownContainer.classList.remove("active");
+
+          if (quickChatDropdown.classList.contains("active")) {
+            loadQuickChats();
+          }
+        }
+      });
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener("click", (e) => {
+      const isMobile = window.innerWidth <= 768;
+
+      // Close user dropdown
+      if (
+        userDropdownContainer &&
+        userToggle &&
+        !userDropdownContainer.contains(e.target) &&
+        !userToggle.contains(e.target)
+      ) {
+        if (isMobile) {
+          userDropdownContainer.classList.remove("active");
+        }
+      }
+
+      // Close quick chat dropdown
+      if (
+        quickChatDropdown &&
+        quickChatToggle &&
+        !quickChatDropdown.contains(e.target) &&
+        !quickChatToggle.contains(e.target)
+      ) {
+        if (isMobile) {
+          quickChatDropdown.classList.remove("active");
+        } else {
+          const quickChatMenu = document.getElementById("quickChatMenu");
+          if (quickChatMenu) {
+            quickChatMenu.style.display = "none";
+          }
+        }
+      }
+
+      // Close mobile menu when clicking outside
+      if (
+        navbarContent &&
+        navbarToggle &&
+        navbarClose &&
+        !navbarContent.contains(e.target) &&
+        !navbarToggle.contains(e.target) &&
+        !navbarClose.contains(e.target) &&
+        !menuOverlay.contains(e.target)
+      ) {
+        if (isMobile && navbarContent.classList.contains("active")) {
+          closeMobileMenu();
+        }
+      }
+    });
+
+    // Close on escape key
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeMobileMenu();
+        if (userDropdownContainer)
+          userDropdownContainer.classList.remove("active");
+        if (quickChatDropdown) quickChatDropdown.classList.remove("active");
+      }
+    });
+
+    // Handle window resize
+    function handleResize() {
+      if (window.innerWidth > 768) {
+        // Desktop: hide hamburger, reset menu
+        if (navbarToggle) navbarToggle.style.display = "none";
+        if (navbarClose) navbarClose.style.display = "none";
+
+        navbarContent.style.display = "flex";
+        navbarContent.classList.remove("active");
+        menuOverlay.classList.remove("active");
+        document.body.style.overflow = "";
+
+        // Reset dropdowns
+        const quickChatMenu = document.getElementById("quickChatMenu");
+        if (quickChatMenu) quickChatMenu.style.display = "none";
+      } else {
+        // Mobile: show hamburger, hide close button, ensure menu is closed
+        if (navbarToggle) {
+          navbarToggle.style.display = "block";
+          navbarToggle.style.opacity = "1";
+          navbarToggle.style.visibility = "visible";
+        }
+        if (navbarClose) navbarClose.style.display = "none";
+
+        if (!navbarContent.classList.contains("active")) {
+          navbarContent.style.display = "none";
+        }
+      }
+    }
+
+    window.addEventListener("resize", handleResize);
+
+    // Load quick chats
+    async function loadQuickChats() {
+      const quickChatList = document.getElementById("quickChatList");
+      if (!quickChatList) return;
+
+      try {
+        const response = await fetch("/api/chat/recent");
+        const chats = await response.json();
+
+        if (chats.length === 0) {
+          quickChatList.innerHTML = `
+            <div class="no-chats">
+              <i class="fas fa-comment-slash"></i>
+              <p>No recent chats</p>
+            </div>
+          `;
+          return;
+        }
+
+        const chatsHtml = chats
+          .slice(0, 5)
+          .map(
+            (chat) => `
+          <a href="/chat/${chat.user_id}" class="chat-preview-item">
+            <div class="chat-preview-avatar">${chat.username[0].toUpperCase()}</div>
+            <div class="chat-preview-info">
+              <h5>${escapeHtml(chat.username)}</h5>
+              <p>${escapeHtml(chat.last_message || "Start chatting...")}</p>
+              <div class="chat-preview-time">${chat.time_ago}</div>
+            </div>
+          </a>
+        `
+          )
+          .join("");
+
+        quickChatList.innerHTML = chatsHtml;
+      } catch (error) {
+        console.error("Error loading quick chats:", error);
+        quickChatList.innerHTML = `
+          <div class="error-loading">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>Failed to load chats</p>
+          </div>
+        `;
+      }
+    }
+
+    // Search functionality
+    if (navbarSearchInput) {
+      let searchTimeout;
+
+      navbarSearchInput.addEventListener("input", function () {
+        clearTimeout(searchTimeout);
+
+        const query = this.value.trim();
+        if (query.length < 2) {
+          searchResults.classList.remove("active");
+          return;
+        }
+
+        searchTimeout = setTimeout(() => {
+          performSearch(query);
+        }, 300);
+      });
+
+      navbarSearchInput.addEventListener("focus", function () {
+        if (this.value.trim().length >= 2) {
+          searchResults.classList.add("active");
+        }
+      });
+
+      document.addEventListener("click", (e) => {
+        if (
+          navbarSearchInput &&
+          searchResults &&
+          !navbarSearchInput.contains(e.target) &&
+          !searchResults.contains(e.target)
+        ) {
+          searchResults.classList.remove("active");
+        }
+      });
+    }
+
+    async function performSearch(query) {
+      try {
+        const response = await fetch(
+          `/api/search?q=${encodeURIComponent(query)}`
+        );
+        const results = await response.json();
+
+        if (results.length === 0) {
+          searchResults.innerHTML = `
+            <div class="no-results">
+              <p>No results found</p>
+            </div>
+          `;
+        } else {
+          const resultsHtml = results
+            .map(
+              (result) => `
+            <a href="${result.link}" class="search-result-item">
+              <div class="search-result-avatar">${result.name[0].toUpperCase()}</div>
+              <div class="search-result-info">
+                <h5>${escapeHtml(result.name)}</h5>
+                <p>${escapeHtml(result.type)}</p>
+              </div>
+            </a>
+          `
+            )
+            .join("");
+
+          searchResults.innerHTML = resultsHtml;
+        }
+
+        searchResults.classList.add("active");
+      } catch (error) {
+        console.error("Search error:", error);
+        searchResults.innerHTML = `
+          <div class="error-loading">
+            <p>Search failed</p>
+          </div>
+        `;
+        searchResults.classList.add("active");
+      }
+    }
+
+    // Socket.IO integration
+    let socket = window.getSocket ? window.getSocket() : null;
+    if (socket) {
+      socket.on("notification_count_update", (data) => {
+        updateNotificationBadge(data.count);
+      });
+    }
+
+    // Helper function to update notification badge
+    function updateNotificationBadge(count) {
+      if (count !== undefined) {
+        const badges = document.querySelectorAll(
+          ".notification-badge, .chat-badge, .notification-nav-badge, .dropdown-badge"
+        );
+        badges.forEach((badge) => {
+          badge.textContent = count;
+          badge.style.display = count > 0 ? "flex" : "none";
+        });
+      } else {
+        fetch("/api/notifications/unread-count")
+          .then((response) => response.json())
+          .then((data) => {
+            const badges = document.querySelectorAll(
+              ".notification-badge, .chat-badge, .notification-nav-badge, .dropdown-badge"
+            );
+            badges.forEach((badge) => {
+              badge.textContent = data.count;
+              badge.style.display = data.count > 0 ? "flex" : "none";
+            });
+          })
+          .catch((error) =>
+            console.error("Error fetching notification count:", error)
+          );
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Make functions available globally
+    window.updateNotificationBadge = updateNotificationBadge;
+    window.closeMobileMenu = closeMobileMenu;
+    window.openMobileMenu = openMobileMenu;
+
+    // Initialize notification badge
+    updateNotificationBadge();
+  });
+</script>

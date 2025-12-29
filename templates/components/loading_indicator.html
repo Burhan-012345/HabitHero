@@ -1,0 +1,24 @@
+<!-- templates/components/loading_indicator.html -->
+<div class="transition-loading" id="global-loading">
+  <div class="spinner"></div>
+</div>
+
+<script>
+  // Optional: Show loading indicator for longer transitions
+  document.addEventListener("DOMContentLoaded", function () {
+    const loadingIndicator = document.getElementById("global-loading");
+
+    if (loadingIndicator) {
+      // Show loading indicator after 500ms if page hasn't loaded
+      const loadingTimer = setTimeout(() => {
+        loadingIndicator.classList.add("active");
+      }, 500);
+
+      // Hide when page is fully loaded
+      window.addEventListener("load", function () {
+        clearTimeout(loadingTimer);
+        loadingIndicator.classList.remove("active");
+      });
+    }
+  });
+</script>
