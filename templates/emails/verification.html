@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Your Email - HabitHero</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #e0e0e0;
+        margin: 0;
+        padding: 0;
+        background-color: #000;
+      }
+
+      .email-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: #0a0a0a;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        border: 1px solid #1a1a1a;
+      }
+
+      .email-header {
+        background: linear-gradient(135deg, #000 0%, #111 100%);
+        color: #00f3ff;
+        padding: 2rem;
+        text-align: center;
+        border-bottom: 2px solid #0066ff;
+        box-shadow: 0 0 10px rgba(0, 102, 255, 0.3);
+      }
+
+      .logo {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 8px rgba(0, 102, 255, 0.5);
+      }
+
+      .email-body {
+        padding: 2rem;
+        background: #111;
+      }
+
+      .otp-container {
+        background: #1a1a1a;
+        border-radius: 8px;
+        padding: 1.5rem;
+        text-align: center;
+        margin: 2rem 0;
+        border: 2px dashed #0066ff;
+        box-shadow: 0 0 15px rgba(0, 102, 255, 0.2);
+      }
+
+      .otp-code {
+        font-size: 2.5rem;
+        font-weight: 800;
+        letter-spacing: 0.5rem;
+        color: #00f3ff;
+        margin: 1rem 0;
+        text-shadow: 0 0 10px rgba(0, 243, 255, 0.7);
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #0066ff 0%, #00f3ff 100%);
+        color: #000;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        margin: 1rem 0;
+        border: none;
+        box-shadow: 0 0 15px rgba(0, 102, 255, 0.4);
+      }
+
+      .btn:hover {
+        background: linear-gradient(135deg, #0052cc 0%, #00ccff 100%);
+        box-shadow: 0 0 20px rgba(0, 102, 255, 0.6);
+      }
+
+      .email-footer {
+        padding: 1.5rem;
+        text-align: center;
+        color: #888;
+        font-size: 0.875rem;
+        border-top: 1px solid #333;
+        background: #0a0a0a;
+      }
+
+      .warning {
+        background: #1a1a1a;
+        border: 1px solid #0066ff;
+        color: #00f3ff;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        font-size: 0.875rem;
+        box-shadow: 0 0 10px rgba(0, 102, 255, 0.2);
+      }
+
+      h2 {
+        color: #00f3ff;
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.3);
+      }
+
+      p {
+        color: #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <div class="email-header">
+        <div class="logo">HabitHero</div>
+        <p>Build better habits with friends</p>
+      </div>
+
+      <div class="email-body">
+        <h2>Verify Your Email Address</h2>
+        <p>Hello!</p>
+        <p>
+          Thank you for signing up for HabitHero. To complete your registration
+          and start building better habits with friends, please verify your
+          email address by entering the following verification code:
+        </p>
+
+        <div class="otp-container">
+          <p style="margin: 0; color: #64748b; font-size: 0.875rem">
+            Your verification code:
+          </p>
+          <div class="otp-code">{{ otp }}</div>
+          <p style="margin: 0; color: #64748b; font-size: 0.875rem">
+            This code will expire in 5 minutes
+          </p>
+        </div>
+
+        <p>
+          Enter this code on the registration page to complete your account
+          setup.
+        </p>
+
+        <div class="warning">
+          <strong>Note:</strong> If you didn't request this verification code,
+          please ignore this email. Your email address will not be used for any
+          purpose.
+        </div>
+
+        <p>Best regards,<br />The HabitHero Team</p>
+      </div>
+
+      <div class="email-footer">
+        <p>© 2024 HabitHero. All rights reserved.</p>
+        <p>
+          This email was sent to you as part of your HabitHero account
+          registration.
+        </p>
+        <p style="font-size: 0.75rem; color: #94a3b8">
+          HabitHero Inc.<br />
+          123 Habit Street, Productivity City, PC 12345
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
