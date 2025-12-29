@@ -18,6 +18,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import or_, and_
 import json
 import mimetypes
+def init_admin():
+    """Initialize admin panel - defined here to avoid circular imports"""
+    print("Admin panel initialized")
 
 # Initialize extensions without app context first
 db = SQLAlchemy()
@@ -28,7 +31,9 @@ socketio = SocketIO()
 
 app = Flask(__name__)
 app.config.from_object('config.Config')
-app.config['SECRET_KEY'] = secrets.token_hex(32)  # Add session secret key
+app.config['SECRET_KEY'] = secrets.token_hex(32)
+
+from admin import init_admin as init_admin_panel, add_admin_field_to_user, create_default_admin_user
 
 # Print debug info
 print(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
@@ -58,9 +63,9 @@ class User(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     is_online = db.Column(db.Boolean, default=False)
+    is_admin = db.Column(db.Boolean, default=False)
+
     saved_snaps = db.relationship('SavedSnap', backref='saving_user', lazy=True)
-    
-    # Relationships
     habits = db.relationship('Habit', backref='user', lazy=True, cascade='all, delete-orphan')
     habit_logs = db.relationship('HabitLog', backref='user', lazy=True, cascade='all, delete-orphan')
     sent_snaps = db.relationship('Snap', foreign_keys='Snap.sender_id', backref='sender', lazy=True)
@@ -130,7 +135,6 @@ class SavedSnap(db.Model):
     
     __table_args__ = (db.UniqueConstraint('user_id', 'snap_id', name='unique_saved_snap'),)
     
-    # Relationships
     user = db.relationship('User', backref='saved_snap_entries')
     snap = db.relationship('Snap', backref='saved_by_users')
 
@@ -168,6 +172,8 @@ class ChatMessage(db.Model):
     sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_messages')
     receiver = db.relationship('User', foreign_keys=[receiver_id], backref='received_messages')
 
+# app.py - around line 300-310, right after the Notification class definition:
+
 class Notification(db.Model):
     __tablename__ = 'notification'
     id = db.Column(db.Integer, primary_key=True)
@@ -178,6 +184,26 @@ class Notification(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     
     user = db.relationship('User', backref='notifications')
+
+# ================ ADD THIS SECTION RIGHT HERE ================
+# Create models dictionary for admin panel
+models = {
+    'User': User,
+    'Habit': Habit,
+    'HabitLog': HabitLog,
+    'Friend': Friend,
+    'Snap': Snap,
+    'SnapReaction': SnapReaction,
+    'SavedSnap': SavedSnap,
+    'EmailVerificationOTP': EmailVerificationOTP,
+    'PasswordResetToken': PasswordResetToken,
+    'ChatMessage': ChatMessage,
+    'Notification': Notification
+}
+
+# Now initialize admin panel with models
+init_admin_panel(app, db, models)
+# ================ END OF ADDED SECTION ================
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -3478,21 +3504,14 @@ def check_auth():
     return jsonify({'authenticated': False})
 
 with app.app_context():
-    # First create tables if they don't exist
     db.create_all()
-    
-    # Then migrate to add new columns
     try:
         migrate_database()
     except Exception as e:
         print(f"Migration error (might be first run): {e}")
     
     print("✓ Database tables created/migrated successfully")
-
-with app.app_context():
-    db.create_all()
-    print("✓ Database tables created successfully")
-
+    
 ###############################################################################
 # SOCKET.IO ROUTES - ADDED AT THE END AS REQUESTED
 ###############################################################################
@@ -3749,13 +3768,9 @@ def handle_disconnect():
     if current_user.is_authenticated:
         print(f"❌ User {current_user.username} disconnected (Socket ID: {request.sid})")
         
-        # IMPORTANT: Small delay to handle quick reconnections
-        # This prevents showing "offline" when user is actually reconnecting
         import time
-        time.sleep(2)  # 2 second delay
-        
-        # Check if user has reconnected in the meantime
-        # If socket is still disconnected after delay, mark as offline
+        time.sleep(2)  
+
         current_user.is_online = False
         current_user.last_seen = datetime.utcnow()
         db.session.commit()
@@ -4291,6 +4306,18 @@ def favicon():
         'favicon.ico',
         mimetype='image/vnd.microsoft.icon'
     )
+
+from admin import init_admin, add_admin_field_to_user, create_default_admin_user
+
+with app.app_context():
+    db.create_all()
+    print("✓ Database tables created successfully")
+    
+    add_admin_field_to_user(db)
+    
+    create_default_admin_user(app, db, models)
+    
+    print("✓ Flask-Admin initialized")
     
 if __name__ == '__main__':
     host = '0.0.0.0'  
